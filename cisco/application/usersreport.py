@@ -3,7 +3,7 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-from flask import render_template, redirect, flash
+
 
 def usersreport():
     cucm_dict = {

@@ -3,7 +3,7 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectForwardSearchType
-from flask import render_template, redirect, flash
+
 def render():
     cucm_dict = {
         "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},

@@ -1,9 +1,8 @@
 import requests
 import xmltodict
-import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-from flask import render_template, redirect, flash
+
 
 def huntreport():
     cucm_ip_address = "172.20.5.10"

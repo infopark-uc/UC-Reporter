@@ -1,13 +1,9 @@
-from flask import render_template, redirect, flash
+from flask import render_template, redirect
 from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
 import application.callforward
-import requests
-import xmltodict
-import collections
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from application.forms import SelectNavigation, SelectSearchType
+
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/index", methods=['GET', 'POST'])
