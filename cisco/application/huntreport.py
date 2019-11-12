@@ -5,6 +5,7 @@ from application.forms import SelectNavigation, SelectSearchType
 
 
 def huntreport():
+
     cucm_ip_address = "172.20.5.10"
     cucm_login = "webadmin"
     cucm_password = "CCMAdminUC"

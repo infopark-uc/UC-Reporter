@@ -3,8 +3,10 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectForwardSearchType
+from application.config import Servers_List
 
 def render():
+
     cucm_dict = {
         "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},
         "KF": {"IPAddress": "10.250.34.10", "login": "webadmin", "password": "CCMAdminSSK"},
@@ -22,6 +24,7 @@ def render():
     form_navigation = SelectNavigation(csrf_enabled=False)
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
+        print(console_output)
         renderdata = {
             "rendertype": "redirect",
             "redirect_to": form_navigation.select_navigation.data
@@ -38,7 +41,6 @@ def render():
 
         # CUCM URL's
         cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
-
         console_output = cucm_url + "\n"
         print(console_output)
 

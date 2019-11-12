@@ -26,6 +26,7 @@ def usersreport():
     form_navigation = SelectNavigation(csrf_enabled=False)
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
+        print(console_output)
         renderdata = {
             "rendertype": "redirect",
             "redirect_to": form_navigation.select_navigation.data
