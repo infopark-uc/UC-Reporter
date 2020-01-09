@@ -3,18 +3,8 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectForwardSearchType
-from application.config import Servers_List
 
 def render():
-
-    cucm_dict = {
-        "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "KF": {"IPAddress": "10.250.34.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "NF": {"IPAddress": "10.250.62.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "TF": {"IPAddress": "10.250.44.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "NU": {"IPAddress": "10.250.74.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "Infocell": {"IPAddress": "172.20.5.10", "login": "webadmin", "password": "CCMAdminUC"}
-    }
 
     SEARCH_BY_DN = "DN"
     SEARCH_BY_TRANSFER = "Transfer"
