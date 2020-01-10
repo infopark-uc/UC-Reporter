@@ -10,9 +10,7 @@ def huntreport():
     cucm_login = "webadmin"
     cucm_password = "CCMAdminUC"
 
-    NAVIGATION_USER_SEARCH = "user"
-
-    html_page_title = 'CUCM Report Beta'
+    html_page_title = 'CUCM Hunt Report'
 
     # CUCM URL's
     cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
