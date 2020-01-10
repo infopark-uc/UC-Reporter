@@ -3,17 +3,10 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-
+from application.config import cucm_servers_list
 
 def usersreport():
-    cucm_dict = {
-        "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "KF": {"IPAddress": "10.250.34.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "NF": {"IPAddress": "10.250.62.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "TF": {"IPAddress": "10.250.44.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "NU": {"IPAddress": "10.250.74.10", "login": "webadmin", "password": "CCMAdminSSK"},
-        "Infocell": {"IPAddress": "172.20.5.10", "login": "webadmin", "password": "CCMAdminUC"}
-    }
+    cucm_dict = cucm_servers_list.cucm_dict
 
     SEARCH_BY_DN = "Number"
     SEARCH_BY_USER = "User"
