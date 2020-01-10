@@ -1,5 +1,5 @@
 # Default params
-class Servers_List():
+class cucm_servers_list():
 
     cucm_dict = {
         "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},
