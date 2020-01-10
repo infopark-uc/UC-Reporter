@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, StringField
-from wtforms.validators import DataRequired, Optional, Length, Regexp
+from wtforms.validators import Optional, Length, Regexp
 
 class SelectNavigation(FlaskForm):
     select_navigation = SelectField('Navigation', choices=[('/index', 'Поиск пользователей'), ('/hunt', 'Отчет по пользователям Hunt Group'), ('/cfa', 'Отчет по переадресациям')])
