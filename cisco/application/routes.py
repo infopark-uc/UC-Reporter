@@ -3,6 +3,8 @@ from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
 import application.callforward
+import application.roomcontrol
+
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -52,6 +54,11 @@ def cfa():
                             console_output=module_result['console_output'],
                             formNAV=module_result['form_navigation'],
                             formSRCH=module_result['form_search'])
+
+@server.route('/roomrequest', methods=['GET', 'POST'])
+
+
+@server.route('/SubmitOrder', methods=['GET', 'POST'])
 
 
 

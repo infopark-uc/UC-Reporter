@@ -11,22 +11,26 @@ class cucm_servers_list():
     }
 
 class in_room_control_access_data():
-    codec_access_data = {
-        "ip_address": "172.20.5.5",
-        "login": "admin",
-        "password": "CCMAdminUC"
-    }
+	global widget_data
+	widget_data = {}
 
-    ipphone_access_data = {
-        "ip_address": "172.20.5.144",
-        "login": "screenshotuser",
-        "password": "Qwerty123"
-    }
+	global roomkit_access_data
+	roomkit_access_data = {
+		"ip_address": "10.10.143.100",
+		"login": "admin",
+		"password": "Qwerty123"
+	}
 
-    wifi_access_data = {
-        "ip_address": "172.20.31.254",
-        "login": "cisco",
-        "password": "cisco"
-    }
+	global phone_access_data
+	phone_access_data = {
+		"ip_address": "10.10.137.101",
+		"login": "screenshotuser",
+		"password": "Qwerty123"
+	}
 
-    ap_list = [" "]
+	global wifi_access_data
+	wifi_access_data = {
+		"ip_address": "10.10.136.7",
+		"login": "uc",
+		"password": "Qwerty123"
+	}
