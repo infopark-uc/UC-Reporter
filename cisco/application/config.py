@@ -23,7 +23,7 @@ class in_room_control_access_data():
 
 	global phone_access_data
 	phone_access_data = {
-		"ip_address": "10.10.137.101",
+		"ip_address": "172.20.36.157",
 		"login": "screenshotuser",
 		"password": "Qwerty123"
 	}
