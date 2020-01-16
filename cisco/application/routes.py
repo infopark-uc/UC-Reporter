@@ -2,8 +2,9 @@ from flask import render_template, redirect
 from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
+from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 import application.callforward
-import application.roomcontrol
+
 
 
 
@@ -56,10 +57,14 @@ def cfa():
                             formSRCH=module_result['form_search'])
 
 @server.route('/roomrequest', methods=['GET', 'POST'])
-
+def roomrequest():
+    codec()
+    return "done"
 
 @server.route('/SubmitOrder', methods=['GET', 'POST'])
-
+def order():
+    submit_order()
+    return "done"
 
 
 

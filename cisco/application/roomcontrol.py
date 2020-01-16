@@ -160,7 +160,6 @@ def submit_order():
     return '<CiscoIPPhoneText><Title>Заказ</Title><Text>Заказ подтвержден</Text><SoftKeyItem><Name>Выход</Name><URL>SoftKey:Exit</URL><Position>1</Position></SoftKeyItem></CiscoIPPhoneText>'.encode('utf-8')
     #return 'Заказ подтвержден'
 
-
 def set_value(roomkit_access_data, widget_name, widget_value):
 
     print ("Выполняется функция установки значений виджетов set_value")
@@ -216,7 +215,6 @@ def set_value(roomkit_access_data, widget_name, widget_value):
     console_output = "Данные получены от " + roomkit_access_data["ip_address"]
     print(console_output)
 
-
 def get_value(roomkit_access_data):
 
     print("Выполняется функция считывания значений виджетов get_value")
@@ -269,7 +267,7 @@ def get_value(roomkit_access_data):
             widget_data[widget["WidgetId"]] = widget["Value"]
 
     print("Установлены исходные значения для виджетов:")
-    print(widget_data)
+    pprint(widget_data)
 
 def send_order():
 
