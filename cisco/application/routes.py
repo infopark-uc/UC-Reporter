@@ -56,12 +56,12 @@ def cfa():
                             formNAV=module_result['form_navigation'],
                             formSRCH=module_result['form_search'])
 
-@server.route('/roomrequest', methods=['GET', 'POST'])
+@app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
     codec()
     return "done"
 
-@server.route('/SubmitOrder', methods=['GET', 'POST'])
+@app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
     submit_order()
     return "done"
