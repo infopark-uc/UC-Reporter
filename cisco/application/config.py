@@ -16,9 +16,9 @@ class in_room_control_access_data():
 
 	global roomkit_access_data
 	roomkit_access_data = {
-		"ip_address": "10.10.143.100",
-		"login": "admin",
-		"password": "Qwerty123"
+		"ip_address": "172.20.5.5",
+		"login": "touchuser",
+		"password": "CCMAdminUC"
 	}
 
 	global phone_access_data

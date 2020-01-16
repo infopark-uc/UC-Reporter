@@ -3,9 +3,7 @@ import xmltodict
 from pprint import pprint
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-import paramiko
-import time
-
+from application.config import in_room_control_access_data
 
 
 def codec():
@@ -76,18 +74,6 @@ def codec():
             # Обработка отправки заказа
             print("Обрабатываем событие отправки заказа")
             send_order()
-
-        elif event[0] == "WiFiService":
-            # Обработка для открытия панельки
-            print ("Обрабатываем событие открытия панельки WiFi")
-
-        elif event[0] == "APLedOn":
-            print("Обрабатываем ссбытие включения новогоднего режима")
-            set_wifi_led_mode("indefinite", ap_list)
-
-        elif event[0] == "APLedOff":
-            print("Обрабатываем ссбытие выключения новогоднего режима")
-            set_wifi_led_mode("disable", ap_list)
 
         else:
             #что-то непонятное, неизвестный виджет - ничего не делаем
@@ -338,38 +324,4 @@ def send_order():
 
     # Convert output to Dict
     console_output = "Данные получены от " + phone_access_data["ip_address"]
-    print(console_output)
-
-def set_wifi_led_mode(led_mode, ap_list):
-
-    print("Изменение новогоднего режима AP")
-
-    shell_command = "config ap led-state flash " + led_mode + " "
-
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  #
-    try:
-        client.connect(wifi_access_data["ip_address"], username=wifi_access_data["login"], password=wifi_access_data["password"])
-        channel = client.invoke_shell()
-        channel.send(wifi_access_data["login"])
-        channel.send("\n")
-        time.sleep(0.5)
-        channel.send(wifi_access_data["password"])
-        channel.send("\n")
-
-        for ap in ap_list:
-            channel.send(shell_command + ap)
-            channel.send("\r\n")
-            time.sleep(0.5)
-
-
-        output = channel.recv(128)
-
-    except:
-        client.close()
-        print("Не получилось отправить команду на консоль беспроводного контроллера!")
-        return
-
-    client.close()
-    console_output = output
     print(console_output)
