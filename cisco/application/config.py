@@ -27,10 +27,3 @@ class in_room_control_access_data():
 		"login": "screenshotuser",
 		"password": "Qwerty123"
 	}
-
-	global wifi_access_data
-	wifi_access_data = {
-		"ip_address": "10.10.136.7",
-		"login": "uc",
-		"password": "Qwerty123"
-	}
