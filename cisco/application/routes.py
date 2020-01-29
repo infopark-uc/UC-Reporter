@@ -3,7 +3,7 @@ from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
-from application.sqlrequests import cm_sqlselect
+from application.sqlrequests import cm_sqlselect,cm_sqlupdate
 import application.callforward
 
 
@@ -70,8 +70,11 @@ def order():
 
 @app.route('/sql', methods=['GET', 'POST'])
 def testsql():
-    rv = cm_sqlselect("cm_servers_list","cm_name","NF")
+
+    cm_sqlupdate("1","widget_table","widget_data","widget_name","CoffeeCount")
+    rv = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "NF")
     return str(rv)
+
 
 
 
