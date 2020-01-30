@@ -204,7 +204,7 @@ def set_value(roomkit_access_data, widget_name, widget_value):
 def get_value(roomkit_access_data):
 
     print("Выполняется функция считывания значений виджетов get_value")
-
+    
     # URL
     http_url = "http://" + roomkit_access_data["ip_address"] + "/getxml"
 

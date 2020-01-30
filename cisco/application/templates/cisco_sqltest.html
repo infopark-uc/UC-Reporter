@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% if title %}
+        <title>{{ title }} </title>
+    {% else %}
+        <title>Welcome to default title</title>
+    {% endif %}
+
+	<style type="text/css">
+	
+		.HeaderLine {
+			display: flex;
+			flex-flow: row nowrap;
+			align-items: center;
+			font-family: Verdana; 
+			font-size: 100%;
+			font-weight: bold;
+			color: #2f6681; 
+			height: 60px;
+			background: linear-gradient(to right, #ffffff, #2f6681);
+		}
+		.HeaderItem {
+			margin: 5px;
+		}
+		
+		.NavigationItem {
+			margin-left: auto;
+			font-size: 80%;
+			color: white;
+		}
+				
+		.HeaderTable {	
+			border-collapse: collapse;
+			text-align: left;
+			font-family: Verdana; 
+			color: white; 
+			font-weight: bold;
+			width: 100%;
+			margin-top: 10px;
+		}
+		.HeaderTable th {
+			height: 150px;
+			padding: 10px;
+			font-size: 130%; 
+			background: #2f6681; 
+		}
+		.HeaderTable td {
+			height: 25px;
+			padding: 10px;
+			font-size: 80%; 
+			background: #6d94a7; 
+		}
+
+		.Status {
+			margin: 10;
+			margin-top: 10px;
+		}
+
+		.StatusHeader {
+			font-size: 70%;
+			font-weight: bold;
+			font-family: Verdana; 
+			color: black; 
+		}
+		
+		.StatusItem {
+			margin: 10;
+			font-size: 70%;
+			font-family: Verdana; 
+			color: black; 
+		}
+		
+		.SearchItem {
+			margin: 10;
+			margin-top: 10px;
+			font-size: 80%;
+			font-family: Verdana; 
+			color: black; 
+		}
+
+		.DataTable {
+			font-size: 70%; 
+			font-family: Verdana; 
+			color: black; 
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.DataTable TH {
+			background: #dbdbdb; /* Цвет фона ячеек */
+		}
+		.DataTable TR:nth-child(odd) {
+			height: 23px;
+			background: #f8f8f8;
+		}
+		
+		.DataTable TR:nth-child(even) {
+			height: 23px;
+			background: #ebebeb;
+		}
+	</style>
+</head>
+<body>
+	<div class="HeaderLine">
+		<div class="HeaderItem"> 
+			<img src="{{ url_for("static", filename="ciscoLogo.gif") }}"/>
+		</div>
+		<div class="HeaderItem"> 
+			Cisco Unified CM Administration
+		</div>
+		<div class="NavigationItem">
+			<form action="" method="post" novalidate>
+			    Navigation:
+			    {{ formNAV.select_navigation() }}
+		        {{ formNAV.submit() }}
+			</form>
+        </div>
+	</div>
+	<table class="HeaderTable">
+		{% if not rows_list %}
+		<tr>
+			<th>
+				Cisco Unified CM UserSearch report
+			</th>
+		</tr>
+		<tr>
+			<td>
+			</td>
+		</tr>
+		{% else %}
+		<tr>
+		</tr>
+		{% endif %}
+	</table>
+	<fieldset class="Status">
+		<legend class="StatusHeader">Status</legend>
+			<div class="StatusItem">
+				{{ console_output }}
+			</div>
+		</legend>
+	</fieldset>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				MAC Address
+			</th>
+			<th>
+				DeviceType
+			</th>
+            <th>
+				Device Description
+			</th>  
+            <th>
+				Number
+			</th>  
+			<th>
+				Partititon
+			</th>
+            <th>
+				CSS
+			</th>
+            <th>
+				Line Description 
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+			<td>
+				{{ row.name }}
+			</td>
+			<td>
+				{{ row.devtype }}
+			</td>
+			<td>
+				{{ row.description }}
+			</td>
+			<td>
+				{{ row.dn }}
+			</td>
+			<td>
+				{{ row.partition }}
+			</td>
+            <td>
+				{{ row.css }}
+			</td>
+            <td>
+				{{ row.display_line }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+<body>
+</html>
