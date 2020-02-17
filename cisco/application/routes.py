@@ -73,5 +73,4 @@ def testsql():
     #cm_sqlupdate("0","widget_table","widget_data","widget_name","CoffeeCount")
     #rv = cm_sqlselectall("widget_table","widget_name","CoffeeCount")
     #rv = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "NF")
-    out = out+1
     return "Ok"

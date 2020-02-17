@@ -9,7 +9,8 @@ def cm_sqlselect(data_colum, table, filter_colum, filter_colum_data):
      result = cur.fetchall()
      mysql.connection.commit()
      cur.close()
-     mysql.connection.close()
+     #mysql.connection.close()
+     print (result)
      return result
 
 def cm_sqlselectall(table, filter_colum, filter_colum_data):
