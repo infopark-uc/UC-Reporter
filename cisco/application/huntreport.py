@@ -2,13 +2,14 @@ import requests
 import xmltodict
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
+from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 
 
 def huntreport():
 
-    cucm_ip_address = "172.20.5.10"
-    cucm_login = "webadmin"
-    cucm_password = "CCMAdminUC"
+    cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", "INFOCELL")
+    cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "INFOCELL")
+    cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", "INFOCELL")
 
     html_page_title = 'CUCM Hunt Report'
 

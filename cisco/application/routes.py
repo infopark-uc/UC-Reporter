@@ -67,22 +67,11 @@ def order():
     submit_order()
     return "done"
 
-
 @app.route('/sql', methods=['GET', 'POST'])
 def testsql():
 
     #cm_sqlupdate("0","widget_table","widget_data","widget_name","CoffeeCount")
-    rv = cm_sqlselectall("widget_table","widget_name","CoffeeCount")
-    renderdata = {
-        "rendertype": "null",
-        "html_template": "cisco_callforward.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_search": form_search
-    }
-     #rv = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "NF")
-     return rv
-
-
-
+    #rv = cm_sqlselectall("widget_table","widget_name","CoffeeCount")
+    #rv = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "NF")
+    out = out+1
+    return "Ok"
