@@ -1,6 +1,6 @@
 # Default params
 class cucm_servers_list():
-
+#не используется.
     cucm_dict = {
         "MSK": {"IPAddress": "10.250.10.10", "login": "webadmin", "password": "CCMAdminSSK"},
         "KF": {"IPAddress": "10.250.34.10", "login": "webadmin", "password": "CCMAdminSSK"},
