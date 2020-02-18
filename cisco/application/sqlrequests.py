@@ -1,6 +1,5 @@
 import pymysql
 
-
 def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
      con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
      with con:
