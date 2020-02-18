@@ -1,33 +1,34 @@
-from flask_mysqldb import MySQL
+#from flask_mysqldb import MySQL
+import pymysql
 from application import app
 
 
+
+
 def cm_sqlselect(data_colum, table, filter_colum, filter_colum_data):
-     mysql = MySQL(app)
-     cur = mysql.connection.cursor()
-     cur.execute('SELECT ' + data_colum + ' FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
-     result = cur.fetchall()
-     mysql.connection.commit()
-     cur.close()
-     #mysql.connection.close()
-     print (result)
+     con = pymysql.connect('172.20.31.50', 'sqladmin',
+                           'Qwerty123', 'ucreporter')
+     with con:
+          cur = con.cursor()
+          cur.execute('SELECT ' + data_colum + ' FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
+          result = cur.fetchone()
+          result = result[0]
      return result
 
 def cm_sqlselectall(table, filter_colum, filter_colum_data):
-     mysql = MySQL(app)
-     cur = mysql.connection.cursor()
-     cur.execute('SELECT * FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
-     result = cur.fetchall()
-     mysql.connection.commit()
-     cur.close()
-     mysql.connection.close()
+     con = pymysql.connect('172.20.31.50', 'sqladmin',
+                           'Qwerty123', 'ucreporter')
+     with con:
+          cur = con.cursor()
+          cur.execute('SELECT * FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
+          result = cur.fetchone()
      return result
 
 def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
-     mysql = MySQL(app)
-     cur = mysql.connection.cursor()
-     cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "'+ data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
-     result = cur.fetchall()
-     mysql.connection.commit()
-     cur.close()
+     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
+
+     with con:
+          cur = con.cursor()
+          cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "'+ data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
+
      return result

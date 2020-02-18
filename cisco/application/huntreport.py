@@ -8,18 +8,8 @@ from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 def huntreport():
 
     cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", "INFOCELL")
-    print(cucm_ip_address)
-    cucm_ip_address = cucm_ip_address["cm_ip"]
-    print (cucm_ip_address)
-
     cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "INFOCELL")
-    print(cucm_login)
-    cucm_login=cucm_login["cm_username"]
-    print(cucm_login)
-
     cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", "INFOCELL")
-    cucm_password = cucm_password["cm_password"]
-    print(cucm_password)
 
     html_page_title = 'CUCM Hunt Report'
 
