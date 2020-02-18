@@ -3,10 +3,12 @@ import xmltodict
 from pprint import pprint
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from application.config import in_room_control_access_data
+from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
 
 def codec():
+    systemindex="0"  #Индекс данных в базе
+    widget_data = {} #данные виджета
     print("Получен HTTP запрос " + request.method)
 
     if not request.json:
@@ -39,23 +41,23 @@ def codec():
         if event[0] == "CoffeService":
             # Обработка для открытия панельки
             print ("Обрабатываем событие открытия панельки Кофе")
-            get_value(roomkit_access_data)
+            get_value(systemindex)
             if "CoffeeCount" in widget_data:
                 if widget_data["CoffeeCount"] is None:
-                     set_value(roomkit_access_data, "CoffeeCount", "0")
+                     set_value(systemindex, "CoffeeCount", "0")
             if "TeaCount" in widget_data:
                 if widget_data["TeaCount"] is None:
-                     set_value(roomkit_access_data, "TeaCount", "0")
+                     set_value(systemindex, "TeaCount", "0")
 
         elif event[0] == "CoffeeCount":
             # Обработка для изменения количества кофе
             if event[1] == "increment":
                 widget_data[event[0]] = str(int(widget_data[event[0]]) + 1)
-                set_value(roomkit_access_data, event[0], widget_data[event[0]])
+                set_value(systemindex, event[0], widget_data[event[0]])
                 print("Обрабатываем событие увелечения кофе")
             elif (event[1] == "decrement") and (int(widget_data[event[0]]) >= 1):
                 widget_data[event[0]] = str(int(widget_data[event[0]]) - 1)
-                set_value(roomkit_access_data, event[0], widget_data[event[0]])
+                set_value(systemindex, event[0], widget_data[event[0]])
                 print("Обрабатываем событие уменьшения кофе")
 
         elif event[0] == "TeaCount":
@@ -63,17 +65,17 @@ def codec():
             print(event[0])
             if event[1] == "increment":
                 widget_data[event[0]] = str(int(widget_data[event[0]]) + 1)
-                set_value(roomkit_access_data, event[0], widget_data[event[0]])
+                set_value(systemindex, event[0], widget_data[event[0]])
                 print("Обрабатываем событие увелечения чая")
             elif (event[1] == "decrement") and (int(widget_data[event[0]]) >= 1):
                 widget_data[event[0]] = str(int(widget_data[event[0]]) - 1)
-                set_value(roomkit_access_data, event[0], widget_data[event[0]])
+                set_value(systemindex, event[0], widget_data[event[0]])
                 print("Обрабатываем событие уменьшения чая")
 
         elif event[0] == "SendButton":
             # Обработка отправки заказа
             print("Обрабатываем событие отправки заказа")
-            send_order()
+            send_order(systemindex)
 
         else:
             #что-то непонятное, неизвестный виджет - ничего не делаем
@@ -85,16 +87,17 @@ def codec():
     return 'OK'
 
 
-def submit_order():
-
+def submit_order(systemindex):
+    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
     print("Получен HTTP запрос - подтверждение заказа: " + request.method)
-    set_value(roomkit_access_data, "CoffeeCount", "0")
-    set_value(roomkit_access_data, "TeaCount", "0")
-    widget_data["CoffeeCount"] = "0"
-    widget_data["TeaCount"] = "0"
+    set_value(systemindex, "CoffeeCount", "0")
+    set_value(systemindex, "TeaCount", "0")
+
 
     # URL
-    http_url = "http://" + roomkit_access_data["ip_address"] + "/putxml"
+    http_url = "http://" + roomkit_access_data_ip + "/putxml"
 
     # HTTP Headers
     http_headers = {'Content-Type': 'text/xml'}
@@ -118,19 +121,19 @@ def submit_order():
 
     # Create the Requests Connection
     try:
-        post = requests.post(http_url, data=http_data.encode('utf-8'), headers=http_headers, verify=False, auth=(roomkit_access_data["login"], roomkit_access_data["password"]))
+        post = requests.post(http_url, data=http_data.encode('utf-8'), headers=http_headers, verify=False, auth=(roomkit_access_data_login,roomkit_access_data_password))
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + roomkit_access_data["ip_address"]
+        console_output = "Ошибка соединения с сервером " + roomkit_access_data_ip
         print(console_output)
         return "OK"
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data["login"] + " к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data_login + " к серверу " + roomkit_access_data_ip
         print(console_output)
         return "OK"
 
     # Check is answer is successful
     if post.status_code == 401:
-        console_output = "Пользователь " + roomkit_access_data["login"] + " не авторизован для подключения к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Пользователь " + roomkit_access_data_login + " не авторизован для подключения к серверу " + roomkit_access_data_ip
         print(console_output)
         return "OK"
 
@@ -140,17 +143,22 @@ def submit_order():
         return "OK"
 
     # Convert output to Dict
-    console_output = "Данные получены от " + roomkit_access_data["ip_address"]
+    console_output = "Данные получены от " + roomkit_access_data_ip
     print(console_output)
 
     return '<CiscoIPPhoneText><Title>Заказ</Title><Text>Заказ подтвержден</Text><SoftKeyItem><Name>Выход</Name><URL>SoftKey:Exit</URL><Position>1</Position></SoftKeyItem></CiscoIPPhoneText>'.encode('utf-8')
     #return 'Заказ подтвержден'
 
-def set_value(roomkit_access_data, widget_name, widget_value):
 
+
+
+def set_value(systemindex, widget_name, widget_value):
+    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
     print ("Выполняется функция установки значений виджетов set_value")
     # URL
-    http_url = "http://" + roomkit_access_data["ip_address"] + "/putxml"
+    http_url = "http://" + roomkit_access_data_ip + "/putxml"
 
     # HTTP Headers
     http_headers = {'Content-Type': 'text/xml'}
@@ -175,19 +183,20 @@ def set_value(roomkit_access_data, widget_name, widget_value):
 
     # Create the Requests Connection
     try:
-        post = requests.post(http_url, data=http_data, headers=http_headers, verify=False, auth=(roomkit_access_data["login"], roomkit_access_data["password"]))
+        post = requests.post(http_url, data=http_data, headers=http_headers, verify=False, auth=(roomkit_access_data_login, roomkit_access_data_password))
+        cm_sqlupdate(widget_value, "widget_table", "widget_data", "widget_name", widget_name)
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + roomkit_access_data["ip_address"]
+        console_output = "Ошибка соединения с сервером " + roomkit_access_data_ip
         print(console_output)
         return
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data["login"] + " к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data_login + " к серверу " + roomkit_access_data_ip
         print(console_output)
         return
 
     # Check is answer is successful
     if post.status_code == 401:
-        console_output = "Пользователь " + roomkit_access_data["login"] + " не авторизован для подключения к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Пользователь " + roomkit_access_data_login + " не авторизован для подключения к серверу " + roomkit_access_data_ip
         print(console_output)
         return
 
@@ -198,15 +207,18 @@ def set_value(roomkit_access_data, widget_name, widget_value):
         return
 
     # Convert output to Dict
-    console_output = "Данные получены от " + roomkit_access_data["ip_address"]
+    console_output = "Данные получены от " + roomkit_access_data_ip
     print(console_output)
 
-def get_value(roomkit_access_data):
-
+def get_value(systemindex):
+    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+    widget_data = {}  # данные виджета
     print("Выполняется функция считывания значений виджетов get_value")
     
     # URL
-    http_url = "http://" + roomkit_access_data["ip_address"] + "/getxml"
+    http_url = "http://" + roomkit_access_data_ip + "/getxml"
 
     # HTTP Headers
     http_headers = {'Content-Type': 'text/xml'}
@@ -218,19 +230,19 @@ def get_value(roomkit_access_data):
 
     # Create the Requests Connection
     try:
-        get = requests.get(http_url, params=http_params, headers=http_headers, verify=False, auth=(roomkit_access_data["login"], roomkit_access_data["password"]))
+        get = requests.get(http_url, params=http_params, headers=http_headers, verify=False, auth=(roomkit_access_data_login, roomkit_access_data_password))
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + roomkit_access_data["ip_address"]
+        console_output = "Ошибка соединения с сервером " + roomkit_access_data_ip
         print(console_output)
         return
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data["login"] + " к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Что-то пошло не так при подключении пользователя " + roomkit_access_data_login + " к серверу " + roomkit_access_data_ip
         print(console_output)
         return
 
     # Check is answer is successful
     if get.status_code == 401:
-        console_output = "Пользователь " + roomkit_access_data["login"] + " не авторизован для подключения к серверу " + roomkit_access_data["ip_address"]
+        console_output = "Пользователь " + roomkit_access_data_login + " не авторизован для подключения к серверу " + roomkit_access_data_ip
         print(console_output)
         return
 
@@ -240,7 +252,7 @@ def get_value(roomkit_access_data):
         return
 
     # Convert output to Dict
-    console_output = "Данные получены от " + roomkit_access_data["ip_address"]
+    console_output = "Данные получены от " + roomkit_access_data_ip
     print(console_output)
 
     xml_dict = xmltodict.parse(get.text)
@@ -255,36 +267,47 @@ def get_value(roomkit_access_data):
     print("Установлены исходные значения для виджетов:")
     pprint(widget_data)
 
-def send_order():
+
+
+
+def send_order(systemindex):
+    submit_server = cm_sqlselect("server_ip", "server_config_table", "index", "0")
+    submin_server_port = cm_sqlselect("server_port", "server_config_table", "index", "0")
+    phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
+    phone_access_data_login = cm_sqlselect("phone_user", "cm_phones_table", "phone_index", systemindex)
+    phone_access_data_password = cm_sqlselect("phone_password", "cm_phones_table", "phone_index", systemindex)
+    widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "CoffeeCount")
+    widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "TeaCount")
+
 
     print("Отправляем заказ")
     # URL
-    http_url = "http://" + phone_access_data["ip_address"] + "/CGI/Execute"
+    http_url = "http://" + phone_access_data_ip + "/CGI/Execute"
 
     # HTTP Headers
     http_headers = {'Content-Type': 'text/xml; charset=utf-8'}
 
-    message = "Прошу подать следующие напитки \nКофе: " + widget_data["CoffeeCount"] + "\n" + "Чай: " + widget_data["TeaCount"]
-    http_data = 'XML=<?xml version="1.0" encoding="utf-8" ?><CiscoIPPhoneText><Title>Конференц-зал</Title><Text>' + message  + '</Text><SoftKeyItem><Name>Подтвердить</Name><URL method="post">http://10.10.143.108:5000/SubmitOrder</URL><Position>4</Position></SoftKeyItem></CiscoIPPhoneText>'
+    message = "Прошу подать следующие напитки \nКофе: " + str(widget_data_CoffeeCount) + "\n" + "Чай: " + str(widget_data_TeaCount)
+    http_data = 'XML=<?xml version="1.0" encoding="utf-8" ?><CiscoIPPhoneText><Title>Конференц-зал</Title><Text>' + message  + '</Text><SoftKeyItem><Name>Подтвердить</Name><URL method="post">http://' + submit_server + ':' + submin_server_port + '/SubmitOrder</URL><Position>4</Position></SoftKeyItem></CiscoIPPhoneText>'
 
     # disable warning about untrusted certs
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     # Create the Requests Connection
     try:
-        post = requests.post(http_url, data=http_data.encode('utf-8'), headers=http_headers, verify=False, auth=(phone_access_data["login"], phone_access_data["password"]))
+        post = requests.post(http_url, data=http_data.encode('utf-8'), headers=http_headers, verify=False, auth=(phone_access_data_login, phone_access_data_password))
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + phone_access_data["ip_address"]
+        console_output = "Ошибка соединения с сервером " + phone_access_data_ip
         print(console_output)
         return
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + phone_access_data["login"] + " к серверу " + phone_access_data["ip_address"]
+        console_output = "Что-то пошло не так при подключении пользователя " + phone_access_data_login + " к серверу " + phone_access_data_ip
         print(console_output)
         return
 
     # Check is answer is successful
     if post.status_code == 401:
-        console_output = "Пользователь " + phone_access_data["login"] + " не авторизован для подключения к серверу " + phone_access_data["ip_address"]
+        console_output = "Пользователь " + phone_access_data_login + " не авторизован для подключения к серверу " + phone_access_data_ip
         print(console_output)
         return
 
@@ -294,26 +317,26 @@ def send_order():
         return
 
     # Convert output to Dict
-    console_output = "Данные получены от " + phone_access_data["ip_address"]
+    console_output = "Данные получены от " + phone_access_data_ip
     print(console_output)
 
     http_data = 'XML= <CiscoIPPhoneExecute><ExecuteItem URL="Play:Chime.raw" /></CiscoIPPhoneExecute>'
 
     # Create the Requests Connection
     try:
-        post = requests.post(http_url, data=http_data, headers=http_headers, verify=False, auth=(phone_access_data["login"], phone_access_data["password"]))
+        post = requests.post(http_url, data=http_data, headers=http_headers, verify=False, auth=(phone_access_data_login, phone_access_data_password))
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + phone_access_data["ip_address"]
+        console_output = "Ошибка соединения с сервером " + phone_access_data_ip
         print(console_output)
-        returm
+        return
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + phone_access_data["login"] + " к серверу " + phone_access_data["ip_address"]
+        console_output = "Что-то пошло не так при подключении пользователя " + phone_access_data_login + " к серверу " + phone_access_data_ip
         print(console_output)
         return
 
     # Check is answer is successful
     if post.status_code == 401:
-        console_output = "Пользователь " + phone_access_data["login"] + " не авторизован для подключения к серверу " + phone_access_data["ip_address"]
+        console_output = "Пользователь " + phone_access_data_login + " не авторизован для подключения к серверу " + phone_access_data_ip
         print(console_output)
         return
 
@@ -323,5 +346,5 @@ def send_order():
         return
 
     # Convert output to Dict
-    console_output = "Данные получены от " + phone_access_data["ip_address"]
+    console_output = "Данные получены от " + phone_access_data_ip
     print(console_output)

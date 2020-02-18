@@ -22,6 +22,6 @@ def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
      con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
      with con:
           cur = con.cursor()
-          cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "'+ data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
+          cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "' + data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
 
      return result
