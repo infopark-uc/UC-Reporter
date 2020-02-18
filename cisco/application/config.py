@@ -10,22 +10,4 @@ class cucm_servers_list():
         "Infocell": {"IPAddress": "172.20.5.10", "login": "webadmin", "password": "CCMAdminUC"}
     }
 
-class in_room_control_access_data():
-	global widget_data
-	widget_data = {}
-
-	global roomkit_access_data
-	roomkit_access_data = {
-		"ip_address": "172.20.5.5",
-		"login": "touchuser",
-		"password": "CCMAdminUC"
-	}
-
-	global phone_access_data
-	phone_access_data = {
-		"ip_address": "172.20.36.157",
-		"login": "screenshotuser",
-		"password": "Qwerty123"
-	}
-
 

@@ -5,7 +5,6 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
-
 def codec(systemindex):
     widget_data = {} #данные виджета
     print("Получен HTTP запрос " + request.method)
@@ -152,9 +151,12 @@ def submit_order(systemindex):
 
 
 def set_value(systemindex, widget_name, widget_value):
+    # credentials from database
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+
+
     print ("Выполняется функция установки значений виджетов set_value")
     # URL
     http_url = "http://" + roomkit_access_data_ip + "/putxml"
@@ -210,10 +212,13 @@ def set_value(systemindex, widget_name, widget_value):
     print(console_output)
 
 def get_value(systemindex):
+	# credentials from database
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
-    widget_data = {}  # данные виджета
+
+    widget_data = {}
+
     print("Выполняется функция считывания значений виджетов get_value")
     
     # URL
@@ -268,6 +273,7 @@ def get_value(systemindex):
 
 
 def send_order(systemindex):
+	#credentials from database
     submit_server = cm_sqlselect("server_ip", "server_config_table", "server_index", "0")
     submit_server_port = cm_sqlselect("server_port", "server_config_table", "server_index", "0")
     phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)

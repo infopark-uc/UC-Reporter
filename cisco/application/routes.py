@@ -59,11 +59,11 @@ def cfa():
 
 @app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
-    codec("0") # "0" - значение индекса системы в базеданных
+    codec("0") # "0" - index roomsystem from database
     return "done"
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
-    submit_order("0") # "0" - значение индекса системы в базеданных
+    submit_order("0") # "0" - index roomsystem from database
     return "done"
 
