@@ -24,4 +24,4 @@ def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
           cur = con.cursor()
           cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "' + data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
 
-     return result
+     return "update database done"

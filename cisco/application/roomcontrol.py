@@ -6,7 +6,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
 def codec(systemindex):
-    widget_data = {} #данные виджета
+
     print("Получен HTTP запрос " + request.method)
 
     if not request.json:
@@ -39,35 +39,45 @@ def codec(systemindex):
         if event[0] == "CoffeService":
             # Обработка для открытия панельки
             print ("Обрабатываем событие открытия панельки Кофе")
-            get_value(systemindex)
-            if "CoffeeCount" in widget_data:
-                if widget_data["CoffeeCount"] is None:
-                     set_value(systemindex, "CoffeeCount", "0")
-            if "TeaCount" in widget_data:
-                if widget_data["TeaCount"] is None:
-                     set_value(systemindex, "TeaCount", "0")
+
+            get_value(systemindex) #забираем данные с панельки и обновляем базу
+			 #обновляем данные с базы данных по виджетам при открытии панельки
+
+
+            #if "CoffeeCount" in widget_data:
+             #   if widget_data["CoffeeCount"] is None:
+             #        set_value(systemindex, "CoffeeCount", "0")
+            #if "TeaCount" in widget_data:
+            #    if widget_data["TeaCount"] is None:
+            #         set_value(systemindex, "TeaCount", "0")
 
         elif event[0] == "CoffeeCount":
+            widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
             # Обработка для изменения количества кофе
             if event[1] == "increment":
-                widget_data[event[0]] = str(int(widget_data[event[0]]) + 1)
-                set_value(systemindex, event[0], widget_data[event[0]])
+                widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) + 1)
+                set_value(systemindex, event[0], widget_data_CoffeeCount)
                 print("Обрабатываем событие увелечения кофе")
-            elif (event[1] == "decrement") and (int(widget_data[event[0]]) >= 1):
-                widget_data[event[0]] = str(int(widget_data[event[0]]) - 1)
-                set_value(systemindex, event[0], widget_data[event[0]])
+            elif (event[1] == "decrement") and (int(widget_data_CoffeeCount) >= 1):
+                widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) - 1)
+                set_value(systemindex, event[0], widget_data_CoffeeCount)
                 print("Обрабатываем событие уменьшения кофе")
 
         elif event[0] == "TeaCount":
-            # Обработка для изменения количества  чая
+            widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+            #Обработка для изменения количества  чая
             print(event[0])
             if event[1] == "increment":
-                widget_data[event[0]] = str(int(widget_data[event[0]]) + 1)
-                set_value(systemindex, event[0], widget_data[event[0]])
+                widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                widget_data_TeaCount = str(int(widget_data_TeaCount) + 1)
+                set_value(systemindex, event[0], widget_data_TeaCount)
                 print("Обрабатываем событие увелечения чая")
-            elif (event[1] == "decrement") and (int(widget_data[event[0]]) >= 1):
-                widget_data[event[0]] = str(int(widget_data[event[0]]) - 1)
-                set_value(systemindex, event[0], widget_data[event[0]])
+            elif (event[1] == "decrement") and (int(widget_data_TeaCount) >= 1):
+                widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                widget_data_TeaCount = str(int(widget_data_TeaCount) - 1)
+                set_value(systemindex, event[0], widget_data_TeaCount)
                 print("Обрабатываем событие уменьшения чая")
 
         elif event[0] == "SendButton":
@@ -147,9 +157,6 @@ def submit_order(systemindex):
     return '<CiscoIPPhoneText><Title>Заказ</Title><Text>Заказ подтвержден</Text><SoftKeyItem><Name>Выход</Name><URL>SoftKey:Exit</URL><Position>1</Position></SoftKeyItem></CiscoIPPhoneText>'.encode('utf-8')
     #return 'Заказ подтвержден'
 
-
-
-
 def set_value(systemindex, widget_name, widget_value):
     # credentials from database
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
@@ -216,7 +223,6 @@ def get_value(systemindex):
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
-
     widget_data = {}
 
     print("Выполняется функция считывания значений виджетов get_value")
@@ -263,14 +269,21 @@ def get_value(systemindex):
 
     # Get Dict with phones
     widget_list = xml_dict["Status"]["UserInterface"]["Extensions"]["Widget"]
-
+    print (xml_dict)
     if type(widget_list) is list:
         for widget in widget_list:
             widget_data[widget["WidgetId"]] = widget["Value"]
 
+    if "CoffeeCount" in widget_data:
+        if widget_data["CoffeeCount"] is None:
+            set_value(systemindex, "CoffeeCount", "0")
+
+    if "TeaCount" in widget_data:
+        if widget_data["TeaCount"] is None:
+            set_value(systemindex, "TeaCount", "0")
+
     print("Установлены исходные значения для виджетов:")
     pprint(widget_data)
-
 
 def send_order(systemindex):
 	#credentials from database
