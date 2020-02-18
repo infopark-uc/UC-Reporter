@@ -59,36 +59,11 @@ def cfa():
 
 @app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
-    codec()
+    codec("0") # "0" - значение индекса системы в базеданных
     return "done"
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
-    submit_order()
+    submit_order("0") # "0" - значение индекса системы в базеданных
     return "done"
 
-@app.route('/SendOrder', methods=['GET', 'POST'])
-def SendOrder():
-    send_order("0")
-    return "done"
-
-@app.route('/sql', methods=['GET', 'POST'])
-def sql():
-    systemindex = "0"
-
-    phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
-    print("phone ip " + phone_access_data_ip)
-
-    phone_access_data_login = cm_sqlselect("phone_user", "cm_phones_table", "phone_index", systemindex)
-    print("phone login " + phone_access_data_login)
-
-    phone_access_data_password = cm_sqlselect("phone_password", "cm_phones_table", "phone_index", systemindex)
-    print("phone password " + phone_access_data_password)
-
-    widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "CoffeeCount")
-    print("CoffeeCount " + str(widget_data_CoffeeCount))
-
-    widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "TeaCount")
-    print("TeaCount " + str(widget_data_TeaCount))
-
-    return "done"

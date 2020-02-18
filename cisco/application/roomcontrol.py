@@ -6,8 +6,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
 
-def codec():
-    systemindex="0"  #Индекс данных в базе
+def codec(systemindex):
     widget_data = {} #данные виджета
     print("Получен HTTP запрос " + request.method)
 
@@ -268,17 +267,14 @@ def get_value(systemindex):
     pprint(widget_data)
 
 
-
-
 def send_order(systemindex):
-    submit_server = cm_sqlselect("server_ip", "server_config_table", "index", "0")
-    submin_server_port = cm_sqlselect("server_port", "server_config_table", "index", "0")
+    submit_server = cm_sqlselect("server_ip", "server_config_table", "server_index", "0")
+    submit_server_port = cm_sqlselect("server_port", "server_config_table", "server_index", "0")
     phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
     phone_access_data_login = cm_sqlselect("phone_user", "cm_phones_table", "phone_index", systemindex)
     phone_access_data_password = cm_sqlselect("phone_password", "cm_phones_table", "phone_index", systemindex)
     widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "CoffeeCount")
     widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "TeaCount")
-
 
     print("Отправляем заказ")
     # URL
@@ -288,7 +284,7 @@ def send_order(systemindex):
     http_headers = {'Content-Type': 'text/xml; charset=utf-8'}
 
     message = "Прошу подать следующие напитки \nКофе: " + str(widget_data_CoffeeCount) + "\n" + "Чай: " + str(widget_data_TeaCount)
-    http_data = 'XML=<?xml version="1.0" encoding="utf-8" ?><CiscoIPPhoneText><Title>Конференц-зал</Title><Text>' + message  + '</Text><SoftKeyItem><Name>Подтвердить</Name><URL method="post">http://' + submit_server + ':' + submin_server_port + '/SubmitOrder</URL><Position>4</Position></SoftKeyItem></CiscoIPPhoneText>'
+    http_data = 'XML=<?xml version="1.0" encoding="utf-8" ?><CiscoIPPhoneText><Title>Конференц-зал</Title><Text>' + message  + '</Text><SoftKeyItem><Name>Подтвердить</Name><URL method="post">http://' + submit_server + ':' + submit_server_port + '/SubmitOrder</URL><Position>4</Position></SoftKeyItem></CiscoIPPhoneText>'
 
     # disable warning about untrusted certs
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
