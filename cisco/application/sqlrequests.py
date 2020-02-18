@@ -1,7 +1,6 @@
 #from flask_mysqldb import MySQL
 import pymysql
 from application import app
-
 def cm_sqlselect(data_colum, table, filter_colum, filter_colum_data):
      con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
      with con:
