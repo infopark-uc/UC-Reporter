@@ -1,6 +1,15 @@
-#from flask_mysqldb import MySQL
 import pymysql
-from application import app
+
+
+def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
+     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
+     with con:
+          cur = con.cursor()
+          cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "' + data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
+
+     return "update database done"
+
+
 def cm_sqlselect(data_colum, table, filter_colum, filter_colum_data):
      con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
      with con:
@@ -17,11 +26,3 @@ def cm_sqlselectall(table, filter_colum, filter_colum_data):
           cur.execute('SELECT * FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
           result = cur.fetchone()
      return result
-
-def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
-     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
-     with con:
-          cur = con.cursor()
-          cur.execute('UPDATE ' + table + ' SET ' + set_column + ' = "' + data + '" WHERE ' + filter_colum + '="' + filter_colum_date + '";')
-
-     return "update database done"
