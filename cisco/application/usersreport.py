@@ -3,11 +3,9 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-from application.config import cucm_servers_list
+from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 
 def usersreport():
-    cucm_dict = cucm_servers_list.cucm_dict
-
     SEARCH_BY_DN = "Number"
     SEARCH_BY_USER = "User"
 
@@ -29,10 +27,9 @@ def usersreport():
     form_search = SelectSearchType(csrf_enabled=False)
     if form_search.validate_on_submit():
         console_output = form_search.select_region.data + " " + form_search.select_field.data + " " + form_search.string_field.data
-
-        cucm_ip_address = cucm_dict[form_search.select_region.data]["IPAddress"]
-        cucm_login = cucm_dict[form_search.select_region.data]["login"]
-        cucm_password = cucm_dict[form_search.select_region.data]["password"]
+        cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", form_search.select_region.data)
+        cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", form_search.select_region.data)
+        cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", form_search.select_region.data)
 
         # CUCM URL's
         cucm_url = "https://" + cucm_ip_address + ":8443/axl/"

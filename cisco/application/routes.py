@@ -69,11 +69,6 @@ def order():
 
 @app.route('/sql', methods=['GET', 'POST'])
 def testsql():
-
     cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", "INFOCELL")
     print(cucm_ip_address)
-    #cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "INFOCELL")
-    #print("login: {}".format(cucm_login[0]))
-    #cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", "INFOCELL")
-    #print("password: {}".format(cucm_password[0]))
     return "done"

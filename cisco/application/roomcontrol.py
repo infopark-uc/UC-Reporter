@@ -5,8 +5,8 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.config import in_room_control_access_data
 
-
 def codec():
+
     print("Получен HTTP запрос " + request.method)
 
     if not request.json:
