@@ -8,7 +8,6 @@ def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_date):
 
      return "update database done"
 
-
 def cm_sqlselect(data_colum, table, filter_colum, filter_colum_data):
      con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
      with con:
