@@ -145,8 +145,8 @@ def submit_order(systemindex):
     console_output = "Данные получены от " + roomkit_access_data_ip
     print(console_output)
 
+    print("Send submit to phone")
     return '<CiscoIPPhoneText><Title>Заказ</Title><Text>Заказ подтвержден</Text><SoftKeyItem><Name>Выход</Name><URL>SoftKey:Exit</URL><Position>1</Position></SoftKeyItem></CiscoIPPhoneText>'.encode('utf-8')
-    #return 'Заказ подтвержден'
 
 def set_value(systemindex, widget_name, widget_value):
     # credentials from database

@@ -64,6 +64,6 @@ def roomrequest():
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
-    submit_order("0") # "0" - index roomsystem from database
-    return "done"
+    return submit_order("0") # "0" - index roomsystem from database
+
 
