@@ -40,16 +40,7 @@ def codec(systemindex):
             # Обработка для открытия панельки
             print ("Обрабатываем событие открытия панельки Кофе")
 
-            get_value(systemindex) #забираем данные с панельки и обновляем базу
-			 #обновляем данные с базы данных по виджетам при открытии панельки
-
-
-            #if "CoffeeCount" in widget_data:
-             #   if widget_data["CoffeeCount"] is None:
-             #        set_value(systemindex, "CoffeeCount", "0")
-            #if "TeaCount" in widget_data:
-            #    if widget_data["TeaCount"] is None:
-            #         set_value(systemindex, "TeaCount", "0")
+            get_value(systemindex) #забираем данные с панельки и обновляем базу, обновляем данные с базы данных по виджетам при открытии панельки
 
         elif event[0] == "CoffeeCount":
             widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
