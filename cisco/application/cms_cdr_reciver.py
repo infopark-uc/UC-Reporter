@@ -54,6 +54,18 @@ def cdr_receiver():
               codectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec'])
               cm_sqlupdate(codectx, 'cms_cdr_records', 'txAudio_codec', 'callleg_id',callleg_id)  # дополняем информацию о вызове
               print("txAudio_codec: " + codectx + " inserted to database")
+        if "coSpace" in cdr_dict['records']['record']['call']:
+            coSpace = str(cdr_dict['records']['record']['call']['coSpace'])
+            cm_sqlupdate(coSpace, 'cms_cdr_records', 'coSpace_id', 'callleg_id',callleg_id)  # дополняем информацию о вызове
+            print("coSpace_id: " + coSpace + " inserted to database")
+
+            coSpace_name = str(cdr_dict['records']['record']['call']['name'])
+            cm_sqlupdate(coSpace_name, 'cms_cdr_records', 'coSpace_name', 'callleg_id',callleg_id)  # дополняем информацию о вызове
+            print("coSpace_name: " + coSpace_name + " inserted to database")
+
+
+
+
 
         return('', 204)
 
