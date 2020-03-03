@@ -3,7 +3,7 @@ from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
-from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
+from application.cms_cdr_reciver import cdr_receiver
 import application.callforward
 
 
@@ -60,10 +60,12 @@ def cfa():
 @app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
     codec("0") # "0" - index roomsystem from database
-    return "done"
+    return "roomrequest done"
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
     return submit_order("0") # "0" - index roomsystem from database
 
-
+@app.route('/cdr', methods=['POST'])
+def cdr():
+    return cdr_receiver()

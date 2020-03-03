@@ -4,9 +4,9 @@
 	{% if title %}
         <title>{{ title }} </title>
     {% else %}
-        <title>Welcome to UC Reporter</title>
+        <title>Welcome to UC Report</title>
     {% endif %}
-	<script type="text/javascript" src="{{ url_for("static", filename="jquery-1.9.0.js") }} "></script>
+	<script type="text/javascript" src="{{ url_for("static" , filename="jquery-1.9.0.js") }} "></script>
     <script type="text/javascript" charset="utf-8">
     $(function(){
         $('#ExportXLS').click(function(){
@@ -18,84 +18,55 @@
     </script>
 	
 	<style type="text/css">
-	
-		.HeaderLine {
+
+	.HeaderLine {
 			display: flex;
 			flex-flow: row nowrap;
 			align-items: center;
-			font-family: Verdana; 
+			font-family: Verdana;
 			font-size: 100%;
 			font-weight: bold;
-			color: #2f6681; 
+			color: #2f6681;
 			height: 60px;
 			background: linear-gradient(to right, #ffffff, #2f6681);
 		}
 		.HeaderItem {
 			margin: 5px;
 		}
-		
+
 		.NavigationItem {
 			margin-left: auto;
 			font-size: 80%;
 			color: white;
 		}
-				
-		.HeaderTable {	
+
+		.HeaderTable {
 			border-collapse: collapse;
 			text-align: left;
-			font-family: Verdana; 
-			color: white; 
+			font-family: Verdana;
+			color: white;
 			font-weight: bold;
 			width: 100%;
-			margin-top: 10px;
 		}
 		.HeaderTable th {
 			height: 150px;
 			padding: 10px;
-			font-size: 130%; 
-			background: #2f6681; 
+			font-size: 130%;
+			background: #2f6681;
 		}
 		.HeaderTable td {
 			height: 25px;
 			padding: 10px;
-			font-size: 80%; 
-			background: #6d94a7; 
-		}
-
-		.Status {
-			margin: 10;
-			margin-top: 10px;
-		}
-
-		.StatusHeader {
-			font-size: 70%;
-			font-weight: bold;
-			font-family: Verdana; 
-			color: black; 
-		}
-		
-		.StatusItem {
-			margin: 10;
-			font-size: 70%;
-			font-family: Verdana; 
-			color: black; 
-		}
-		
-		.SearchItem {
-			margin: 10;
-			margin-top: 10px;
 			font-size: 80%;
-			font-family: Verdana; 
-			color: black; 
+			background: #6d94a7;
 		}
 
 		.DataTable {
-			font-size: 70%; 
-			font-family: Verdana; 
-			color: black; 
+			font-size: 80%;
+			font-family: Verdana;
+			color: #333366;
 			width: 100%;
 			border-collapse: collapse;
-			margin-top: 10px;
 		}
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
@@ -104,7 +75,6 @@
 			height: 23px;
 			background: #f8f8f8;
 		}
-		
 		.DataTable TR:nth-child(even) {
 			height: 23px;
 			background: #ebebeb;
@@ -131,7 +101,7 @@
 		{% if not rows_list %}
 		<tr>
 			<th>
-				Cisco Unified CM UserSearch report
+				Cisco Meeting Server report
 			</th>
 		</tr>
 		<tr>
@@ -157,7 +127,7 @@
 		<form action="" method="post" novalidate>
 		    Найти телефон в
 			{{ formSRCH.select_region() }}
-			где  
+			где
 		    {{ formSRCH.select_field() }}
 			начинается с:
 			{{ formSRCH.string_field() }}
@@ -169,49 +139,28 @@
 	<table class="DataTable">
 		<tr>
 			<th>
-				MAC Address
+				Meeting Name
 			</th>
 			<th>
-				DeviceType
+				Owner
 			</th>
-            <th>
-				Device Description
-			</th>  
-            <th>
-				Number
-			</th>  
 			<th>
-				Partititon
+				Start
 			</th>
             <th>
-				CSS
-			</th>
-            <th>
-				Line Description 
+				End
 			</th>
 		</tr>
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				{{ row.name }}
+				{{ row.dnorpattern }}
 			</td>
 			<td>
-				{{ row.devtype }}
+				{{ row.cfadestination }}
 			</td>
 			<td>
-				{{ row.description }}
-			</td>
-			<td>
-				{{ row.dn }}
-			</td>
-			<td>
-				{{ row.partition }}
-			</td>
-            <td>
-				{{ row.css }}
-			</td>
-            <td>
-				{{ row.display_line }}
+				{{ row.cfavoicemailenabled }}
 			</td>
 		</tr>
 		{% endfor %}

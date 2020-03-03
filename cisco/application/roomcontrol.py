@@ -7,10 +7,10 @@ from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
 def codec(systemindex):
 
-    print("Получен HTTP запрос " + request.method)
+    print("Received HTTP request " + request.method)
 
     if not request.json:
-        print("Нет JSON внутри HTTP запроса")
+        print("Missing JSON inside HTTP request")
         return "OK"
 
     json_data = request.json
@@ -19,7 +19,7 @@ def codec(systemindex):
 
     try:
         event = (json_data['Event']['UserInterface']['Extensions']['Panel']['Clicked']['PanelId']['Value']).split(":")
-        print('Приехало событие от панельки')
+        print('Received event from touch panel')
     except KeyError:
         print('Сработало исключение для панельки')
 
@@ -31,7 +31,7 @@ def codec(systemindex):
 
     try:
         event = (json_data['Event']['UserInterface']['Extensions']['Event']['Clicked']['Signal']['Value']).split(":")
-        print('Приехало событие от виджета Clicked')
+        print('Received event Clicked')
     except KeyError:
         print('Сработало исключение для виджета Clicked')
 
@@ -49,12 +49,12 @@ def codec(systemindex):
                 widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) + 1)
                 set_value(systemindex, event[0], widget_data_CoffeeCount)
-                print("Обрабатываем событие увелечения кофе")
+                print("increment CoffeeCount")
             elif (event[1] == "decrement") and (int(widget_data_CoffeeCount) >= 1):
                 widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) - 1)
                 set_value(systemindex, event[0], widget_data_CoffeeCount)
-                print("Обрабатываем событие уменьшения кофе")
+                print("decrement CoffeeCount")
 
         elif event[0] == "TeaCount":
             widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
@@ -64,12 +64,12 @@ def codec(systemindex):
                 widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_TeaCount = str(int(widget_data_TeaCount) + 1)
                 set_value(systemindex, event[0], widget_data_TeaCount)
-                print("Обрабатываем событие увелечения чая")
+                print("increment TeaCount")
             elif (event[1] == "decrement") and (int(widget_data_TeaCount) >= 1):
                 widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_TeaCount = str(int(widget_data_TeaCount) - 1)
                 set_value(systemindex, event[0], widget_data_TeaCount)
-                print("Обрабатываем событие уменьшения чая")
+                print("decrement TeaCount")
 
         elif event[0] == "SendButton":
             # Обработка отправки заказа
@@ -210,7 +210,7 @@ def set_value(systemindex, widget_name, widget_value):
     print(console_output)
 
 def get_value(systemindex):
-	# credentials from database
+    # credentials from database
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
@@ -277,7 +277,7 @@ def get_value(systemindex):
     pprint(widget_data)
 
 def send_order(systemindex):
-	#credentials from database
+    #credentials from database
     submit_server = cm_sqlselect("server_ip", "server_config_table", "server_index", "0")
     submit_server_port = cm_sqlselect("server_port", "server_config_table", "server_index", "0")
     phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
@@ -286,7 +286,7 @@ def send_order(systemindex):
     widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "CoffeeCount")
     widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "TeaCount")
 
-    print("Отправляем заказ")
+    print("Send order")
     # URL
     http_url = "http://" + phone_access_data_ip + "/CGI/Execute"
 
