@@ -67,6 +67,8 @@ def cdr_receiver():
             cms_sql_request(
                 "UPDATE cms_cdr_records SET txAudio_codec='" + acodectx + "',durationSeconds='" + durationSeconds + "',reason='" + reason + "',txVideo_codec='" + vcodectx + "',rxVideo_codec='" + vcodecrx + "',rxAudio_codec='" + acodecrx + "' WHERE callleg_id='" + callleg_id + "';")
             print("call detail updated from callLegEnd")
+            pprint(cdr_dict)
+
 
 
 
