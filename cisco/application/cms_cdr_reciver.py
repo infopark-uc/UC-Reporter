@@ -8,63 +8,60 @@ def cdr_receiver():
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
         cdr_dict = json.loads(json.dumps(cdr)) #trasfrorm OrderedDict to Dict
-        #
-        session_id = str(cdr_dict['records']["@session"])  # забираем Session ID
-            # print("Session ID:  " + session_id)
-        callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID
-            # print ("CallLeg ID:  " + callleg_id)
-        sipcall_id = str(cdr_dict['records']['record']['callLeg']['sipCallId'])  # забираем sipcall_id
-            # print("SipCall ID:  " + sipcall_id)
+        if cdr_dict['records']['record']['@type'] == 'callLegStart':  #проверяем что, это новый коллег
+            # print("We get callLegStart")
+            cms_ip = str(request.environ['REMOTE_ADDR'])
+            session_id = str(cdr_dict['records']["@session"])  # забираем Session ID
+            callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID
+            sipcall_id = str(cdr_dict['records']['record']['callLeg']['sipCallId'])  # забираем sipcall_id
+            remoteAddress = str(cdr_dict['records']['record']['callLeg']['remoteAddress'])  # забираем  remoteAddress
+            localAddress = str(cdr_dict['records']['record']['callLeg']['localAddress'])  # забираем  localAddress
+            displayName = str(cdr_dict['records']['record']['callLeg']['displayName'])  # забираем  displayName
 
-        if not cm_sqlselect_dict('callleg_id', 'cms_cdr_records', 'callleg_id', callleg_id):
-                print("insert data to database")
-                # insert IDs to database
-                cms_sql_request("INSERT INTO cms_cdr_records SET session_id='" + session_id + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "';")
-        else:
-                print("ID data already presence")
+            ### добавляем идентификаторы в базу
+            cms_sql_request(
+                "INSERT INTO cms_cdr_records SET session_id='" + session_id + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "';")
+            print("SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
+            ### обновляем информацию о вызове
+            cms_sql_request(
+                "UPDATE cms_cdr_records SET remoteAddress='" + remoteAddress + "',localAddress='" + localAddress + "' WHERE callleg_id='" + callleg_id + "';")
 
-        if cdr_dict['records']['record']['@type'] == 'callLegStart':  # проверяем что, это новый коллег
-            if "@time" in cdr_dict['records']['record']['callLeg']:
-                startTime = str(cdr_dict['records']['record']['callLeg']['@time'])
-                cm_sqlupdate(startTime, 'cms_cdr_records', 'startTime', 'callleg_id',callleg_id)  # дополняем информацию о начале вызова
-                print("startTime: " + startTime + " inserted to database")
-
-            if "remoteAddress" in cdr_dict['records']['record']['callLeg']:
-                remoteAddress = str(cdr_dict['records']['record']['callLeg']['remoteAddress'])  # забираем  remoteAddress
-                cm_sqlupdate(remoteAddress, 'cms_cdr_records', 'remoteAddress', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                print("remoteAddress: " + remoteAddress + " inserted to database")
-            if "localAddress" in cdr_dict['records']['record']['callLeg']:
-                localAddress = str(cdr_dict['records']['record']['callLeg']['remoteAddress'])  # забираем  remoteAddress
-                cm_sqlupdate(localAddress, 'cms_cdr_records', 'localAddress', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                print("localAddress: " + remoteAddress + " inserted to database")
+        if cdr_dict['records']['record']['@type'] == 'callLegUpdate':
+            #print("this is callLegUpdate")
+            callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
+            if "call" in cdr_dict['records']['record']['callLeg']:
+                call_id = str(cdr_dict['records']['record']['callLeg']['call'])  # забираем  reason
+                cm_sqlupdate(call_id, 'cms_cdr_records', 'call_id', 'callleg_id',callleg_id)  # дополняем информацию о вызове
+                cms_sql_request(
+                    "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
 
         if cdr_dict['records']['record']['@type'] == 'callLegEnd':
-            if "durationSeconds" in cdr_dict['records']['record']['callLeg']:
-                 durationSeconds = str(cdr_dict['records']['record']['callLeg']['durationSeconds'])  # забираем  durationSeconds
-                 cm_sqlupdate(durationSeconds, 'cms_cdr_records', 'durationSeconds', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                 print("durationSeconds: " + durationSeconds + " inserted to database")
-            if "reason" in cdr_dict['records']['record']['callLeg']:
-                 reason = str(cdr_dict['records']['record']['callLeg']['reason'])  # забираем  reason
-                 cm_sqlupdate(reason, 'cms_cdr_records', 'reason', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                 print("reason: " + reason + " inserted to database")
-            if "codec" in cdr_dict['records']['record']['callLeg']['rxAudio']:
-                 codecrx = str(cdr_dict['records']['record']['callLeg']['rxAudio']['codec'])
-                 cm_sqlupdate(codecrx, 'cms_cdr_records', 'rxAudio_codec', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                 print("rxAudio_codec: " + codecrx + " inserted to database")
-            if "codec" in cdr_dict['records']['record']['callLeg']['txAudio']:
-                 codectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec'])
-                 cm_sqlupdate(codectx, 'cms_cdr_records', 'txAudio_codec', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                 print("txAudio_codec: " + codectx + " inserted to database")
-            if "coSpace" in cdr_dict['records']['record']['call']:
-                 coSpace = str(cdr_dict['records']['record']['call']['coSpace'])
-                 cm_sqlupdate(coSpace, 'cms_cdr_records', 'coSpace_id', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                 print("coSpace_id: " + coSpace + " inserted to database")
+            #print("this is callLegEnd")
+            callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
+            durationSeconds = str(cdr_dict['records']['record']['callLeg']['durationSeconds'])  # забираем  durationSeconds
+            reason = str(cdr_dict['records']['record']['callLeg']['reason'])  # забираем  reason
+            codecrx = str(cdr_dict['records']['record']['callLeg']['rxAudio']['codec']) # забираем тип кодека аудио RX
+            codectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec']) # забираем тип кодека аудио TX
+            ### обновляем информацию о вызове
+            cms_sql_request(
+                "UPDATE cms_cdr_records SET txAudio_codec='" + codectx + "',durationSeconds='" + durationSeconds + "',reason='" + reason + "',rxAudio_codec='" + codecrx + "' WHERE callleg_id='" + callleg_id + "';")
+            print("call detail updated from callLegEnd")
 
-            #coSpace_name = str(cdr_dict['records']['record']['call']['name'])
-            #cm_sqlupdate(coSpace_name, 'cms_cdr_records', 'coSpace_name', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-            #print("coSpace_name: " + coSpace_name + " inserted to database")
+        if cdr_dict['records']['record']['@type'] == 'callStart':
+            #print("this is callStart")
+            call_id = str(cdr_dict['records']['record']['call']['@id'])
+            coSpace = str(cdr_dict['records']['record']['call']['coSpace'])
+            name = str(cdr_dict['records']['record']['call']['name'])
+            print("cospace: " + coSpace)
+            print("space name: " + name )
+            if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
+                print("insert data to database")
+                # insert IDs to database
+                cms_sql_request(
+                    "INSERT INTO cms_cdr_calls SET id='" + call_id + "',coSpace='" + coSpace + "',name='" + name + "';")
+            else:
+                print("Space ID data already presence")
 
-        pprint(cdr_dict)
         return('', 204)
 
     except:
