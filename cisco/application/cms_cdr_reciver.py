@@ -49,7 +49,7 @@ def cdr_receiver():
             if "codec" in cdr_dict['records']['record']['callLeg']['txAudio']:
                 acodectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec']) # забираем тип кодека аудио TX
             else:
-                acodecrx = "none"
+                acodectx = "none"
 
             #проверяем наличие информации о Видео
             if "codec" in cdr_dict['records']['record']['callLeg']['rxVideo']:
