@@ -40,12 +40,36 @@ def cdr_receiver():
             callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
             durationSeconds = str(cdr_dict['records']['record']['callLeg']['durationSeconds'])  # забираем  durationSeconds
             reason = str(cdr_dict['records']['record']['callLeg']['reason'])  # забираем  reason
-            codecrx = str(cdr_dict['records']['record']['callLeg']['rxAudio']['codec']) # забираем тип кодека аудио RX
-            codectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec']) # забираем тип кодека аудио TX
+
+            #проверяем наличие информации о аудио
+            if "codec" in cdr_dict['records']['record']['callLeg']['rxAudio']:
+                acodecrx = str(cdr_dict['records']['record']['callLeg']['rxAudio']['codec']) # забираем тип кодека аудио RX
+            else:
+                acodecrx = "none"
+            if "codec" in cdr_dict['records']['record']['callLeg']['txAudio']:
+                acodectx = str(cdr_dict['records']['record']['callLeg']['txAudio']['codec']) # забираем тип кодека аудио TX
+            else:
+                acodecrx = "none"
+
+            #проверяем наличие информации о Видео
+            if "codec" in cdr_dict['records']['record']['callLeg']['rxVideo']:
+                vcodecrx = str(cdr_dict['records']['record']['callLeg']['rxVideo']['codec']) # забираем тип кодека аудио RX
+                print("video codec RX: " + vcodecrx)
+            else:
+                vcodecrx = "none"
+            if "codec" in cdr_dict['records']['record']['callLeg']['txVideo']:
+                vcodectx = str(cdr_dict['records']['record']['callLeg']['txVideo']['codec']) # забираем тип кодека аудио TX
+                print("video codec TX: " + vcodectx)
+            else:
+                vcodectx = "none"
+
             ### обновляем информацию о вызове
             cms_sql_request(
-                "UPDATE cms_cdr_records SET txAudio_codec='" + codectx + "',durationSeconds='" + durationSeconds + "',reason='" + reason + "',rxAudio_codec='" + codecrx + "' WHERE callleg_id='" + callleg_id + "';")
+                "UPDATE cms_cdr_records SET txAudio_codec='" + acodectx + "',durationSeconds='" + durationSeconds + "',reason='" + reason + "',txVideo_codec='" + vcodectx + "',rxVideo_codec='" + vcodecrx + "',rxAudio_codec='" + acodecrx + "' WHERE callleg_id='" + callleg_id + "';")
             print("call detail updated from callLegEnd")
+
+
+
 
         if cdr_dict['records']['record']['@type'] == 'callStart':
             #print("this is callStart")
@@ -55,7 +79,7 @@ def cdr_receiver():
             print("cospace: " + coSpace)
             print("space name: " + name )
             if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                print("insert data to database")
+                print("insert CALL to database")
                 # insert IDs to database
                 cms_sql_request(
                     "INSERT INTO cms_cdr_calls SET id='" + call_id + "',coSpace='" + coSpace + "',name='" + name + "';")
