@@ -41,7 +41,7 @@ def cdr_receiver():
             durationSeconds = str(cdr_dict['records']['record']['callLeg']['durationSeconds'])  # забираем  durationSeconds
             reason = str(cdr_dict['records']['record']['callLeg']['reason'])  # забираем  reason
 
-            #проверяем наличие информации о аудио
+            #проверяем наличие информации о Аудио
             if "codec" in cdr_dict['records']['record']['callLeg']['rxAudio']:
                 acodecrx = str(cdr_dict['records']['record']['callLeg']['rxAudio']['codec']) # забираем тип кодека аудио RX
             else:
@@ -62,6 +62,9 @@ def cdr_receiver():
                 print("video codec TX: " + vcodectx)
             else:
                 vcodectx = "none"
+
+
+
 
             ### обновляем информацию о вызове
             cms_sql_request(
@@ -87,7 +90,7 @@ def cdr_receiver():
                     "INSERT INTO cms_cdr_calls SET id='" + call_id + "',coSpace='" + coSpace + "',name='" + name + "';")
             else:
                 print("Space ID data already presence")
-
+            #pprint(cdr_dict)
         return('', 204)
 
     except:
