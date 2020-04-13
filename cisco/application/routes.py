@@ -4,6 +4,8 @@ from application.huntreport import huntreport
 from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
+from application.sendmail import ucsendmail
+
 import application.callforward
 
 
@@ -66,6 +68,13 @@ def roomrequest():
 def order():
     return submit_order("0") # "0" - index roomsystem from database
 
+@app.route('/ucsendmail', methods=['POST'])
+def ucmail():
+    return ucsendmail()
+
 @app.route('/cdr', methods=['POST'])
 def cdr():
     return cdr_receiver()
+
+
+
