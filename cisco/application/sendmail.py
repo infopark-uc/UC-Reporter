@@ -18,10 +18,23 @@ def ucsendmail():
         FirstName = str(postdata_dict['config']["FirstName"]) #Имя
         CalledNumber = str(postdata_dict['config']["CalledNumber"])  #набранный номер
         IncomingCallingNumber = str(postdata_dict['config']["IncomingCallingNumber"]) #АОН
-        mailtype = str(postdata_dict['config']["mailtype"])  # Тип очереди
+        queuetype = str(postdata_dict['config']["queuetype"])  # Тип очереди
 
 
+        # проверка после какой из очередей мы приняли запрос на отправку сообщения.
+        if queuetype == 'None': #отправка для группы сервисных инженеров
+            msg_body = str("ФИО: " + FirstName + " " + LastName + " \n"
+					"Номер абонента: " + IncomingCallingNumber + " \n"
+					"Номер сервиса: " + CalledNumber + " \n")
+            subject = str("Сработала переадресация на мобильный номер")
 
+        else:   #отправка для группы диспетчеров
+            msg_body = str("ФИО: " + FirstName + " " + LastName + " \n"
+					"Номер абонента: " + IncomingCallingNumber + " \n"
+					"Номер сервиса: " + CalledNumber + " \n")
+            subject = str("вызов пропущен группой")
+
+        print(msg_body)
 
 
 
