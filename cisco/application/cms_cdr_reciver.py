@@ -17,16 +17,18 @@ def cdr_receiver():
             sipcall_id = str(cdr_dict['records']['record']['callLeg']['sipCallId'])  # забираем sipcall_id
             remoteAddress = str(cdr_dict['records']['record']['callLeg']['remoteAddress'])  # забираем  remoteAddress
             localAddress = str(cdr_dict['records']['record']['callLeg']['localAddress'])  # забираем  localAddress
-            displayName = str(cdr_dict['records']['record']['callLeg']['displayName'])  # забираем  displayName
+            #displayName = str(cdr_dict['records']['record']['callLeg']['displayName'])  # забираем  displayName
             callLegStartTime = str(cdr_dict['records']['record']['@time']) #забираем время лега
+            timenow = str(datetime.datetime.now())
 
             ### добавляем идентификаторы в базу
             cms_sql_request(
-                "INSERT INTO cms_cdr_records SET session_id='" + session_id + "', startTime='" + callLegStartTime + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "';")
+                "INSERT INTO cms_cdr_records SET session_id='" + session_id + "', date='" + timenow + "', startTime='" + callLegStartTime + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "';")
             print("CMS_CDR:     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
             ### обновляем информацию о вызове
             cms_sql_request(
                 "UPDATE cms_cdr_records SET remoteAddress='" + remoteAddress + "',localAddress='" + localAddress + "' WHERE callleg_id='" + callleg_id + "';")
+            #собираем статистику по данному легу
             callleginfo(callleg_id,cms_ip)
 
         if cdr_dict['records']['record']['@type'] == 'callLegUpdate':
