@@ -4,6 +4,7 @@ import json
 from pprint import pprint
 from collections import OrderedDict
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate
+from application.cms_cdr_requester import callleginfo
 def cdr_receiver():
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
@@ -26,6 +27,7 @@ def cdr_receiver():
             ### обновляем информацию о вызове
             cms_sql_request(
                 "UPDATE cms_cdr_records SET remoteAddress='" + remoteAddress + "',localAddress='" + localAddress + "' WHERE callleg_id='" + callleg_id + "';")
+            callleginfo(callleg_id,cms_ip)
 
         if cdr_dict['records']['record']['@type'] == 'callLegUpdate':
             #print("this is callLegUpdate")
@@ -96,6 +98,6 @@ def cdr_receiver():
 
     except:
         print('CMS_CDR: Parser failure!')
-        pprint(cdr_dict)
+        #pprint(cdr_dict)
         return('', 204)
 
