@@ -45,3 +45,11 @@ def cm_sqlselect_dict(data_colum, table, filter_colum, filter_colum_data):
           cur.execute('SELECT ' + data_colum + ' FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
           result = cur.fetchall()
      return result
+
+def cms_sql_request_dict(sqlrequest):
+     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter',cursorclass=pymysql.cursors.DictCursor)
+     with con:
+          cur = con.cursor()
+          cur.execute(sqlrequest)
+          result = cur.fetchall()
+     return result

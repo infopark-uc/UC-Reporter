@@ -78,7 +78,7 @@ def codec(systemindex):
 
         else:
             #что-то непонятное, неизвестный виджет - ничего не делаем
-            print("Roomcontrol: we don't know to do)
+            print("Roomcontrol: we don't know to do")
 
     else:
         print("Roomcontrol: request is empty")

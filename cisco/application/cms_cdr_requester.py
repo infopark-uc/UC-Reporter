@@ -99,9 +99,7 @@ def callleginfo(callleg_id,cms_ip):
        VideoRoundTripTimeTX = "0"
 
 
-
-
-     print("CMS Rq: CallID:"+callleg_id + "insert to database")
+     print("CMS Rq: CallID:"+callleg_id + " insert to database")
      cms_sql_request(
 		"INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id + "',cms_node='" + cms_ip + "',date='" + timenow + "',call_id='" + call_id + "',VideoRoundTripTimeTX='" + VideoRoundTripTimeTX + "',VideoPacketLossPercentageTX='" + VideoPacketLossPercentageTX + "',VideoPacketLossPercentageRX='" + VideoPacketLossPercentageRX + "',AudioPacketLossPercentageRX='" + AudioPacketLossPercentageRX + "',AudioPacketLossPercentageTX='" + AudioPacketLossPercentageTX + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
      #pprint(cdr_dict)

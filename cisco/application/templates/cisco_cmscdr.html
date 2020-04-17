@@ -18,8 +18,7 @@
     </script>
 	
 	<style type="text/css">
-
-	.HeaderLine {
+        .HeaderLine {
 			display: flex;
 			flex-flow: row nowrap;
 			align-items: center;
@@ -47,6 +46,7 @@
 			color: white;
 			font-weight: bold;
 			width: 100%;
+			margin-top: 10px;
 		}
 		.HeaderTable th {
 			height: 150px;
@@ -61,12 +61,40 @@
 			background: #6d94a7;
 		}
 
-		.DataTable {
+		.Status {
+			margin: 10;
+			margin-top: 10px;
+		}
+
+		.StatusHeader {
+			font-size: 70%;
+			font-weight: bold;
+			font-family: Verdana;
+			color: black;
+		}
+
+		.StatusItem {
+			margin: 10;
+			font-size: 70%;
+			font-family: Verdana;
+			color: black;
+		}
+
+		.SearchItem {
+			margin: 10;
+			margin-top: 10px;
 			font-size: 80%;
 			font-family: Verdana;
-			color: #333366;
+			color: black;
+		}
+
+		.DataTable {
+			font-size: 70%;
+			font-family: Verdana;
+			color: black;
 			width: 100%;
 			border-collapse: collapse;
+			margin-top: 10px;
 		}
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
@@ -75,6 +103,7 @@
 			height: 23px;
 			background: #f8f8f8;
 		}
+
 		.DataTable TR:nth-child(even) {
 			height: 23px;
 			background: #ebebeb;
@@ -101,7 +130,7 @@
 		{% if not rows_list %}
 		<tr>
 			<th>
-				Cisco Meeting Server report
+				Cisco Meeting Server CDR report
 			</th>
 		</tr>
 		<tr>
@@ -123,44 +152,37 @@
 			</div>
 		</legend>
 	</fieldset>
-	<div class="SearchItem">
-		<form action="" method="post" novalidate>
-		    Найти телефон в
-			{{ formSRCH.select_region() }}
-			где
-		    {{ formSRCH.select_field() }}
-			начинается с:
-			{{ formSRCH.string_field() }}
-	        {{ formSRCH.submit() }}
-		</form>
 	</div>
     {% if rows_list %}
 	<div id="tableWrap">
 	<table class="DataTable">
 		<tr>
 			<th>
-				Meeting Name
+				Name
 			</th>
 			<th>
-				Owner
+				Cospace
 			</th>
 			<th>
-				Start
+				Call
 			</th>
-            <th>
-				End
+			<th>
+				Time
 			</th>
 		</tr>
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				{{ row.dnorpattern }}
+				{{ row.cospace_name }}
 			</td>
 			<td>
-				{{ row.cfadestination }}
+				{{ row.cospace_id }}
 			</td>
 			<td>
-				{{ row.cfavoicemailenabled }}
+				{{ row.call_id }}
+			</td>
+			<td>
+				{{ row.time }}
 			</td>
 		</tr>
 		{% endfor %}
