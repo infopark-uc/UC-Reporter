@@ -28,7 +28,7 @@ def cdr_receiver():
             print("CMS_CDR:     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
             #собираем статистику по данному вызову
             callleginfo(callleg_id,cms_ip)
-            print("CMS_CDR: request to CMS " + cms_ip + " for "+ callleg_id + " is stop")
+            print("CMS_CDR: requests to CMS " + cms_ip + " for "+ callleg_id + " is stop")
 
         if cdr_dict['records']['record']['@type'] == 'callLegUpdate':
             print("CMS_CDR: we get callLegUpdate")
