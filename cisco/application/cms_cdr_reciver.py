@@ -1,17 +1,18 @@
-from flask import Flask, request, redirect, jsonify
+from flask import Flask, request
 import xmltodict
 import json
+import datetime
 from pprint import pprint
-from collections import OrderedDict
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate
 from application.cms_cdr_requester import callleginfo
+
 def cdr_receiver():
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
         cdr_dict = json.loads(json.dumps(cdr)) #trasfrorm OrderedDict to Dict
+        cms_ip = str(request.environ['REMOTE_ADDR']) #забираем IP
         if cdr_dict['records']['record']['@type'] == 'callLegStart':  #проверяем что, это новый коллег
-            # print("We get callLegStart")
-            cms_ip = str(request.environ['REMOTE_ADDR'])
+            print("CMS_CDR: We get callLegStart")
             session_id = str(cdr_dict['records']["@session"])  # забираем Session ID
             callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID
             sipcall_id = str(cdr_dict['records']['record']['callLeg']['sipCallId'])  # забираем sipcall_id
@@ -23,16 +24,14 @@ def cdr_receiver():
 
             ### добавляем идентификаторы в базу
             cms_sql_request(
-                "INSERT INTO cms_cdr_records SET session_id='" + session_id + "', date='" + timenow + "', startTime='" + callLegStartTime + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "';")
+                "INSERT INTO cms_cdr_records SET session_id='" + session_id + "', date='" + timenow + "', startTime='" + callLegStartTime + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "',localAddress='" + localAddress + "',remoteAddress='" + remoteAddress + "';")
             print("CMS_CDR:     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
-            ### обновляем информацию о вызове
-            cms_sql_request(
-                "UPDATE cms_cdr_records SET remoteAddress='" + remoteAddress + "',localAddress='" + localAddress + "' WHERE callleg_id='" + callleg_id + "';")
-            #собираем статистику по данному легу
+            #собираем статистику по данному вызову
             callleginfo(callleg_id,cms_ip)
+            print("CMS_CDR: request to CMS " + cms_ip + " for "+ callleg_id + " is stop")
 
         if cdr_dict['records']['record']['@type'] == 'callLegUpdate':
-            #print("this is callLegUpdate")
+            print("CMS_CDR: we get callLegUpdate")
             callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
             if "call" in cdr_dict['records']['record']['callLeg']:
                 call_id = str(cdr_dict['records']['record']['callLeg']['call'])  # забираем  reason
@@ -41,7 +40,7 @@ def cdr_receiver():
                     "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
 
         if cdr_dict['records']['record']['@type'] == 'callLegEnd':
-            #print("this is callLegEnd")
+            print("CMS_CDR: we get callLegEnd")
             callleg_id = str(cdr_dict['records']['record']['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
             durationSeconds = str(cdr_dict['records']['record']['callLeg']['durationSeconds'])  # забираем  durationSeconds
             reason = str(cdr_dict['records']['record']['callLeg']['reason'])  # забираем  reason
@@ -80,7 +79,7 @@ def cdr_receiver():
             #pprint(cdr_dict)
 
         if cdr_dict['records']['record']['@type'] == 'callStart':
-            #print("this is callStart")
+            print("CMS_CDR: we get callStart")
             call_id = str(cdr_dict['records']['record']['call']['@id'])
             coSpace = str(cdr_dict['records']['record']['call']['coSpace'])
             name = str(cdr_dict['records']['record']['call']['name'])
@@ -100,6 +99,6 @@ def cdr_receiver():
 
     except:
         print('CMS_CDR: Parser failure!')
-        #pprint(cdr_dict)
+        pprint(cdr_dict)
         return('', 204)
 

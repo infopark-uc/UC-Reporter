@@ -7,10 +7,10 @@ from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
 
 def codec(systemindex):
 
-    print("Received HTTP request " + request.method)
+    print("Roomcontrol: Received HTTP request " + request.method)
 
     if not request.json:
-        print("Missing JSON inside HTTP request")
+        print("Roomcontrol: Missing JSON inside HTTP request")
         return "OK"
 
     json_data = request.json
@@ -19,9 +19,9 @@ def codec(systemindex):
 
     try:
         event = (json_data['Event']['UserInterface']['Extensions']['Panel']['Clicked']['PanelId']['Value']).split(":")
-        print('Received event from touch panel')
+        print('Roomcontrol:  Received event from touch panel')
     except KeyError:
-        print('Сработало исключение для панельки')
+        print('Roomcontrol: except for panel')
 
     #try:
     #    event = (json_data['Event']['UserInterface']['Extensions']['Event']['Pressed']['Signal']['Value']).split(":")
@@ -31,14 +31,14 @@ def codec(systemindex):
 
     try:
         event = (json_data['Event']['UserInterface']['Extensions']['Event']['Clicked']['Signal']['Value']).split(":")
-        print('Received event Clicked')
+        print('Roomcontrol: Received event Clicked')
     except KeyError:
-        print('Сработало исключение для виджета Clicked')
+        print('Roomcontrol: except for widget Clicked')
 
     if event:
         if event[0] == "CoffeService":
             # Обработка для открытия панельки
-            print ("Обрабатываем событие открытия панельки Кофе")
+            print ("Roomcontrol: event CoffeService")
 
             get_value(systemindex) #забираем данные с панельки и обновляем базу, обновляем данные с базы данных по виджетам при открытии панельки
 
@@ -73,15 +73,15 @@ def codec(systemindex):
 
         elif event[0] == "SendButton":
             # Обработка отправки заказа
-            print("Обрабатываем событие отправки заказа")
+            print("Roomcontrol: we send order")
             send_order(systemindex)
 
         else:
             #что-то непонятное, неизвестный виджет - ничего не делаем
-            print("Какое-то непонятное событие - ничего не делаем")
+            print("Roomcontrol: we don't know to do)
 
     else:
-        print("В HTTP запросе пусто - выросла капуста")
+        print("Roomcontrol: request is empty")
 
     return 'OK'
 
@@ -90,7 +90,7 @@ def submit_order(systemindex):
     roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
     roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
-    print("Получен HTTP запрос - подтверждение заказа: " + request.method)
+    print("Roomcontrol: submit order " + request.method)
     set_value(systemindex, "CoffeeCount", "0")
     set_value(systemindex, "TeaCount", "0")
 
