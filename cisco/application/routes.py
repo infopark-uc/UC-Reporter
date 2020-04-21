@@ -89,8 +89,9 @@ def cmspage():
                            formNAV=module_result['form_navigation'])
 
 @app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
-def cmscallview(callid):
+def cmscall(callid):
     module_result = cmscallviewer(callid)
+
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(module_result['redirect_to'])
 
@@ -101,8 +102,9 @@ def cmscallview(callid):
 
 
 @app.route('/cms/callleg/<string:callegid>/', methods=['GET', 'POST'])
-def cmscalllegview(callegid):
+def cmscallleg(callegid):
     module_result = cmscalllegviewer(callegid)
+
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(module_result['redirect_to'])
 

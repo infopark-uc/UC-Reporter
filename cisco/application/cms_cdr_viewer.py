@@ -39,12 +39,11 @@ def cmsviewer():
 def cmscallviewer(call_id):
 
 	html_page_title = 'CMS Call Report'
-	print("CMS CALLVW: request for callID: "+ call_id)
-	callsqlreq=str(call_id)
+	print("CMS CALLVW: request for callID: " + call_id)
 	rows_list = cms_sql_request_dict(
-		"SELECT callleg_id,remoteaddress,durationseconds,cms_ip FROM cms_cdr_records WHERE call_id='" + callsqlreq + "';")
+		"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,cms_ip FROM cms_cdr_records WHERE call_id='" + call_id + "';")
 
-	print("CMS CALLVW: get dict for callID:  " + callsqlreq)
+	print("CMS CALLVW: get dict for callID:  " + call_id)
 	pprint (rows_list)
 
 
@@ -70,14 +69,16 @@ def cmscallviewer(call_id):
 
 
 def cmscalllegviewer(callleg_id):
-	html_page_title = 'CMS Call Report'
+	html_page_title = 'CMS CallLeg Report'
 	print("CMS CALLLEGVW: request for calllegID: " + callleg_id)
-	callsqlreq = str(callleg_id)
-	rows_list = cms_sql_request_dict(
-		"SELECT DISTINCT callleg_id,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callsqlreq + "';")
 
-	print("CMS CALLVW: get dict for callID:  " + callsqlreq)
+	rows_list = cms_sql_request_dict(
+		"SELECT DISTINCT callleg_id,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callleg_id + "';")
+
+	print("CMS CALLLEGVW: get dict for callID:  " + callleg_id)
 	pprint(rows_list)
+
+
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
 	if form_navigation.validate_on_submit():
