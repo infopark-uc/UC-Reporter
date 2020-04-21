@@ -13,7 +13,7 @@ def cmsviewer():
 	rows_list = cms_sql_request_dict(
 		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime AS time FROM cms_cdr_calls")
 	print("CMS VW: get dict")
-	pprint (rows_list)
+	#pprint (rows_list)
 
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
@@ -44,7 +44,7 @@ def cmscallviewer(call_id):
 		"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,cms_ip FROM cms_cdr_records WHERE call_id='" + call_id + "';")
 
 	print("CMS CALLVW: get dict for callID:  " + call_id)
-	pprint (rows_list)
+	#pprint (rows_list)
 
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
@@ -76,7 +76,7 @@ def cmscalllegviewer(callleg_id):
 		"SELECT DISTINCT callleg_id,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callleg_id + "';")
 
 	print("CMS CALLLEGVW: get dict for callID:  " + callleg_id)
-	pprint(rows_list)
+	#pprint(rows_list)
 
 
 
