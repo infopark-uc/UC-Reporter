@@ -158,13 +158,19 @@
 	<table class="DataTable">
 		<tr>
 			<th>
-				remoteaddress
+				callleg_id
 			</th>
 			<th>
-				CallLegID
+				AudioPacketLossPercentageRX
 			</th>
 			<th>
-				Duration
+				AudioPacketLossPercentageTX
+			</th>
+			<th>
+				VideoPacketLossPercentageRX
+			</th>
+			<th>
+				VideoPacketLossPercentageTX
 			</th>
 			<th>
 				CMS node
@@ -173,16 +179,22 @@
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				 <p><a href="http://127.0.0.1:5000/cms/call/{{ row.callleg_id }}">{{ row.remoteaddress }}</a></p>
+				 {{ row.callleg_id }}
 			</td>
 			<td>
-				{{ row.remoteaddress }}
+				{{ row.AudioPacketLossPercentageRX }}
 			</td>
 			<td>
-				{{ row.durationseconds }}
+				{{ row.AudioPacketLossPercentageTX }}
 			</td>
 			<td>
-				{{ row.cms_ip }}
+				{{ row.VideoPacketLossPercentageRX }}
+			</td>
+			<td>
+				{{ row.VideoPacketLossPercentageTX }}
+			</td>
+			<td>
+				{{ row.cms_node }}
 			</td>
 		</tr>
 		{% endfor %}
