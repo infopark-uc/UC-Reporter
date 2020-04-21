@@ -5,7 +5,7 @@ from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
-from application.cms_cdr_viewer import cmsviewer
+from application.cms_cdr_viewer import cmsviewer,cmscallviewer
 
 import application.callforward
 
@@ -90,8 +90,16 @@ def cmspage():
 
 @app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
 def cmscallview(callid):
-    print(callid)
-    return callid
+    module_result = cmscallviewer(callid)
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(module_result['redirect_to'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           console_output=module_result['console_output'],
+                           rows_list=module_result['rows_list'],
+                           formNAV=module_result['form_navigation'])
+
+
 @app.route('/cms/callleg/<string:callegid>/', methods=['GET', 'POST'])
 def cmscalllegview(callegid):
     print(callegid)

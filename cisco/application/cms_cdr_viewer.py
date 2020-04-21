@@ -35,3 +35,34 @@ def cmsviewer():
 		"rows_list": rows_list
 	}
 	return renderdata
+
+def cmscallviewer(call_id):
+
+	html_page_title = 'CMS PacketLoss Report'
+	#Запросить из
+	print("CMS CALLVW: request for callID: "+ call_id)
+	rows_list = cms_sql_request_dict(
+		"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,cms_ip  FROM cms_cdr_records WHERE call_id='"+ call_id + "';")
+	print("CMS CALL VW: get dict")
+	pprint (rows_list)
+
+
+	form_navigation = SelectNavigation(csrf_enabled=False)
+	if form_navigation.validate_on_submit():
+		console_output = "Нет активного запроса"
+		print(console_output)
+		renderdata = {
+			"rendertype": "redirect",
+			"redirect_to": form_navigation.select_navigation.data
+		}
+		return renderdata
+
+	renderdata = {
+		"rendertype": "success",
+		"html_template": "cisco_cmscallview.html",
+		"html_page_title": html_page_title,
+		"console_output": "done",
+		"form_navigation": form_navigation,
+		"rows_list": rows_list
+	}
+	return renderdata
