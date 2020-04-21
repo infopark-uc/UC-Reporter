@@ -59,7 +59,7 @@ def cmscallviewer(call_id):
 
 	renderdata = {
 		"rendertype": "success",
-		"html_template": "cisco_cmscallview.html",
+		"html_template": "cisco_cmsview.html",
 		"html_page_title": html_page_title,
 		"console_output": "done",
 		"form_navigation": form_navigation,
