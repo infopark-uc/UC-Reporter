@@ -88,4 +88,14 @@ def cmspage():
                            rows_list=module_result['rows_list'],
                            formNAV=module_result['form_navigation'])
 
+@app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
+def cmscallview(callid):
+    print(callid)
+    return callid
+@app.route('/cms/callleg/<string:callegid>/', methods=['GET', 'POST'])
+def cmscalllegview(callegid):
+    print(callegid)
+    return callegid
+
+
 
