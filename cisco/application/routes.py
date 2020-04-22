@@ -111,7 +111,10 @@ def cmscallleg(callegid):
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
                            rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'])
+                           formNAV=module_result['form_navigation'],
+                           div=module_result['div'],
+                           script=module_result['script'],
+                           resources=module_result['resources'])
 
 
 

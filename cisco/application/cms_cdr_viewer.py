@@ -6,6 +6,10 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
 from application.sqlrequests import cms_sql_request_dict
 
+# библиотеки для графиков
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.resources import CDN
 
 def cmsviewer():
 
@@ -90,12 +94,23 @@ def cmscalllegviewer(callleg_id):
 		}
 		return renderdata
 
+	#для графиков
+	p = figure(plot_width=400, plot_height=400)
+	p.line([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], line_width=2)
+	script, div = components(p)
+	resources = CDN.render()
+	print(resources)
+
+
 	renderdata = {
 		"rendertype": "success",
 		"html_template": "cisco_cmspacketloss.html",
 		"html_page_title": html_page_title,
 		"console_output": "done",
 		"form_navigation": form_navigation,
-		"rows_list": rows_list
+		"rows_list": rows_list,
+		"script": script,
+		"div": div,
+		"resources": resources
 	}
 	return renderdata
