@@ -1,4 +1,4 @@
-import pymysql
+#import pymysql
 from pprint import pprint
 from application.sqlrequests import cms_sql_request_dict
 

@@ -10,6 +10,9 @@ from application.sqlrequests import cms_sql_request_dict
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import CDN
+from bokeh.models import DatetimeTickFormatter
+from math import pi
+from datetime import datetime
 
 def cmsviewer():
 
@@ -76,13 +79,32 @@ def cmscalllegviewer(callleg_id):
 	html_page_title = 'CMS CallLeg Report'
 	print("CMS CALLLEGVW: request for calllegID: " + callleg_id)
 
+#	rows_list = cms_sql_request_dict(
+#		"SELECT DISTINCT callleg_id,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callleg_id + "';")
+
 	rows_list = cms_sql_request_dict(
-		"SELECT DISTINCT callleg_id,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callleg_id + "';")
+		"SELECT callleg_id,date,AudioPacketLossPercentageRX,AudioPacketLossPercentageTX,VideoPacketLossPercentageRX,VideoPacketLossPercentageTX,cms_node  FROM cms_cdr_calllegs WHERE callleg_id='" + callleg_id + "';")
 
 	print("CMS CALLLEGVW: get dict for callID:  " + callleg_id)
-	#pprint(rows_list)
 
+	AudioPacketLossPercentageRX_list = []
+	AudioPacketLossPercentageTX_list = []
+	VideoPacketLossPercentageRX_list = []
+	VideoPacketLossPercentageTX_list = []
+	date_list = []
+	number_list = []
+	x = 0
 
+	for row in rows_list:
+		AudioPacketLossPercentageRX_list.append(float(row["AudioPacketLossPercentageRX"]))
+		AudioPacketLossPercentageTX_list.append(row["AudioPacketLossPercentageTX"])
+		VideoPacketLossPercentageRX_list.append(row["VideoPacketLossPercentageRX"])
+		VideoPacketLossPercentageTX_list.append(row["VideoPacketLossPercentageTX"])
+		date_list.append(datetime.strptime(row["date"], '%Y-%m-%d %H:%M:%S.%f'))
+		number_list.append(x)
+		x = x + 1
+
+	pprint(date_list)
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
 	if form_navigation.validate_on_submit():
@@ -94,13 +116,29 @@ def cmscalllegviewer(callleg_id):
 		}
 		return renderdata
 
+
+
+
 	#для графиков
-	p = figure(plot_width=400, plot_height=400)
-	p.line([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], line_width=2)
+	p = figure(plot_width=1800, plot_height=400,x_axis_type="datetime")
+	p.line(date_list, AudioPacketLossPercentageRX_list, line_width=2, color='#A6CEE3', legend_label='Audio RX')
+	p.line(date_list, AudioPacketLossPercentageTX_list, line_width=2, color='#B2DF8A', legend_label='Audio TX')
+	p.line(date_list, VideoPacketLossPercentageRX_list, line_width=2, color='#33A02C', legend_label='Video RX')
+	p.line(date_list, VideoPacketLossPercentageTX_list, line_width=2, color='#FB9A99', legend_label='Video TX')
+	p.xaxis.formatter = DatetimeTickFormatter(
+		milliseconds=["%H:%M:%S.%3Ns"],
+		seconds=["%H:%M:%S"],
+		minsec=["%H:%M:%S"],
+		minutes=["%H:%M:%S"],
+		hourmin=["%H:%M:%S"],
+		hours=["%d %B %Y"],
+		days=["%d %B %Y"],
+		months=["%d %B %Y"],
+		years=["%d %B %Y"],
+	)
+	p.xaxis.major_label_orientation = pi / 4
 	script, div = components(p)
 	resources = CDN.render()
-	print(resources)
-
 
 	renderdata = {
 		"rendertype": "success",
