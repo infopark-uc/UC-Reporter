@@ -92,9 +92,10 @@
 			font-size: 70%;
 			font-family: Verdana;
 			color: black;
-			width: 100%;
 			border-collapse: collapse;
 			margin-top: 10px;
+			margin-left: auto;
+            margin-right: auto;
 		}
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
@@ -110,7 +111,9 @@
 		}
 	</style>
 
-	{{ resources|safe }}
+    {% if resources %}
+	    {{ resources|safe }}
+    {% endif %}
 
 </head>
 <body>
@@ -130,7 +133,7 @@
         </div>
 	</div>
 	<table class="HeaderTable">
-		{% if not rows_list %}
+		{% if not max_loss_values %}
 		<tr>
 			<th>
 				Cisco Meeting Server CDR report
@@ -157,56 +160,51 @@
 	</fieldset>
 	</div>
 
-	{{ div|safe }}
-	{{ script|safe }}
+    {% if div %}
+	    {{ div|safe }}
+    {% endif %}
+    {% if script %}
+	    {{ script|safe }}
+    {% endif %}
 
-	{% if rows_list %}
-	<div id="tableWrap">
-	<table class="DataTable">
-		<tr>
-			<th>
-				callleg_id
-			</th>
-			<th>
-				AudioPacketLossPercentageRX
-			</th>
-			<th>
-				AudioPacketLossPercentageTX
-			</th>
-			<th>
-				VideoPacketLossPercentageRX
-			</th>
-			<th>
-				VideoPacketLossPercentageTX
-			</th>
-			<th>
-				CMS node
-			</th>
-		</tr>
-		{% for row in rows_list %}
-		<tr>
-			<td>
-				 {{ row.callleg_id }}
-			</td>
-			<td>
-				{{ row.AudioPacketLossPercentageRX }}
-			</td>
-			<td>
-				{{ row.AudioPacketLossPercentageTX }}
-			</td>
-			<td>
-				{{ row.VideoPacketLossPercentageRX }}
-			</td>
-			<td>
-				{{ row.VideoPacketLossPercentageTX }}
-			</td>
-			<td>
-				{{ row.cms_node }}
-			</td>
-		</tr>
-		{% endfor %}
-	</table>
-	</div>
-	{% endif %}
+    {% if max_loss_values %}
+        <div id="tableWrap">
+        <table class="DataTable">
+            <tr>
+                <td>
+                    Max Audio Packet Loss Percentage RX:
+                </td>
+                <td>
+                    {{ max_loss_values.AudioRX }}
+                </td>
+            </tr>
+                    <tr>
+                <td>
+                    Max Audio Packet Loss Percentage TX:
+                </td>
+                <td>
+                    {{ max_loss_values.AudioTX }}
+                </td>
+            </tr>
+                    <tr>
+                <td>
+                    Max Video Packet Loss Percentage RX:
+                </td>
+                <td>
+                    {{ max_loss_values.VideoRX }}
+                </td>
+            </tr>
+                    <tr>
+                <td>
+                    Max Video Packet Loss Percentage TX:
+                </td>
+                <td>
+                    {{ max_loss_values.VideoTX }}
+                </td>
+            </tr>
+        </table>
+        </div>
+    {% endif %}
+
 <body>
 </html>

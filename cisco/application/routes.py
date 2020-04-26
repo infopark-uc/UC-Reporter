@@ -108,13 +108,17 @@ def cmscallleg(callegid):
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(module_result['redirect_to'])
 
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'],
-                           div=module_result['div'],
-                           script=module_result['script'],
-                           resources=module_result['resources'])
+    if module_result['rendertype'] == 'success':  # проверка если данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               formNAV=module_result['form_navigation'],
+                               div=module_result['div'],
+                               script=module_result['script'],
+                               resources=module_result['resources'],
+                               max_loss_values=module_result['max_loss_values'])
 
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+        console_output=module_result['console_output'],
+        formNAV=module_result['form_navigation'])
 
 
