@@ -19,7 +19,7 @@ def cmsviewer():
 
 	html_page_title = 'CMS CDR Report'
 	rows_list = cms_sql_request_dict(
-		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime AS time FROM cms_cdr_calls")
+		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime AS time FROM cms_cdr_calls ORDER BY starttime DESC")
 	print("CMS VW: get dict")
 	#pprint (rows_list)
 
@@ -48,8 +48,16 @@ def cmscallviewer(call_id):
 
 	html_page_title = 'CMS Call Report'
 	print("CMS CALLVW: request for callID: " + call_id)
-	rows_list = cms_sql_request_dict(
-		"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,cms_ip FROM cms_cdr_records WHERE call_id='" + call_id + "';")
+
+	sql_request_string_select_basic = "SELECT DISTINCT callleg_id,remoteaddress,displayName,durationseconds,cms_ip,alarm_type,alarm_value"
+	sql_request_string_audio_video_codecs = ",rxAudio_codec,txAudio_codec,rxVideo_codec,txVideo_codec,txVideo_maxHeight,txVideo_maxWidth"
+	sql_request_string_audio_statistics = ",rxAudio_packetLossBurst_duration,rxAudio_packetLossBurst_density,rxAudio_packetGap_duration,rxAudio_packetGap_density"
+	sql_request_string_video_statistics = ",rxVideo_packetLossBurst_duration,rxVideo_packetLossBurst_density,rxVideo_packetGap_duration,rxVideo_packetGap_density"
+	sql_request_string_from = " FROM cms_cdr_records WHERE call_id='" + call_id + "';"
+	sql_request_result_string = sql_request_string_select_basic + sql_request_string_audio_video_codecs + sql_request_string_audio_statistics + sql_request_string_video_statistics + sql_request_string_from
+
+	rows_list = cms_sql_request_dict(sql_request_result_string)
+		#"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,rxAudio_codec,txAudio_codec,rxVideo_codec,txVideo_codec,txVideo_maxHeight,txVideo_maxWidth,cms_ip,alarm_type,alarm_value FROM cms_cdr_records WHERE call_id='" + call_id + "';")
 
 	print("CMS CALLVW: get dict for callID:  " + call_id)
 

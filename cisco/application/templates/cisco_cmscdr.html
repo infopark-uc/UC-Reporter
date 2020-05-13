@@ -98,6 +98,7 @@
 		}
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
+			text-align: left;
 		}
 		.DataTable TR:nth-child(odd) {
 			height: 23px;
@@ -161,28 +162,28 @@
 				Name
 			</th>
 			<th>
+				Time
+			</th>
+			<th>
 				Cospace
 			</th>
 			<th>
 				Call
 			</th>
-			<th>
-				Time
-			</th>
 		</tr>
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				 <p><a href="http://127.0.0.1:5000/cms/call/{{ row.call_id }}">{{ row.cospace_name }}</a></p>
+				 <a href="http://127.0.0.1:5000/cms/call/{{ row.call_id }}">{{ row.cospace_name }}</a>
+			</td>
+			<td>
+				{{ row.time }}
 			</td>
 			<td>
 				{{ row.cospace_id }}
 			</td>
 			<td>
 				{{ row.call_id }}
-			</td>
-			<td>
-				{{ row.time }}
 			</td>
 		</tr>
 		{% endfor %}

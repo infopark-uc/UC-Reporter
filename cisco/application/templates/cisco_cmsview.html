@@ -98,15 +98,19 @@
 		}
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
+			text-align: left;
+
 		}
 		.DataTable TR:nth-child(odd) {
 			height: 23px;
 			background: #f8f8f8;
+
 		}
 
 		.DataTable TR:nth-child(even) {
 			height: 23px;
 			background: #ebebeb;
+
 		}
 	</style>
 </head>
@@ -158,31 +162,80 @@
 	<table class="DataTable">
 		<tr>
 			<th>
-				remoteaddress
+				Remote address
 			</th>
 			<th>
-				CallLegID
+				Display Name
+			</th>
+			<th>
+				CMS node
 			</th>
 			<th>
 				Duration
 			</th>
 			<th>
-				CMS node
+				RX media
 			</th>
+			<th>
+				TX media
+			</th>
+			<th>
+				Alarm type
+			</th>
+			<th>
+				Duration percentage
+			</th>
+			<th>
+				Audio Gap
+			</th>
+			<th>
+				Audio Burst
+			</th>
+			<th>
+				Video Gap
+			</th>
+			<th>
+				Video Burst
+			</th>
+
 		</tr>
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				 <p><a href="http://127.0.0.1:5000/cms/callleg/{{ row.callleg_id }}">{{ row.remoteaddress }}</a></p>
+				 <a href="http://127.0.0.1:5000/cms/callleg/{{ row.callleg_id }}">{{ row.remoteaddress }}</a>
 			</td>
 			<td>
-				{{ row.remoteaddress }}
+				{{ row.displayName }}
+			</td>
+			<td>
+				{{ row.cms_ip }}
 			</td>
 			<td>
 				{{ row.durationseconds }}
 			</td>
 			<td>
-				{{ row.cms_ip }}
+				{{ row.rxAudio_codec }},{{ row.rxVideo_codec }}
+			</td>
+			<td>
+				{{ row.txAudio_codec }},{{ row.txVideo_codec }} {{ row.txVideo_maxHeight }} x {{ row.txVideo_maxWidth }}
+			</td>
+			<td>
+				{{ row.alarm_type }}
+			</td>
+			<td>
+				{{ row.alarm_value }}
+			</td>
+			<td>
+				{{ row.rxAudio_packetGap_duration }} {{ row.rxAudio_packetGap_density }}
+			</td>
+			<td>
+				{{ row.rxAudio_packetLossBurst_duration }} {{ row.rxAudio_packetLossBurst_density }}
+			</td>
+			<td>
+				{{ row.rxVideo_packetGap_duration }} {{ row.rxVideo_packetGap_density }}
+			</td>
+			<td>
+				{{ row.rxVideo_packetLossBurst_duration }} {{ row.rxVideo_packetLossBurst_density }}
 			</td>
 		</tr>
 		{% endfor %}
