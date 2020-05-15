@@ -10,22 +10,22 @@ def cdr_receiver():
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
         cdr_dict = json.loads(json.dumps(cdr)) #trasfrorm OrderedDict to Dict
-        cms_ip = str(request.environ['REMOTE_ADDR']) #забираем IP
+        cms_ip = str(request.environ['HTTP_X_FORWARDED_FOR']) #забираем IP
 
         if type (cdr_dict['records']['record']) is list:
-            print("CMS_RECEIVER: We get record list")
+            print("CMS_RECEIVER " + cms_ip + ": We get record list")
             record_list = cdr_dict['records']['record']
         else:
-            print("CMS_RECEIVER: We get not record list")
+            print("CMS_RECEIVER " + cms_ip + ": We get not record list")
             record_list = [cdr_dict['records']['record']]
 
-        print("CMS_RECEIVER: Number of records in list: " + str(len(record_list)))
+        print("CMS_RECEIVER " + cms_ip + ": Number of records in list: " + str(len(record_list)))
 
         for record_item in record_list:
-            print("CMS_RECEIVER: record_item")
+            print("CMS_RECEIVER " + cms_ip + ": record_item")
             pprint(record_item)
             if record_item['@type'] == 'callLegStart':  #проверяем что, это новый коллег
-                print("CMS_RECEIVER: We get callLegStart")
+                print("CMS_RECEIVER " + cms_ip + ": We get callLegStart")
                 callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID
                 sipcall_id = str(record_item['callLeg']['sipCallId'])  # забираем sipcall_id
                 remoteAddress = str(record_item['callLeg']['remoteAddress'])  # забираем  remoteAddress
@@ -37,13 +37,13 @@ def cdr_receiver():
                 ### добавляем идентификаторы в базу
                 cms_sql_request(
                     "INSERT INTO cms_cdr_records SET date='" + timenow + "', startTime='" + callLegStartTime + "',cms_ip='" + cms_ip + "',callleg_id='" + callleg_id + "',sipcall_id='" + sipcall_id + "',displayName='" + displayName + "',localAddress='" + localAddress + "',remoteAddress='" + remoteAddress + "';")
-                print("CMS_RECEIVER:     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
+                print("CMS_RECEIVER " + cms_ip + ":     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
                 #собираем статистику по данному вызову
                 #callleginfo(callleg_id,cms_ip)
-                print("CMS_RECEIVER: requests to CMS " + cms_ip + " for "+ callleg_id + " is stop")
+                print("CMS_RECEIVER " + cms_ip + ": requests to CMS " + cms_ip + " for "+ callleg_id + " is stop")
 
             if record_item['@type'] == 'callLegUpdate':
-                print("CMS_RECEIVER: we get callLegUpdate")
+                print("CMS_RECEIVER " + cms_ip + ": we get callLegUpdate")
                 callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
                 if "call" in record_item['callLeg']:
                     call_id = str(record_item['callLeg']['call'])  # забираем  reason
@@ -52,7 +52,7 @@ def cdr_receiver():
                         "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
 
             if record_item['@type'] == 'callLegEnd':
-                print("CMS_RECEIVER: we get callLegEnd")
+                print("CMS_RECEIVER " + cms_ip + ": we get callLegEnd")
                 callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
                 durationSeconds = str(record_item['callLeg']['durationSeconds'])  # забираем  durationSeconds
                 reason = str(record_item['callLeg']['reason'])  # забираем  reason
@@ -190,7 +190,7 @@ def cdr_receiver():
                     alarm_value = "none"
 
                 ### обновляем информацию о вызове
-                print("CMS_RECEIVER: insert CallLegEnd data to database")
+                print("CMS_RECEIVER " + cms_ip + ": insert CallLegEnd data to database")
                 cms_sql_request("UPDATE cms_cdr_records SET txAudio_codec='" + acodectx
                                 + "',endTime='" + callLegEndTime
                                 + "',durationSeconds='" + durationSeconds
@@ -212,25 +212,43 @@ def cdr_receiver():
                                 + "',alarm_value='" + alarm_value
                                 + "' WHERE callleg_id='" + callleg_id + "';")
 
-                print("CMS_RECEIVER:  call detail updated from callLegEnd")
+                print("CMS_RECEIVER " + cms_ip + ":  call detail updated from callLegEnd")
                 #pprint(cdr_dict)
 
             if record_item['@type'] == 'callStart':
-                print("CMS_RECEIVER: we get callStart")
+                print("CMS_RECEIVER " + cms_ip + ": we get callStart")
                 call_id = str(record_item['call']['@id'])
                 coSpace = str(record_item['call']['coSpace'])
                 name = str(record_item['call']['name'])
                 starttime = str(record_item['@time'])
 
-                print("cospace: " + coSpace + " time: " + starttime)
-                print("space name: " + name )
+                print("CMS_RECEIVER " + cms_ip + ": cospace: " + coSpace + " time: " + starttime)
                 if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                    print("insert CALL to database")
+                    print("CMS_RECEIVER " + cms_ip + ": insert CALL to database")
                     # insert IDs to database
                     cms_sql_request(
                         "INSERT INTO cms_cdr_calls SET id='" + call_id + "',StartTime='" + starttime + "',coSpace='" + coSpace + "',name='" + name + "';")
                 else:
-                    print("Space ID data already presence")
+                    print("CMS_RECEIVER " + cms_ip + ": Space ID data already presence")
+                #pprint(cdr_dict)
+
+            if record_item['@type'] == 'callEnd':
+                print("CMS_RECEIVER " + cms_ip + ": we get callEnd")
+                call_id = str(record_item['call']['@id'])
+                call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
+                call_durationSeconds = str(record_item['call']['durationSeconds'])
+                call_endtime = str(record_item['@time'])
+
+                if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
+                    print("CMS_RECEIVER " + cms_ip + ": update CALL to database")
+                    # insert IDs to database
+                    cms_sql_request(
+                        "UPDATE cms_cdr_calls SET EndTime='" + call_endtime
+                        + "',callLegsMaxActive='" + call_callLegsMaxActive
+                        + "',durationSeconds='" + call_durationSeconds
+                        + "' WHERE cms_cdr_calls.id='" + call_id + "';")
+                else:
+                    print("CMS_RECEIVER " + cms_ip + ": Call " + call_id + " is not found in DB")
                 #pprint(cdr_dict)
 
 

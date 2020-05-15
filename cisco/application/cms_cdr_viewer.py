@@ -19,7 +19,7 @@ def cmsviewer():
 
 	html_page_title = 'CMS CDR Report'
 	rows_list = cms_sql_request_dict(
-		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime AS time FROM cms_cdr_calls ORDER BY starttime DESC")
+		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime FROM cms_cdr_calls ORDER BY starttime DESC")
 	print("CMS VW: get dict")
 	#pprint (rows_list)
 
