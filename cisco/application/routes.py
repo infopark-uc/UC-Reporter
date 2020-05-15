@@ -78,6 +78,7 @@ def cdr():
     return cdr_receiver()
 
 @app.route('/cms', methods=['GET', 'POST'])
+@app.route('/cms/', methods=['GET', 'POST'])
 def cmspage():
     module_result = cmsviewer()
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
