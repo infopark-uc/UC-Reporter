@@ -227,7 +227,11 @@ def cdr_receiver():
                     print("CMS_RECEIVER " + cms_ip + ": insert CALL to database")
                     # insert IDs to database
                     cms_sql_request(
-                        "INSERT INTO cms_cdr_calls SET id='" + call_id + "',StartTime='" + starttime + "',coSpace='" + coSpace + "',name='" + name + "';")
+                        "INSERT INTO cms_cdr_calls SET id='" + call_id
+                        + "',StartTime='" + starttime
+                        + "',coSpace='" + coSpace
+                        + "',cms_ip='" + cms_ip
+                        + "',name='" + name + "';")
                 else:
                     print("CMS_RECEIVER " + cms_ip + ": Space ID data already presence")
                 #pprint(cdr_dict)

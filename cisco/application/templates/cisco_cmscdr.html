@@ -161,6 +161,9 @@
 			<th>
 				Name
 			</th>
+            <th>
+				CMS IP
+			</th>
 			<th>
 				Start time
 			</th>
@@ -184,6 +187,9 @@
 		<tr>
 			<td>
 				 <a href="http://127.0.0.1:5000/cms/call/{{ row.call_id }}">{{ row.cospace_name }}</a>
+			</td>
+            <td>
+				{{ row.cms_ip }}
 			</td>
 			<td>
 				{{ row.starttime }}
