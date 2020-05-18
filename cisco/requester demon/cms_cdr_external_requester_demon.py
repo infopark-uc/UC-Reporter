@@ -1,26 +1,45 @@
 import xmltodict
+import pymysql
 from pprint import pprint
 import time
 import datetime
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from sqlrequests import cm_sqlselect,cms_sql_request
 from collections import OrderedDict
 import getopt
 import sys
 
 
+def sqlselect_dict(sqlrequest):
+    con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
+    with con:
+        cur = con.cursor()
+        cur.execute(sqlrequest)
+        result = cur.fetchall()
+    return result
+
+def sqlrequest(sqlrequest):
+    try:
+        con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter')
+    except:
+        print("CMS Rq MySQL: DB access error")
+        return None
+    with con:
+        cur = con.cursor()
+        cur.execute(sqlrequest)
+    return "Request to database done"
+
 
 def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     # auth data
-    #cms_login = cm_sqlselect("login", "cms_servers", "ip", cms_ip)
-    #cms_password = cm_sqlselect("password", "cms_servers", "ip", cms_ip)
-    #cms_port = cm_sqlselect("api_port", "cms_servers", "ip", cms_ip)
+    #cms_login = sqlselect("login", "cms_servers", "ip", cms_ip)
+    #cms_password = sqlselect("password", "cms_servers", "ip", cms_ip)
+    #cms_port = sqlselect("api_port", "cms_servers", "ip", cms_ip)
 
     # URL
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs/" + callleg_id
-    print("CMS Rq: URL: "+ http_url)
+    print("CMS Rq " + cms_ip + ": URL: "+ http_url)
 
     http_headers = {'Content-Type': 'text/xml'}
 
@@ -28,19 +47,19 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     try:
        get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
     except requests.exceptions.ConnectionError:
-        print("CMS Rq:  Server connection error " + cms_ip)
+        print("CMS Rq " + cms_ip + ":  Server connection error " + cms_ip)
         return
     except:
         print("CMS Rq: Auth by " + cms_login + " to server " + cms_ip + " error")
         return
 
     if get.status_code == 401:
-        console_output = "CMS Rq: User " + cms_login + " deny by " + cms_ip
+        console_output = "CMS Rq " + cms_ip + ": User " + cms_login + " deny by " + cms_ip
         print(console_output)
         return
 
     if get.status_code != 200:
-        console_output = "CMS Rq: Connect error: " + str(get.status_code) + ": " + get.reason
+        console_output = "CMS Rq " + cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
         print(console_output)
         return
 
@@ -98,7 +117,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoRoundTripTimeTX = "0"
 
     print("CMS Rq: CallID:"+callleg_id + " insert to database")
-    cms_sql_request("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
+    sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
                     + "',date='" + timenow
                     + "',call_id='" + call_id
@@ -112,12 +131,19 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
 
 def getCallLegs(cms_ip):
     # auth data
-    cms_login = cm_sqlselect("login", "cms_servers", "ip", cms_ip)
-    cms_password = cm_sqlselect("password", "cms_servers", "ip", cms_ip)
-    cms_port = cm_sqlselect("api_port", "cms_servers", "ip", cms_ip)
+    #cms_login = sqlselect("login", "cms_servers", "ip", cms_ip)
+    #cms_password = sqlselect("password", "cms_servers", "ip", cms_ip)
+    #cms_port = sqlselect("api_port", "cms_servers", "ip", cms_ip)
+
+    auth_data_dict = sqlselect_dict("SELECT login,password,api_port FROM cms_servers WHERE ip='" + cms_ip + "'") #получаем лист словарей
+    auth_data = auth_data_dict[0] # делаем из листа словарь
+
+    cms_login = str(auth_data['login'])
+    cms_password = str(auth_data['password'])
+    cms_port = str(auth_data['api_port'])
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
-        print("CMS Rq: Login, password and port not received")
+        print("CMS Rq " + cms_ip + ": Login, password and port not received")
         return
 
     # URL
@@ -135,31 +161,31 @@ def getCallLegs(cms_ip):
         while not endOfCycle:
             http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs?limit=" + str(page_limit) + "&offset=" + str(page_offset)
             #http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/coSpaces?limit=" + str(page_limit) + "&offset=" + str(page_offset)
-            print("CMS Rq: URL: " + http_url)
+            print("CMS Rq " + cms_ip + ": URL: " + http_url)
 
             try:
                 get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
             except requests.exceptions.ConnectionError:
-                print("CMS Rq:  Server connection error " + cms_ip)
+                print("CMS Rq " + cms_ip + ":  Server connection error " + cms_ip)
                 break
             except:
-                print("CMS Rq: Auth by " + cms_login + " to server " + cms_ip + " error")
+                print("CMS Rq " + cms_ip + ": Auth by " + cms_login + " to server " + cms_ip + " error")
                 break
 
             if get.status_code == 401:
-                console_output = "CMS Rq: User " + cms_login + " deny by " + cms_ip
+                console_output = "CMS Rq " + cms_ip + ": User " + cms_login + " deny by " + cms_ip
                 print(console_output)
                 break
 
             if get.status_code != 200:
-                console_output = "CMS Rq: Connect error: " + str(get.status_code) + ": " + get.reason
+                console_output = "CMS Rq " + cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
                 print(console_output)
                 break
-            print("CMS Rq: we got dict with calls")
+            print("CMS Rq " + cms_ip + ": we got dict with calls")
             xml_dict = xmltodict.parse(get.text)
             totalCallLegs = xml_dict["callLegs"]["@total"]
             #totalCallLegs = xml_dict["coSpaces"]["@total"]
-            print("CMS Rq: Total number of CallLegs: " + totalCallLegs)
+            print("CMS Rq " + cms_ip + ": Total number of CallLegs: " + totalCallLegs)
 
 
 #            if "coSpace" in xml_dict["coSpaces"]:
@@ -175,12 +201,12 @@ def getCallLegs(cms_ip):
                 # Проверяем тип list или OrderedDict для выбора корректного способа добавления в общий список
                 if type(xml_dict["callLegs"]["callLeg"]) is OrderedDict:
                     callLeg_list.append(xml_dict["callLegs"]["callLeg"])
-                    print("CMS Rq: Number of CallLegs from current request: 1")
+                    print("CMS Rq " + cms_ip + ": Number of CallLegs from current request: 1")
                 elif type(xml_dict["callLegs"]["callLeg"]) is list:
                     callLeg_list.extend(xml_dict["callLegs"]["callLeg"])
-                    print("CMS Rq: Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"])))
+                    print("CMS Rq " + cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"])))
 
-            print("CMS Rq: Number of collected CallLegs: " + str(len(callLeg_list)))
+            print("CMS Rq " + cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list)))
 
             if int(totalCallLegs) > len(callLeg_list):
                 page_offset = len(callLeg_list)
@@ -217,8 +243,8 @@ def main(argv):
 
 if __name__ == "__main__":
     if not sys.version_info.major == 3 and sys.version_info.minor >= 5:
-        print("CMS Rq: Python 3.5 is needed!")
-        print("CMS Rq: You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+        print("CMS Rq " + cms_ip + ": Python 3.5 is needed!")
+        print("CMS Rq " + cms_ip + ": You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
         sys.exit(1)
 
     if len(sys.argv) > 1:
