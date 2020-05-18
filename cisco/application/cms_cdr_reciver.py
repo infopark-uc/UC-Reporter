@@ -4,7 +4,6 @@ import json
 import datetime
 from pprint import pprint
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate
-from application.cms_cdr_requester import callleginfo
 
 def cdr_receiver():
     try:
