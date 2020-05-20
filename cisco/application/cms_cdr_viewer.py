@@ -3,7 +3,7 @@ import xmltodict
 from pprint import pprint
 from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from application.forms import SelectNavigation, SelectSearchType
+from application.forms import SelectNavigation, SelectCMSClusterForCDR
 from application.sqlrequests import cms_sql_request_dict
 import collections
 
@@ -17,11 +17,12 @@ from datetime import datetime
 
 def cmsviewer():
 
+	SEARCH_FOR_ALL = "all"
+
 	html_page_title = 'CMS CDR Report'
-	rows_list = cms_sql_request_dict(
-		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
-	print("CMS VW: get dict")
-	#pprint(rows_list)
+
+	# Temporary values
+	console_output = "Нет активного запроса"
 
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
@@ -34,13 +35,35 @@ def cmsviewer():
 		}
 		return renderdata
 
+	form_cmsselection = SelectCMSClusterForCDR(csrf_enabled=False)
+	if form_cmsselection.validate_on_submit():
+		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
+			rows_list = cms_sql_request_dict(
+				"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
+			print("CMS VW: get dict")
+		else:
+			rows_list = cms_sql_request_dict(
+				"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC;")
+			print("CMS VW: get dict")
+
+		renderdata = {
+			"rendertype": "success",
+			"html_template": "cisco_cmscdr.html",
+			"html_page_title": html_page_title,
+			"console_output": "done",
+			"form_navigation": form_navigation,
+			"form_cmsselection": form_cmsselection,
+			"rows_list": rows_list
+		}
+		return renderdata
+
 	renderdata = {
-		"rendertype": "success",
+		"rendertype": "Null",
 		"html_template": "cisco_cmscdr.html",
 		"html_page_title": html_page_title,
-		"console_output": "done",
+		"console_output": console_output,
 		"form_navigation": form_navigation,
-		"rows_list": rows_list
+		"form_cmsselection": form_cmsselection,
 	}
 	return renderdata
 

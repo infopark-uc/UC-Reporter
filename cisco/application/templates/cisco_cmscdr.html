@@ -154,6 +154,13 @@
 		</legend>
 	</fieldset>
 	</div>
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Поиск вызовов в кластере CMS:
+			{{ formCMS.select_CMSCluster() }}
+	        {{ formCMS.submit() }}
+		</form>
+	</div>
     {% if rows_list %}
 	<div id="tableWrap">
 	<table class="DataTable">
@@ -176,12 +183,6 @@
             <th>
 				Max CallLegs
 			</th>
-			<th>
-				Cospace
-			</th>
-			<th>
-				Call
-			</th>
 		</tr>
 		{% for row in rows_list %}
 		<tr>
@@ -202,12 +203,6 @@
 			</td>
             <td>
 				{{ row.callLegsMaxActive }}
-			</td>
-			<td>
-				{{ row.cospace_id }}
-			</td>
-			<td>
-				{{ row.call_id }}
 			</td>
 		</tr>
 		{% endfor %}

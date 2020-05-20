@@ -80,14 +80,25 @@ def cdr():
 @app.route('/cms', methods=['GET', 'POST'])
 @app.route('/cms/', methods=['GET', 'POST'])
 def cmspage():
+
     module_result = cmsviewer()
+
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(module_result['redirect_to'])
 
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'],
+                               formCMS=module_result['form_cmsselection'])
+
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
-                           rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'])
+                           formNAV=module_result['form_navigation'],
+                           formCMS=module_result['form_cmsselection'])
+
+
 
 @app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
 def cmscall(callid):

@@ -17,3 +17,7 @@ class SelectForwardSearchType(FlaskForm):
     select_field = SelectField('Navigation', choices=[('DN', 'номер абонента'), ('Transfer', 'номер переадресации')])
     string_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     submit = SubmitField('Найти')
+
+class SelectCMSClusterForCDR(FlaskForm):
+    select_CMSCluster = SelectField('Navigation', default="NF", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    submit = SubmitField('Найти')
