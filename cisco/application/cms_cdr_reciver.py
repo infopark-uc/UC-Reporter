@@ -303,6 +303,8 @@ def cdr_receiver():
                 coSpace = str(record_item['call']['coSpace'])
                 name = str(record_item['call']['name'])
                 starttime = str(record_item['@time'])
+                starttimeMSK = str(datetime.datetime.strptime(starttime,"%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
+                print("CMS_RECEIVER " + cms_ip + ": Call start time: " + starttimeMSK)
 
                 print("CMS_RECEIVER " + cms_ip + ": cospace: " + coSpace + " time: " + starttime)
                 if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
@@ -310,7 +312,7 @@ def cdr_receiver():
                     # insert IDs to database
                     cms_sql_request(
                         "INSERT INTO cms_cdr_calls SET id='" + call_id
-                        + "',StartTime='" + starttime
+                        + "',StartTime='" + starttimeMSK
                         + "',coSpace='" + coSpace
                         + "',cms_ip='" + cms_ip
                         + "',name='" + name + "';")
@@ -324,12 +326,14 @@ def cdr_receiver():
                 call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
                 call_durationSeconds = str(record_item['call']['durationSeconds'])
                 call_endtime = str(record_item['@time'])
+                call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
+                print("CMS_RECEIVER " + cms_ip + ": Call end time: " + call_endtimeMSK)
 
                 if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
                     print("CMS_RECEIVER " + cms_ip + ": update CALL to database")
                     # insert IDs to database
                     cms_sql_request(
-                        "UPDATE cms_cdr_calls SET EndTime='" + call_endtime
+                        "UPDATE cms_cdr_calls SET EndTime='" + call_endtimeMSK
                         + "',callLegsMaxActive='" + call_callLegsMaxActive
                         + "',durationSeconds='" + call_durationSeconds
                         + "' WHERE cms_cdr_calls.id='" + call_id + "';")
@@ -341,7 +345,7 @@ def cdr_receiver():
         return('', 204)
 
     except:
-        print('CMS_RECEIVER: Parser failure!')
+        print('CMS_RECEIVER: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<Parser failure>>!')
         pprint(cdr_dict)
         return('', 204)
 

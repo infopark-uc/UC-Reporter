@@ -21,7 +21,7 @@ def cmsviewer():
 	rows_list = cms_sql_request_dict(
 		"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
 	print("CMS VW: get dict")
-	#pprint (rows_list)
+	#pprint(rows_list)
 
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
