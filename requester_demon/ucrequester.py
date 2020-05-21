@@ -16,6 +16,8 @@ def sqlselect_dict(sqlrequest):
         cur = con.cursor()
         cur.execute(sqlrequest)
         result = cur.fetchall()
+        cur.close()  # закрываем курсор
+    con.close() # закрываем соединение
     return result
 
 def sqlrequest(sqlrequest):
@@ -27,6 +29,8 @@ def sqlrequest(sqlrequest):
     with con:
         cur = con.cursor()
         cur.execute(sqlrequest)
+        cur.close()  # закрываем курсор
+    con.close() # закрываем соединение
     return "Request to database done"
 
 
