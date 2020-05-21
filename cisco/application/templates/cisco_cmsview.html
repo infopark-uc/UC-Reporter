@@ -202,7 +202,7 @@
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				 <a href="http://127.0.0.1:5000/cms/callleg/{{ row.callleg_id }}">{{ row.remoteaddress }}</a>
+				 <a href="  {{ url_for('cmscallleg', callegid=row.callleg_id) }}">{{ row.remoteaddress }}</a>
 			</td>
 			<td>
 				{{ row.displayName }}
