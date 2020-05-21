@@ -299,26 +299,57 @@ def cdr_receiver():
 
             if record_item['@type'] == 'callStart':
                 print("CMS_RECEIVER " + cms_ip + ": we get callStart")
-                call_id = str(record_item['call']['@id'])
-                coSpace = str(record_item['call']['coSpace'])
-                name = str(record_item['call']['name'])
-                starttime = str(record_item['@time'])
-                starttimeMSK = str(datetime.datetime.strptime(starttime,"%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
-                print("CMS_RECEIVER " + cms_ip + ": Call start time: " + starttimeMSK)
 
-                print("CMS_RECEIVER " + cms_ip + ": cospace: " + coSpace + " time: " + starttime)
-                if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                    print("CMS_RECEIVER " + cms_ip + ": insert CALL to database")
-                    # insert IDs to database
-                    cms_sql_request(
-                        "INSERT INTO cms_cdr_calls SET id='" + call_id
-                        + "',StartTime='" + starttimeMSK
-                        + "',coSpace='" + coSpace
-                        + "',cms_ip='" + cms_ip
-                        + "',name='" + name + "';")
-                else:
-                    print("CMS_RECEIVER " + cms_ip + ": Space ID data already presence")
-                #pprint(cdr_dict)
+                if "@id" in record_item['call']:
+                    call_id = str(record_item['call']['@id'])  # забираем call ID
+                    print("CMS_RECEIVER " + cms_ip + ": We get callID from callStart")
+
+                    # забираем coSpace
+                    if "coSpace" in record_item['call']:
+                        coSpace = str(record_item['call']['coSpace'])
+                        print("CMS_RECEIVER " + cms_ip + ": We get coSpace from callStart")
+                    else:
+                        coSpace = "none"
+
+                    # забираем name
+                    if "name" in record_item['call']:
+                        name = str(record_item['call']['name'])
+                        print("CMS_RECEIVER " + cms_ip + ": We get name from callStart")
+                    else:
+                        name = "none"
+
+                    # забираем name
+                    if "name" in record_item['call']:
+                        name = str(record_item['call']['name'])
+                        print("CMS_RECEIVER " + cms_ip + ": We get name from callStart")
+                    else:
+                        name = "none"
+
+
+                    # забираем время
+                    if "@time" in record_item['call']:
+                        starttime = str(record_item['@time'])
+                        starttimeMSK = str(datetime.datetime.strptime(starttime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
+                        print("CMS_RECEIVER " + cms_ip + ": We get start time from callStart")
+                        print("CMS_RECEIVER " + cms_ip + ": Call start time: " + starttimeMSK)
+                    else:
+                        starttime = "none"
+                        starttimeMSK = "none"
+
+
+                    print("CMS_RECEIVER " + cms_ip + ": cospace: " + coSpace + " time: " + starttime)
+                    if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
+                        print("CMS_RECEIVER " + cms_ip + ": insert CALL to database")
+                        # insert IDs to database
+                        cms_sql_request(
+                            "INSERT INTO cms_cdr_calls SET id='" + call_id
+                            + "',StartTime='" + starttimeMSK
+                            + "',coSpace='" + coSpace
+                            + "',cms_ip='" + cms_ip
+                            + "',name='" + name + "';")
+                    else:
+                        print("CMS_RECEIVER " + cms_ip + ": Space ID data already presence")
+
 
             if record_item['@type'] == 'callEnd':
                 print("CMS_RECEIVER " + cms_ip + ": we get callEnd")
