@@ -44,6 +44,8 @@ def cm_sqlselect_dict(data_colum, table, filter_colum, filter_colum_data):
           cur = con.cursor()
           cur.execute('SELECT ' + data_colum + ' FROM ' + table + '  WHERE  ' + filter_colum + ' LIKE "' + filter_colum_data + '";')
           result = cur.fetchall()
+          cur.close() # закрываем курсор
+     con.close() # закрываем соединение
      return result
 
 def cms_sql_request_dict(sqlrequest):
@@ -51,5 +53,7 @@ def cms_sql_request_dict(sqlrequest):
      with con:
           cur = con.cursor()
           cur.execute(sqlrequest)
-          result = cur.fetchall()
+          result = cur.fetchall() #забираем все значения
+          cur.close() #закрываем курсор
+     con.close()
      return result
