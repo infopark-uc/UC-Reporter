@@ -1,4 +1,4 @@
-from flask import render_template, redirect
+from flask import render_template, redirect,url_for
 from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
@@ -24,7 +24,7 @@ def usersearchpage():
                                    formSRCH=module_result['form_search'])
 
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
      return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
@@ -35,7 +35,7 @@ def usersearchpage():
 def huntpage():
      module_result = huntreport()
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
      return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                             console_output=module_result['console_output'],
@@ -46,7 +46,7 @@ def huntpage():
 def cfa():
      module_result = application.callforward.render()
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
      if module_result['rendertype'] == 'success': # данные получены
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
@@ -84,7 +84,7 @@ def cmspage():
     module_result = cmsviewer()
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
     if module_result['rendertype'] == 'success':  # данные получены
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
@@ -105,7 +105,7 @@ def cmscall(callid):
     module_result = cmscallviewer(callid)
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
@@ -118,7 +118,7 @@ def cmscallleg(callegid):
     module_result = cmscalllegviewer(callegid)
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(module_result['redirect_to'])
+        return redirect(url_for(module_result['redirect_to']))
 
     if module_result['rendertype'] == 'success':  # проверка если данные получены
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
