@@ -239,7 +239,7 @@ def main(argv):
                 cms_ip_address = val
 
     except:
-        print ('usage: cms_cdr_external_requester_demon.py -s <CMS ip address>')
+        print ('usage: ucrequester.py -s <CMS ip address>')
         sys.exit(2)
 
     getCallLegs(cms_ip_address)
@@ -254,4 +254,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         main(sys.argv[1:])
     else:
-        print('usage: cms_cdr_external_requester_demon.py -s <CMS ip address>')
+        print('usage: ucrequester.py -s <CMS ip address>')
