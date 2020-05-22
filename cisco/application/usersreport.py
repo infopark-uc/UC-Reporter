@@ -27,9 +27,18 @@ def usersreport():
     form_search = SelectSearchType(csrf_enabled=False)
     if form_search.validate_on_submit():
         console_output = form_search.select_region.data + " " + form_search.select_field.data + " " + form_search.string_field.data
-        cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", form_search.select_region.data)
-        cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", form_search.select_region.data)
-        cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", form_search.select_region.data)
+        #cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", form_search.select_region.data)
+        #cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", form_search.select_region.data)
+        #cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", form_search.select_region.data)
+
+        auth_data_list = sql_request_dict(
+            "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cm_name='"+ form_search.select_region.data + "'")  # получаем лист словарей
+
+        cucm_ip_address = str(auth_data_list[0]['cm_ip'])
+        cucm_login = str(auth_data_list[0]['cm_username'])
+        cucm_password = str(auth_data_list[0]['cm_password'])
+
+
 
         # CUCM URL's
         cucm_url = "https://" + cucm_ip_address + ":8443/axl/"

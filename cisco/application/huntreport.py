@@ -2,14 +2,17 @@ import requests
 import xmltodict
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
+from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate,sql_request_dict
 
 
 def huntreport():
 
-    cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", "INFOCELL")
-    cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", "INFOCELL")
-    cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", "INFOCELL")
+    auth_data_list = sql_request_dict(
+        "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cm_name='INFOCELL'")  # получаем лист словарей
+
+    cucm_ip_address = str(auth_data_list[0]['cm_ip'])
+    cucm_login = str(auth_data_list[0]['cm_username'])
+    cucm_password = str(auth_data_list[0]['cm_password'])
 
     html_page_title = 'CUCM Hunt Report'
 
