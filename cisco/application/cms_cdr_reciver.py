@@ -318,16 +318,9 @@ def cdr_receiver():
                     else:
                         name = "none"
 
-                    # забираем name
-                    if "name" in record_item['call']:
-                        name = str(record_item['call']['name'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get name from callStart")
-                    else:
-                        name = "none"
-
-
+ 
                     # забираем время
-                    if "@time" in record_item['call']:
+                    if "@time" in record_item:
                         starttime = str(record_item['@time'])
                         starttimeMSK = str(datetime.datetime.strptime(starttime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         print("CMS_RECEIVER " + cms_ip + ": We get start time from callStart")
