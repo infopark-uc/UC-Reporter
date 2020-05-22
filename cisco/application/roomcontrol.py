@@ -3,7 +3,7 @@ import xmltodict
 from pprint import pprint
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate
+from application.sqlrequests import cm_sqlselect, cm_sqlselectall, cm_sqlupdate, sql_request_dict
 
 def codec(systemindex):
 
@@ -46,12 +46,12 @@ def codec(systemindex):
             widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
             # Обработка для изменения количества кофе
             if event[1] == "increment":
-                widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                #widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) + 1)
                 set_value(systemindex, event[0], widget_data_CoffeeCount)
                 print("increment CoffeeCount")
             elif (event[1] == "decrement") and (int(widget_data_CoffeeCount) >= 1):
-                widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                #widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_CoffeeCount = str(int(widget_data_CoffeeCount) - 1)
                 set_value(systemindex, event[0], widget_data_CoffeeCount)
                 print("decrement CoffeeCount")
@@ -61,12 +61,12 @@ def codec(systemindex):
             #Обработка для изменения количества  чая
             print(event[0])
             if event[1] == "increment":
-                widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                #widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_TeaCount = str(int(widget_data_TeaCount) + 1)
                 set_value(systemindex, event[0], widget_data_TeaCount)
                 print("increment TeaCount")
             elif (event[1] == "decrement") and (int(widget_data_TeaCount) >= 1):
-                widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
+                #widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", str(event[0]))
                 widget_data_TeaCount = str(int(widget_data_TeaCount) - 1)
                 set_value(systemindex, event[0], widget_data_TeaCount)
                 print("decrement TeaCount")
@@ -87,9 +87,18 @@ def codec(systemindex):
 
 
 def submit_order(systemindex):
-    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+    auth_data_list = sql_request_dict(
+        "SELECT room_ip,room_user,room_password FROM cm_roomsystems_table WHERE room_index='" + systemindex + "'")  # получаем лист словарей
+    roomkit_access_data_ip = str(auth_data_list[0]['room_ip']) # забираем IP
+    roomkit_access_data_login = str(auth_data_list[0]['room_user'])  # забираем пользователя
+    roomkit_access_data_password = str(auth_data_list[0]['room_password'])  # забираем пароль
+
+
+
+
     print("Roomcontrol: submit order " + request.method)
     set_value(systemindex, "CoffeeCount", "0")
     set_value(systemindex, "TeaCount", "0")
@@ -150,9 +159,15 @@ def submit_order(systemindex):
 
 def set_value(systemindex, widget_name, widget_value):
     # credentials from database
-    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+
+    auth_data_list = sql_request_dict(
+        "SELECT room_ip,room_user,room_password FROM cm_roomsystems_table WHERE room_index='" + systemindex + "'")  # получаем лист словарей
+    roomkit_access_data_ip = str(auth_data_list[0]['room_ip'])  # забираем IP
+    roomkit_access_data_login = str(auth_data_list[0]['room_user'])  # забираем пользователя
+    roomkit_access_data_password = str(auth_data_list[0]['room_password'])  # забираем пароль
 
 
     print ("Выполняется функция установки значений виджетов set_value")
@@ -211,9 +226,17 @@ def set_value(systemindex, widget_name, widget_value):
 
 def get_value(systemindex):
     # credentials from database
-    roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
-    roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
+    #roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+
+    auth_data_list = sql_request_dict(
+        "SELECT room_ip,room_user,room_password FROM cm_roomsystems_table WHERE room_index='" + systemindex + "'")  # получаем лист словарей
+    roomkit_access_data_ip = str(auth_data_list[0]['room_ip'])  # забираем IP
+    roomkit_access_data_login = str(auth_data_list[0]['room_user'])  # забираем пользователя
+    roomkit_access_data_password = str(auth_data_list[0]['room_password'])  # забираем пароль
+
+
     widget_data = {}
 
     print("Выполняется функция считывания значений виджетов get_value")
@@ -273,20 +296,29 @@ def get_value(systemindex):
         if widget_data["TeaCount"] is None:
             set_value(systemindex, "TeaCount", "0")
 
-    print("Установлены исходные значения для виджетов:")
+    print("Roomcontrol: Установлены исходные значения для виджетов:")
     pprint(widget_data)
 
 def send_order(systemindex):
     #credentials from database
-    submit_server = cm_sqlselect("server_ip", "server_config_table", "server_index", "0")
-    submit_server_port = cm_sqlselect("server_port", "server_config_table", "server_index", "0")
-    phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
-    phone_access_data_login = cm_sqlselect("phone_user", "cm_phones_table", "phone_index", systemindex)
-    phone_access_data_password = cm_sqlselect("phone_password", "cm_phones_table", "phone_index", systemindex)
+    auth_data_list = sql_request_dict(
+        "SELECT server_config_table.server_port,server_config_table.server_ip, cm_phones_table.phone_ip,cm_phones_table.phone_user,cm_phones_table.phone_password FROM cm_phones_table INNER JOIN server_config_table ON server_config_table.server_index=cm_phones_table.phone_index WHERE server_config_table.server_index='" + systemindex + "'")  # получаем лист словарей
+    #submit_server = cm_sqlselect("server_ip", "server_config_table", "server_index", "0")
+    #submit_server_port = cm_sqlselect("server_port", "server_config_table", "server_index", "0")
+    #phone_access_data_ip = cm_sqlselect("phone_ip", "cm_phones_table", "phone_index", systemindex)
+    #phone_access_data_login = cm_sqlselect("phone_user", "cm_phones_table", "phone_index", systemindex)
+    #phone_access_data_password = cm_sqlselect("phone_password", "cm_phones_table", "phone_index", systemindex)
+
+    phone_access_data_ip = str(auth_data_list[0]['phone_ip'])  # забираем IP
+    phone_access_data_login = str(auth_data_list[0]['phone_user'])  # забираем пользователя
+    phone_access_data_password = str(auth_data_list[0]['phone_password'])  # забираем пароль
+    submit_server = str(auth_data_list[0]['server_ip'])
+    submit_server_port = str(auth_data_list[0]['server_port'])
+
     widget_data_CoffeeCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "CoffeeCount")
     widget_data_TeaCount = cm_sqlselect("widget_data", "widget_table", "widget_name", "TeaCount")
 
-    print("Send order")
+    print("Roomcontrol: Send order")
     # URL
     http_url = "http://" + phone_access_data_ip + "/CGI/Execute"
 

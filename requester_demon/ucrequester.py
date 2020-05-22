@@ -20,7 +20,7 @@ def sqlselect_dict(sqlrequest):
     con.close() # закрываем соединение
     return result
 
-def sqlrequest(sqlrequest):
+def sqlrequest_dict(sqlrequest):
     try:
         con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter')
     except:

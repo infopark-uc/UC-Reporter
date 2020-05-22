@@ -26,6 +26,28 @@ def cm_sqlselectall(table, filter_colum, filter_colum_data):
      return result
 
 
+############ SQL Requests ###################################
+
+def sql_request_dict(sqlrequest):   #запрос листа словорей
+     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter',cursorclass=pymysql.cursors.DictCursor)
+     with con:
+          cur = con.cursor()
+          cur.execute(sqlrequest)
+          result = cur.fetchall() #забираем все значения
+          cur.close() #закрываем курсор
+     con.close() #закрываем соединение
+     return result
+
+def sql_execute(sqlrequest):
+     con = pymysql.connect('172.20.31.50', 'sqladmin','Qwerty123', 'ucreporter')
+     with con:
+          cur = con.cursor()
+          cur.execute(sqlrequest)
+          cur.close()  # закрываем курсор
+     con.commit() #подтверждает изменения
+     con.close() #закрываем соединение
+     return "Request to database done"
+
 
 
 ############# CMS Requests #############
@@ -36,6 +58,7 @@ def cms_sql_request(sqlrequest):
      with con:
           cur = con.cursor()
           cur.execute(sqlrequest)
+
      return "Request to database done"
 
 def cm_sqlselect_dict(data_colum, table, filter_colum, filter_colum_data):
