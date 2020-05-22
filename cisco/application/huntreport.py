@@ -2,7 +2,7 @@ import requests
 import xmltodict
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
-from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate,sql_request_dict
+from application.sqlrequests import sql_request_dict
 
 
 def huntreport():

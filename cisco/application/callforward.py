@@ -3,7 +3,7 @@ import xmltodict
 import collections
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectForwardSearchType
-from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
+from application.sqlrequests import sql_request_dict
 
 def render():
     SEARCH_BY_DN = "DN"
