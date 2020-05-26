@@ -8,10 +8,16 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
+from multiprocessing import Process
 
 
 def sqlselect_dict(sqlrequest):
-    con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
+    try:
+         con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
+    except:
+        console_output = "MySQL DB access error"
+        print(console_output) #info
+        return None
     with con:
         cur = con.cursor()
         cur.execute(sqlrequest)
@@ -24,7 +30,8 @@ def sqlrequest(sqlrequest):
     try:
         con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter')
     except:
-        print("CMS Rq MySQL: DB access error")
+        console_output = "MySQL DB access error"
+        print(console_output) #info
         return None
     with con:
         cur = con.cursor()
@@ -35,15 +42,11 @@ def sqlrequest(sqlrequest):
 
 
 def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
-    # auth data
-    #cms_login = sqlselect("login", "cms_servers", "ip", cms_ip)
-    #cms_password = sqlselect("password", "cms_servers", "ip", cms_ip)
-    #cms_port = sqlselect("api_port", "cms_servers", "ip", cms_ip)
-
     # URL
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs/" + callleg_id
-    print("CMS Rq " + cms_ip + ": URL: "+ http_url)
+    console_output =  cms_ip + ": URL: "+ http_url
+    print(console_output)
 
     http_headers = {'Content-Type': 'text/xml'}
 
@@ -51,23 +54,26 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     try:
        get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
     except requests.exceptions.ConnectionError:
-        print("CMS Rq " + cms_ip + ":  Server connection error " + cms_ip)
+        console_output =  cms_ip + ":  Server connection error " + cms_ip
+        print(console_output)
         return
     except:
-        print("CMS Rq: Auth by " + cms_login + " to server " + cms_ip + " error")
+        console_output = " Auth by " + cms_login + " to server " + cms_ip + " error"
+        print(console_output)
         return
 
     if get.status_code == 401:
-        console_output = "CMS Rq " + cms_ip + ": User " + cms_login + " deny by " + cms_ip
+        console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
         print(console_output)
         return
 
     if get.status_code != 200:
-        console_output = "CMS Rq " + cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
+        console_output = cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
         print(console_output)
         return
 
-    print("CMS Rq: we got dict with callLegs")
+    console_output = " we got dict with callLegs"
+    print(console_output)
     xml_dict = xmltodict.parse(get.text)
     callLeg = xml_dict['callLeg']
 
@@ -120,7 +126,8 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoPacketLossPercentageTX = "0.0"
        VideoRoundTripTimeTX = "0"
 
-    print("CMS Rq: CallID:"+callleg_id + " insert to database")
+    console_output = cms_ip +  " CallID:"+callleg_id + " insert to database"
+    print(console_output)
     sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
                     + "',date='" + timenow
@@ -132,22 +139,11 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
                     + "',AudioPacketLossPercentageTX='" + AudioPacketLossPercentageTX
                     + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
 
-
-def getCallLegs(cms_ip):
-    # auth data
-    #cms_login = sqlselect("login", "cms_servers", "ip", cms_ip)
-    #cms_password = sqlselect("password", "cms_servers", "ip", cms_ip)
-    #cms_port = sqlselect("api_port", "cms_servers", "ip", cms_ip)
-
-    auth_data_dict = sqlselect_dict("SELECT login,password,api_port FROM cms_servers WHERE ip='" + cms_ip + "'") #получаем лист словарей
-    auth_data = auth_data_dict[0] # делаем из листа словарь
-
-    cms_login = str(auth_data['login'])
-    cms_password = str(auth_data['password'])
-    cms_port = str(auth_data['api_port'])
+def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
-        print("CMS Rq " + cms_ip + ": Login, password and port not received")
+        console_output = cms_ip + ": Login, password and port not received"
+        print(console_output) #info
         return
 
     # URL
@@ -164,53 +160,49 @@ def getCallLegs(cms_ip):
         endOfCycle = False
         while not endOfCycle:
             http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs?limit=" + str(page_limit) + "&offset=" + str(page_offset)
-            #http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/coSpaces?limit=" + str(page_limit) + "&offset=" + str(page_offset)
-            print("CMS Rq " + cms_ip + ": URL: " + http_url)
+            console_output =  cms_ip + ": URL: " + http_url
+            print(console_output)
 
             try:
                 get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
             except requests.exceptions.ConnectionError:
-                print("CMS Rq " + cms_ip + ":  Server connection error " + cms_ip)
+                console_output = cms_ip + ":  Server connection error " + cms_ip
+                print(console_output)
                 break
             except:
-                print("CMS Rq " + cms_ip + ": Auth by " + cms_login + " to server " + cms_ip + " error")
+                console_output = cms_ip + ": Auth by " + cms_login + " to server " + cms_ip + " error"
+                print(console_output)
                 break
 
             if get.status_code == 401:
-                console_output = "CMS Rq " + cms_ip + ": User " + cms_login + " deny by " + cms_ip
+                console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
                 print(console_output)
                 break
 
             if get.status_code != 200:
-                console_output = "CMS Rq " + cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
+                console_output =cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
                 print(console_output)
                 break
-            print("CMS Rq " + cms_ip + ": we got dict with calls")
+            console_output = cms_ip + ": we got dict with calls"
+            print(console_output)
             xml_dict = xmltodict.parse(get.text)
             totalCallLegs = xml_dict["callLegs"]["@total"]
-            #totalCallLegs = xml_dict["coSpaces"]["@total"]
-            print("CMS Rq " + cms_ip + ": Total number of CallLegs: " + totalCallLegs)
-
-
-#            if "coSpace" in xml_dict["coSpaces"]:
-#                if type(xml_dict["coSpaces"]["coSpace"]) is OrderedDict:
-#                    callLeg_list.append(xml_dict["coSpaces"]["coSpace"])
-#                    print("CMS Rq: Number of CallLegs from current request: 1")
-#                elif type(xml_dict["coSpaces"]["coSpace"]) is list:
-#                    callLeg_list.extend(xml_dict["coSpaces"]["coSpace"])
-#                    print("CMS Rq: Number of CallLegs from current request: " + str(len(xml_dict["coSpaces"]["coSpace"])))
+            console_output =  cms_ip + ": Total number of CallLegs: " + totalCallLegs
+            print(console_output)
 
             # проверям что есть активные CallLeg
             if "callLeg" in xml_dict["callLegs"]:
                 # Проверяем тип list или OrderedDict для выбора корректного способа добавления в общий список
                 if type(xml_dict["callLegs"]["callLeg"]) is OrderedDict:
                     callLeg_list.append(xml_dict["callLegs"]["callLeg"])
-                    print("CMS Rq " + cms_ip + ": Number of CallLegs from current request: 1")
+                    console_output =  cms_ip + ": Number of CallLegs from current request: 1"
+                    print(console_output)
                 elif type(xml_dict["callLegs"]["callLeg"]) is list:
                     callLeg_list.extend(xml_dict["callLegs"]["callLeg"])
-                    print("CMS Rq " + cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"])))
-
-            print("CMS Rq " + cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list)))
+                    console_output =  cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"]))
+                    print(console_output)
+            console_output =  cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
+            print(console_output)
 
             if int(totalCallLegs) > len(callLeg_list):
                 page_offset = len(callLeg_list)
@@ -225,33 +217,63 @@ def getCallLegs(cms_ip):
             if "@id" in callLeg:
                 callLeg_id = callLeg["@id"]
                 callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
+                time.sleep(1) #уменьшаем переодичность запросов callLeg
             else:
                 callLeg_id = "none"
 
-        time.sleep(2)
+        time.sleep(repeat_check)
 
 def main(argv):
-
+    cms_ip_address = ""
     try:
-        opts, args = getopt.getopt(argv, 's:')
+        opts, args = getopt.getopt(argv, 's:d')
         for opt,val in opts:
             if opt=='-s':
                 cms_ip_address = val
+            elif opt=='-d':
+                console_output = "start database mode"
+                print(console_output)  # info
 
     except:
-        print ('usage: ucrequester.py -s <CMS ip address>')
+        console_output = "usage: ucrequester.py -s <CMS ip address>"
+        print(console_output) #info
         sys.exit(2)
 
-    getCallLegs(cms_ip_address)
+    if cms_ip_address:  #если указан IP
+
+        request_configuration_dict = sqlselect_dict(
+            "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port, cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_servers.ip='" + cms_ip_address + "'")  # получаем лист словарей
+        cluster_data = request_configuration_dict[0]  # делаем из листа словарь
+        console_output = "we get config for: " + cms_ip_address
+        print(console_output)  # info
+        getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'])
+
+    else:
+        request_configuration_dict = sqlselect_dict("SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_requester_config.running='True'")
+        console_output = "we get config"
+        print(console_output) #info
+        #pprint(request_configuration_dict)
+        for cluster_data in request_configuration_dict:
+            console_output = "start request for: " + cluster_data['ip']
+            print(console_output) #info
+            #pprint(cluster_data)
+            p = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
+            p.start() # запуск процедуры в отдельном процессе
+            console_output = "PID " + str(p.pid) + "started for: " + cluster_data['ip']
+            print(console_output) #info
+            #p.join() - ждать пока выполниться процедура.
 
 
 if __name__ == "__main__":
     if not sys.version_info.major == 3 and sys.version_info.minor >= 5:
-        print("CMS Rq " + cms_ip + ": Python 3.5 is needed!")
-        print("CMS Rq " + cms_ip + ": You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+        console_output = "CMS Rq " + cms_ip + ": Python 3.7 is needed!"
+        print(console_output)
+        console_output = "CMS Rq " + cms_ip + ": You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor)
+        print(console_output)
         sys.exit(1)
 
     if len(sys.argv) > 1:
         main(sys.argv[1:])
     else:
-        print('usage: ucrequester.py -s <CMS ip address>')
+        console_output = "usage: ucrequester.py -s <CMS ip address>"
+        print(console_output)
