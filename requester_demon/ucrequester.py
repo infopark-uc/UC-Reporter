@@ -46,7 +46,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs/" + callleg_id
     console_output =  cms_ip + ": URL: "+ http_url
-    print(console_output)
+    print(console_output) #debug
 
     http_headers = {'Content-Type': 'text/xml'}
 
@@ -55,26 +55,31 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
     except requests.exceptions.ConnectionError:
         console_output =  cms_ip + ":  Server connection error " + cms_ip
-        print(console_output)
+        print(console_output) #info
+        get.close()
         return
-    except:
-        console_output = " Auth by " + cms_login + " to server " + cms_ip + " error"
-        print(console_output)
+    except requests.exceptions.RequestException as err:
+        console_output = cms_ip + ":Error Something Else" + err
+        print(console_output) #info
+        get.close()
         return
 
     if get.status_code == 401:
         console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
-        print(console_output)
+        print(console_output) #info
+        get.close()
         return
 
     if get.status_code != 200:
         console_output = cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
-        print(console_output)
+        print(console_output) #info
+        get.close()
         return
 
     console_output = " we got dict with callLegs"
-    print(console_output)
+    print(console_output) #debug
     xml_dict = xmltodict.parse(get.text)
+    get.close()  # закрываем web сессию
     callLeg = xml_dict['callLeg']
 
     # забираем call ID
@@ -127,7 +132,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoRoundTripTimeTX = "0"
 
     console_output = cms_ip +  " CallID:"+callleg_id + " insert to database"
-    print(console_output)
+    print(console_output) #debug
     sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
                     + "',date='" + timenow
@@ -140,7 +145,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
                     + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
 
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
-
+    CALLLEG_CHECK_REPEATTIME = 1 #пауза между запусками функции callleginfo
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
         console_output = cms_ip + ": Login, password and port not received"
         print(console_output) #info
@@ -161,34 +166,39 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
         while not endOfCycle:
             http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs?limit=" + str(page_limit) + "&offset=" + str(page_offset)
             console_output =  cms_ip + ": URL: " + http_url
-            print(console_output)
+            print(console_output) #debug
 
             try:
                 get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
             except requests.exceptions.ConnectionError:
                 console_output = cms_ip + ":  Server connection error " + cms_ip
-                print(console_output)
+                print(console_output) #info
+                get.close()
                 break
-            except:
-                console_output = cms_ip + ": Auth by " + cms_login + " to server " + cms_ip + " error"
-                print(console_output)
-                break
+            except requests.exceptions.RequestException as err:
+                console_output = cms_ip + ": Error Something Else" + str(err)
+                print(console_output) #info
+                get.close()
+                return #закрываем функцию т.к. мы не знаем что это такое, если бы мы знали, что это такое, мы не знаем, что это такое.
 
             if get.status_code == 401:
                 console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
-                print(console_output)
-                break
+                print(console_output) #info
+                get.close()
+                return #закрываем функцию, т.к. можно заблочить пользователя на длительный срок.
 
             if get.status_code != 200:
                 console_output =cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
-                print(console_output)
+                print(console_output) #info
+                get.close()
                 break
             console_output = cms_ip + ": we got dict with calls"
-            print(console_output)
+            print(console_output) #debug
             xml_dict = xmltodict.parse(get.text)
+            get.close() #закрываем web сессию
             totalCallLegs = xml_dict["callLegs"]["@total"]
             console_output =  cms_ip + ": Total number of CallLegs: " + totalCallLegs
-            print(console_output)
+            print(console_output) #debug
 
             # проверям что есть активные CallLeg
             if "callLeg" in xml_dict["callLegs"]:
@@ -196,13 +206,13 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 if type(xml_dict["callLegs"]["callLeg"]) is OrderedDict:
                     callLeg_list.append(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: 1"
-                    print(console_output)
+                    print(console_output) #debug
                 elif type(xml_dict["callLegs"]["callLeg"]) is list:
                     callLeg_list.extend(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"]))
-                    print(console_output)
+                    print(console_output) #debug
             console_output =  cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
-            print(console_output)
+            print(console_output) #debug
 
             if int(totalCallLegs) > len(callLeg_list):
                 page_offset = len(callLeg_list)
@@ -217,7 +227,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
             if "@id" in callLeg:
                 callLeg_id = callLeg["@id"]
                 callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
-                time.sleep(1) #уменьшаем переодичность запросов callLeg
+                time.sleep(CALLLEG_CHECK_REPEATTIME) #уменьшаем переодичность запросов callLeg
             else:
                 callLeg_id = "none"
 
@@ -259,16 +269,16 @@ def main(argv):
             #pprint(cluster_data)
             p = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
             p.start() # запуск процедуры в отдельном процессе
-            console_output = "PID " + str(p.pid) + "started for: " + cluster_data['ip']
+            console_output = "PID " + str(p.pid) + " started for: " + cluster_data['ip']
             print(console_output) #info
             #p.join() - ждать пока выполниться процедура.
 
 
 if __name__ == "__main__":
     if not sys.version_info.major == 3 and sys.version_info.minor >= 5:
-        console_output = "CMS Rq " + cms_ip + ": Python 3.7 is needed!"
+        console_output =  cms_ip + ": Python 3.7 is needed!"
         print(console_output)
-        console_output = "CMS Rq " + cms_ip + ": You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor)
+        console_output =  cms_ip + ": You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor)
         print(console_output)
         sys.exit(1)
 
