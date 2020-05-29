@@ -3,85 +3,166 @@ import xmltodict
 import json
 import datetime
 from pprint import pprint
+from pprint import pformat
+import logging.handlers
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate
 
 def cdr_receiver():
+
+    # Настройка логирования
+    # Диспетчер логов
+    logger = logging.getLogger('CMS_RECEIVER')
+    #
+    logger.setLevel(logging.DEBUG)
+
+    # Обработчик логов - запись в файлы с перезаписью
+    rotate_file_handler = logging.handlers.RotatingFileHandler("CMS_RECEIVER.log", maxBytes=10240, backupCount=5)
+    rotate_file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
+    rotate_file_handler.setFormatter(formatter)
+    logger.addHandler(rotate_file_handler)
+
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
         cdr_dict = json.loads(json.dumps(cdr)) #trasfrorm OrderedDict to Dict
         cms_ip = str(request.environ['HTTP_X_FORWARDED_FOR']) #забираем IP
 
         if type (cdr_dict['records']['record']) is list:
-            print("CMS_RECEIVER " + cms_ip + ": We get record list")
+            console_output = "CMS_RECEIVER " + cms_ip + ": We get record list"
+            print(console_output)
+            logger.debug(console_output)
             record_list = cdr_dict['records']['record']
         else:
-            print("CMS_RECEIVER " + cms_ip + ": We get not record list")
+            console_output =  cms_ip + ": We get not record list"
+            print("CMS_RECEIVER " + console_output)
+            logger.debug(console_output)
             record_list = [cdr_dict['records']['record']]
 
-        print("CMS_RECEIVER " + cms_ip + ": Number of records in list: " + str(len(record_list)))
+        console_output = cms_ip + ": Number of records in list: " + str(len(record_list))
+        print("CMS_RECEIVER " + console_output)
+        logger.debug(console_output)
 
         for record_item in record_list:
-            print("CMS_RECEIVER " + cms_ip + ": record_item")
+            console_output = "CMS_RECEIVER " + cms_ip + ": record_item"
+            print(console_output)
+            logger.debug(console_output)
             pprint(record_item)
+            logger.debug("\n" + pformat(record_item))
 
             if record_item['@type'] == 'callLegStart':  #проверяем что, это новый коллег
-                print("CMS_RECEIVER " + cms_ip + ": We get callLegStart")
-                print("CMS_RECEIVER " + cms_ip + ": Start to process callLegStart")
+                console_output =  cms_ip + ": We get callLegStart"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
+                console_output =  cms_ip + ": Start to process callLegStart"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
 
                 if "@id" in record_item['callLeg']:
                     callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID
-                    print("CMS_RECEIVER " + cms_ip + ": We get callLegID from callLegStart")
+                    console_output =  cms_ip + ": We get callLegID from callLegStart"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
                     # забираем sipcall_id
                     if "sipCallId" in record_item['callLeg']:
                         sipcall_id = str(record_item['callLeg']['sipCallId'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get sipCallID from callLegStart")
+                        console_output =  cms_ip + ": We get sipCallID from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         sipcall_id = "none"
 
                     # забираем call_id
                     if "call" in record_item['callLeg']:
                         call_id = str(record_item['callLeg']['call'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get callID from callLegStart")
+                        console_output =  cms_ip + ": We get callID from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         call_id = "none"
 
                     # забираем  remoteAddress
                     if "remoteAddress" in record_item['callLeg']:
                         remoteAddress = str(record_item['callLeg']['remoteAddress'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get remoteAddress from callLegStart")
+                        console_output =  cms_ip + ": We get remoteAddress from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         remoteAddress = "none"
 
                     # забираем  remoteParty
                     if "remoteParty" in record_item['callLeg']:
                         remoteParty = str(record_item['callLeg']['remoteParty'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get remoteParty from callLegStart")
+                        console_output =  cms_ip + ": We get remoteParty from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         remoteParty = "none"
 
                     # забираем  localAddress
                     if "localAddress" in record_item['callLeg']:
                         localAddress = str(record_item['callLeg']['localAddress'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get localAddress from callLegStart")
+                        console_output =  cms_ip + ": We get localAddress from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         localAddress = "none"
 
                     # забираем  displayName
                     if "displayName" in record_item['callLeg']:
                         displayName = str(record_item['callLeg']['displayName'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get displayName from callLegStart")
+                        console_output =  cms_ip + ": We get displayName from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         displayName = "none"
 
                     # забираем время лега
                     if "@time" in record_item:
                         callLegStartTime = str(record_item['@time'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get callLegTime from callLegStart")
+                        console_output =  cms_ip + ": We get callLegTime from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         callLegStartTime = "none"
 
                     timenow = str(datetime.datetime.now())
+
+                    # забираем GuestConnection
+                    if "guestConnection" in record_item['callLeg']:
+                        guestConnection = str(record_item['callLeg']['guestConnection'])
+                        console_output =  cms_ip + ": We get guestConnection from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                         guestConnection = "none"
+
+                    # забираем  recording
+                    if "recording" in record_item['callLeg']:
+                        recording = str(record_item['callLeg']['recording'])
+                        console_output =  cms_ip + ": We get recording from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                         recording = "none"
+
+                    # забираем CallLeg type
+                    if "type" in record_item['callLeg']:
+                        callLeg_type = str(record_item['callLeg']['type'])
+                        console_output =  cms_ip + ": We get type from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        callLeg_type = "none"
+
+                    # забираем CallLeg subtype
+                    if "subType" in record_item['callLeg']:
+                        callLeg_subtype = str(record_item['callLeg']['subType'])
+                        console_output =  cms_ip + ": We get subType from callLegStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        callLeg_subtype = "none"
 
                     ### добавляем идентификаторы в базу
                     cms_sql_request(
@@ -94,14 +175,24 @@ def cdr_receiver():
                         + "',displayName='" + displayName
                         + "',localAddress='" + localAddress
                         + "',remoteParty='" + remoteParty
+                        + "',guestConnection='" + guestConnection
+                        + "',recording='" + recording
+                        + "',callLeg_type='" + callLeg_type
+                        + "',callLeg_subtype='" + callLeg_subtype
                         + "',remoteAddress='" + remoteAddress + "';")
 
-                    print("CMS_RECEIVER " + cms_ip + ":     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database")
+                    console_output =  cms_ip + ":     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
                 else:
-                    print("CMS_RECEIVER " + cms_ip + ": CallLeg Id not found in callLegStart - nothing was inserted in DB")
+                    console_output =  cms_ip + ": CallLeg Id not found in callLegStart - nothing was inserted in DB"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
             if record_item['@type'] == 'callLegUpdate':
-                print("CMS_RECEIVER " + cms_ip + ": we get callLegUpdate")
+                console_output =  cms_ip + ": we get callLegUpdate"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
                 callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
                 if "call" in record_item['callLeg']:
                     call_id = str(record_item['callLeg']['call'])  # забираем  reason
@@ -110,31 +201,50 @@ def cdr_receiver():
                         "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
 
             if record_item['@type'] == 'callLegEnd':
-                print("CMS_RECEIVER " + cms_ip + ": we get callLegEnd")
+                console_output =  cms_ip + ": we get callLegEnd"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
 
                 # забираем callleg ID для обновления базы данных
                 if "@id" in record_item['callLeg']:
                     callleg_id = str(record_item['callLeg']['@id'])
-                    print("CMS_RECEIVER " + cms_ip + ": We get callLegID from callLegEnd")
+                    console_output =  cms_ip + ": We get callLegID from callLegEnd"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
                     # забираем  durationSeconds
                     if "durationSeconds" in record_item['callLeg']:
                         durationSeconds = str(record_item['callLeg']['durationSeconds'])  # забираем  durationSeconds
-                        print("CMS_RECEIVER " + cms_ip + ": We get durationSeconds from callLegEnd")
+                        console_output =  cms_ip + ": We get durationSeconds from callLegEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         durationSeconds = "none"
 
                     # забираем  reason
                     if "reason" in record_item['callLeg']:
                         reason = str(record_item['callLeg']['reason'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get reason from callLegEnd")
+                        console_output =  cms_ip + ": We get reason from callLegEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         reason = "none"
+
+                    # забираем remoteTeardown
+                    if "remoteTeardown" in record_item['callLeg']:
+                        remoteTeardown = str(record_item['callLeg']['remoteTeardown'])
+                        console_output =  cms_ip + ": We get remoteTeardown from callLegEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        remoteTeardown = "none"
 
                     # забираем время лега
                     if "@time" in record_item:
                         callLegEndTime = str(record_item['@time'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get callLegEndTime from callLegEnd")
+                        console_output =  cms_ip + ": We get callLegEndTime from callLegEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         callLegEndTime = "none"
 
@@ -270,11 +380,14 @@ def cdr_receiver():
                         alarm_value = "none"
 
                     ### обновляем информацию о вызове
-                    print("CMS_RECEIVER " + cms_ip + ": insert CallLegEnd data to database")
+                    console_output =  cms_ip + ": insert CallLegEnd data to database"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
                     cms_sql_request("UPDATE cms_cdr_records SET txAudio_codec='" + acodectx
                                     + "',endTime='" + callLegEndTime
                                     + "',durationSeconds='" + durationSeconds
                                     + "',reason='" + reason
+                                    + "',remoteTeardown='" + remoteTeardown
                                     + "',txVideo_codec='" + vcodectx
                                     + "',txVideo_maxHeight='" + maxSizeHeight_videoTX
                                     + "',txVideo_maxWidth='" + maxSizeWidth_videoTX
@@ -292,47 +405,66 @@ def cdr_receiver():
                                     + "',alarm_value='" + alarm_value
                                     + "' WHERE callleg_id='" + callleg_id + "';")
 
-                    print("CMS_RECEIVER " + cms_ip + ":  call detail updated from callLegEnd")
+                    console_output =  cms_ip + ":  call detail updated from callLegEnd"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
                     #pprint(cdr_dict)
                 else:
-                    print("CMS_RECEIVER " + cms_ip + ": CallLeg Id not found in callLegEnd - nothing was inserted in DB")
+                    console_output =  cms_ip + ": CallLeg Id not found in callLegEnd - nothing was inserted in DB"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
             if record_item['@type'] == 'callStart':
-                print("CMS_RECEIVER " + cms_ip + ": we get callStart")
+                console_output =  cms_ip + ": we get callStart"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
 
                 if "@id" in record_item['call']:
                     call_id = str(record_item['call']['@id'])  # забираем call ID
-                    print("CMS_RECEIVER " + cms_ip + ": We get callID from callStart")
+                    console_output =  cms_ip + ": We get callID from callStart"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
                     # забираем coSpace
                     if "coSpace" in record_item['call']:
                         coSpace = str(record_item['call']['coSpace'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get coSpace from callStart")
+                        console_output =  cms_ip + ": We get coSpace from callStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         coSpace = "none"
 
                     # забираем name
                     if "name" in record_item['call']:
                         name = str(record_item['call']['name'])
-                        print("CMS_RECEIVER " + cms_ip + ": We get name from callStart")
+                        console_output =  cms_ip + ": We get name from callStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         name = "none"
 
- 
                     # забираем время
                     if "@time" in record_item:
                         starttime = str(record_item['@time'])
                         starttimeMSK = str(datetime.datetime.strptime(starttime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
-                        print("CMS_RECEIVER " + cms_ip + ": We get start time from callStart")
-                        print("CMS_RECEIVER " + cms_ip + ": Call start time: " + starttimeMSK)
+                        console_output =  cms_ip + ": We get start time from callStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                        console_output = cms_ip + ": Call start time:" + starttimeMSK
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                     else:
                         starttime = "none"
                         starttimeMSK = "none"
 
+                    console_output = cms_ip + ": cospace: " + coSpace + " time: " + starttime)
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
-                    print("CMS_RECEIVER " + cms_ip + ": cospace: " + coSpace + " time: " + starttime)
                     if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                        print("CMS_RECEIVER " + cms_ip + ": insert CALL to database")
+                        console_output = cms_ip + ": insert CALL to database"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
                         # insert IDs to database
                         cms_sql_request(
                             "INSERT INTO cms_cdr_calls SET id='" + call_id
@@ -341,20 +473,28 @@ def cdr_receiver():
                             + "',cms_ip='" + cms_ip
                             + "',name='" + name + "';")
                     else:
-                        print("CMS_RECEIVER " + cms_ip + ": Space ID data already presence")
+                        console_output =  cms_ip + ": Space ID data already presence"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
 
 
             if record_item['@type'] == 'callEnd':
-                print("CMS_RECEIVER " + cms_ip + ": we get callEnd")
+                console_output =  cms_ip + ": we get callEnd"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
                 call_id = str(record_item['call']['@id'])
                 call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
                 call_durationSeconds = str(record_item['call']['durationSeconds'])
                 call_endtime = str(record_item['@time'])
                 call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
-                print("CMS_RECEIVER " + cms_ip + ": Call end time: " + call_endtimeMSK)
+                console_output = cms_ip + ": Call end time: " + call_endtimeMSK)
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
 
                 if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                    print("CMS_RECEIVER " + cms_ip + ": update CALL to database")
+                    console_output =  cms_ip + ": update CALL to database"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
                     # insert IDs to database
                     cms_sql_request(
                         "UPDATE cms_cdr_calls SET EndTime='" + call_endtimeMSK
@@ -362,14 +502,18 @@ def cdr_receiver():
                         + "',durationSeconds='" + call_durationSeconds
                         + "' WHERE cms_cdr_calls.id='" + call_id + "';")
                 else:
-                    print("CMS_RECEIVER " + cms_ip + ": Call " + call_id + " is not found in DB")
+                    console_output =  cms_ip + ": Call " + call_id + " is not found in DB"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
                 #pprint(cdr_dict)
-
 
         return('', 204)
 
     except:
-        print("CMS_RECEIVER: " + cms_ip + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<Parser failure>>!")
+        console_output = cms_ip + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<<<Parser failure>>!"
+        print("CMS_RECEIVER " + console_output)
+        logger.debug(console_output)
         pprint(cdr_dict)
+        logger.debug("\n" + pformat(record_item))
         return('', 204)
 
