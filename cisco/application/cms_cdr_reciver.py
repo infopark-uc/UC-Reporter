@@ -487,7 +487,7 @@ def cdr_receiver():
                 call_durationSeconds = str(record_item['call']['durationSeconds'])
                 call_endtime = str(record_item['@time'])
                 call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
-                console_output = cms_ip + ": Call end time: " + call_endtimeMSK)
+                console_output = cms_ip + ": Call end time: " + call_endtimeMSK
                 print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
 
