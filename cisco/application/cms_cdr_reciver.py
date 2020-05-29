@@ -457,7 +457,7 @@ def cdr_receiver():
                         starttime = "none"
                         starttimeMSK = "none"
 
-                    console_output = cms_ip + ": cospace: " + coSpace + " time: " + starttime)
+                    console_output = cms_ip + ": cospace: " + coSpace + " time: " + starttime
                     print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
