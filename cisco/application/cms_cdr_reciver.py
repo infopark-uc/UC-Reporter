@@ -17,7 +17,7 @@ def cdr_receiver():
 
     # Обработчик логов - запись в файлы с перезаписью
     if not logger.handlers:
-        console_output = cms_ip + ": no any handlers in Logger - create new one"
+        console_output = ": no any handlers in Logger - create new one"
         print("CMS_RECEIVER " + console_output)
 
         rotate_file_handler = logging.handlers.RotatingFileHandler("/opt/UC-Reporter/logs/CMS_RECEIVER.log", maxBytes=10240000, backupCount=5)
@@ -26,7 +26,7 @@ def cdr_receiver():
         rotate_file_handler.setFormatter(formatter)
         logger.addHandler(rotate_file_handler)
     else:
-        console_output = cms_ip + ": handlers are already exists in Logger"
+        console_output = ": handlers are already exists in Logger"
         print("CMS_RECEIVER " + console_output)
 
     try:
