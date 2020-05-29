@@ -16,7 +16,7 @@ def cdr_receiver():
     logger.setLevel(logging.DEBUG)
 
     # Обработчик логов - запись в файлы с перезаписью
-    rotate_file_handler = logging.handlers.RotatingFileHandler("CMS_RECEIVER.log", maxBytes=10240, backupCount=5)
+    rotate_file_handler = logging.handlers.RotatingFileHandler("/opt/UC-Reporter/logs/CMS_RECEIVER.log", maxBytes=10240000, backupCount=5)
     rotate_file_handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
     rotate_file_handler.setFormatter(formatter)
