@@ -16,11 +16,18 @@ def cdr_receiver():
     logger.setLevel(logging.DEBUG)
 
     # Обработчик логов - запись в файлы с перезаписью
-    rotate_file_handler = logging.handlers.RotatingFileHandler("/opt/UC-Reporter/logs/CMS_RECEIVER.log", maxBytes=10240000, backupCount=5)
-    rotate_file_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
-    rotate_file_handler.setFormatter(formatter)
-    logger.addHandler(rotate_file_handler)
+    if not logger.handlers:
+        console_output = cms_ip + ": no any handlers in Logger - create new one"
+        print("CMS_RECEIVER " + console_output)
+
+        rotate_file_handler = logging.handlers.RotatingFileHandler("/opt/UC-Reporter/logs/CMS_RECEIVER.log", maxBytes=10240000, backupCount=5)
+        rotate_file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
+        rotate_file_handler.setFormatter(formatter)
+        logger.addHandler(rotate_file_handler)
+    else:
+        console_output = cms_ip + ": handlers are already exists in Logger"
+        print("CMS_RECEIVER " + console_output)
 
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
@@ -28,8 +35,8 @@ def cdr_receiver():
         cms_ip = str(request.environ['HTTP_X_FORWARDED_FOR']) #забираем IP
 
         if type (cdr_dict['records']['record']) is list:
-            console_output = "CMS_RECEIVER " + cms_ip + ": We get record list"
-            print(console_output)
+            console_output = cms_ip + ": We get record list"
+            print("CMS_RECEIVER " + console_output)
             logger.debug(console_output)
             record_list = cdr_dict['records']['record']
         else:
