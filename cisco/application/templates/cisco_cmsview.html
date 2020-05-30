@@ -174,6 +174,12 @@
 				Duration
 			</th>
 			<th>
+				Start time
+			</th>
+			<th>
+				Disconnect
+			</th>
+			<th>
 				RX media
 			</th>
 			<th>
@@ -202,7 +208,20 @@
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				 <a href="  {{ url_for('cmscallleg', callegid=row.callleg_id) }}">{{ row.remoteaddress }}</a>
+				 <a href="  {{ url_for('cmscallleg', callegid=row.callleg_id) }}">
+				 	{% if row.remoteaddress == 'none' %}
+					 	{% if row.guestConnection == 'true' %}
+					 		WebRTC App guest
+					 	{% else %}
+					 		none
+					 	{% endif %}
+					{% else %}
+						{{row.remoteaddress}}
+    				{% endif %}
+ 				 	{% if (row.callLeg_subtype == 'lync') or (row.callLeg_subtype == 'distributionLink')  %}
+						({{ row.callLeg_subtype }})
+    				{% endif %}
+				 </a>
 			</td>
 			<td>
 				{{ row.displayName }}
@@ -212,6 +231,12 @@
 			</td>
 			<td>
 				{{ row.durationseconds }}
+			</td>
+			<td>
+				{{ row.startTime }}
+			</td>
+			<td>
+				{{ row.reason }}
 			</td>
 			<td>
 				{{ row.rxAudio_codec }},{{ row.rxVideo_codec }}

@@ -127,11 +127,13 @@ def cdr_receiver():
                     # забираем время лега
                     if "@time" in record_item:
                         callLegStartTime = str(record_item['@time'])
+                        callLegStartTimeMSK = str(datetime.datetime.strptime(callLegStartTime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output =  cms_ip + ": We get callLegTime from callLegStart"
                         print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLegStartTime = "none"
+                        callLegStartTimeMSK = "none"
 
                     timenow = str(datetime.datetime.now())
 
@@ -174,7 +176,7 @@ def cdr_receiver():
                     ### добавляем идентификаторы в базу
                     cms_sql_request(
                         "INSERT INTO cms_cdr_records SET date='" + timenow
-                        + "', startTime='" + callLegStartTime
+                        + "',startTime='" + callLegStartTimeMSK
                         + "',cms_ip='" + cms_ip
                         + "',callleg_id='" + callleg_id
                         + "',sipcall_id='" + sipcall_id
@@ -249,11 +251,13 @@ def cdr_receiver():
                     # забираем время лега
                     if "@time" in record_item:
                         callLegEndTime = str(record_item['@time'])
+                        callLegEndTimeMSK = str(datetime.datetime.strptime(callLegEndTime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output =  cms_ip + ": We get callLegEndTime from callLegEnd"
                         print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLegEndTime = "none"
+                        callLegEndTimeMSK = "none"
 
                     #проверяем наличие информации о Аудио
                     if "rxAudio" in record_item['callLeg']:
@@ -391,7 +395,7 @@ def cdr_receiver():
                     print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
                     cms_sql_request("UPDATE cms_cdr_records SET txAudio_codec='" + acodectx
-                                    + "',endTime='" + callLegEndTime
+                                    + "',endTime='" + callLegEndTimeMSK
                                     + "',durationSeconds='" + durationSeconds
                                     + "',reason='" + reason
                                     + "',remoteTeardown='" + remoteTeardown
@@ -489,30 +493,56 @@ def cdr_receiver():
                 console_output =  cms_ip + ": we get callEnd"
                 print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
-                call_id = str(record_item['call']['@id'])
-                call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
-                call_durationSeconds = str(record_item['call']['durationSeconds'])
-                call_endtime = str(record_item['@time'])
-                call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
-                console_output = cms_ip + ": Call end time: " + call_endtimeMSK
-                print("CMS_RECEIVER " + console_output)
-                logger.debug(console_output)
+                if "@id" in record_item['call']:
+                    call_id = str(record_item['call']['@id'])
+                    console_output = cms_ip + ": We get callID from callEnd"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
-                if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
-                    console_output =  cms_ip + ": update CALL to database"
-                    print("CMS_RECEIVER " + console_output)
-                    logger.debug(console_output)
-                    # insert IDs to database
-                    cms_sql_request(
-                        "UPDATE cms_cdr_calls SET EndTime='" + call_endtimeMSK
-                        + "',callLegsMaxActive='" + call_callLegsMaxActive
-                        + "',durationSeconds='" + call_durationSeconds
-                        + "' WHERE cms_cdr_calls.id='" + call_id + "';")
-                else:
-                    console_output =  cms_ip + ": Call " + call_id + " is not found in DB"
-                    print("CMS_RECEIVER " + console_output)
-                    logger.debug(console_output)
-                #pprint(cdr_dict)
+                    # забираем call_callLegsMaxActive
+                    if "callLegsMaxActive" in record_item['call']:
+                        call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
+                        console_output = cms_ip + ": We get call_callLegsMaxActive from callEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        call_callLegsMaxActive = "none"
+
+                    # забираем call_durationSeconds
+                    if "durationSeconds" in record_item['call']:
+                        call_durationSeconds = str(record_item['call']['durationSeconds'])
+                        console_output = cms_ip + ": We get call_durationSeconds from callEnd"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        call_durationSeconds = "none"
+
+                    # забираем время
+                    if "@time" in record_item:
+                        call_endtime = str(record_item['@time'])
+                        call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
+                        console_output = cms_ip + ": Call end time: " + call_endtimeMSK
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        call_endtime = "none"
+                        call_endtimeMSK = "none"
+
+                    if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
+                        console_output =  cms_ip + ": update CALL to database"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                        # insert IDs to database
+                        cms_sql_request(
+                            "UPDATE cms_cdr_calls SET EndTime='" + call_endtimeMSK
+                            + "',callLegsMaxActive='" + call_callLegsMaxActive
+                            + "',durationSeconds='" + call_durationSeconds
+                            + "' WHERE cms_cdr_calls.id='" + call_id + "';")
+                    else:
+                        console_output =  cms_ip + ": Call " + call_id + " is not found in DB"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    #pprint(cdr_dict)
 
         return('', 204)
 
