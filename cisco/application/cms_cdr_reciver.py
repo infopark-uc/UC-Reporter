@@ -10,6 +10,10 @@ from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupda
 def cdr_receiver():
 
     # Настройка логирования
+    CMS_RECEIVER_LOG_FILE_NAME = "/opt/UC-Reporter/logs/CMS_RECEIVER.log"
+    CMS_RECEIVER_LOG_FILE_SIZE = 2048000
+    CMS_RECEIVER_LOG_FILE_COUNT = 5
+
     # Диспетчер логов
     logger = logging.getLogger('CMS_RECEIVER')
     #
@@ -20,7 +24,7 @@ def cdr_receiver():
         console_output = ": no any handlers in Logger - create new one"
         print("CMS_RECEIVER " + console_output)
 
-        rotate_file_handler = logging.handlers.RotatingFileHandler("/opt/UC-Reporter/logs/CMS_RECEIVER.log", maxBytes=10240000, backupCount=5)
+        rotate_file_handler = logging.handlers.RotatingFileHandler(CMS_RECEIVER_LOG_FILE_NAME, maxBytes=CMS_RECEIVER_LOG_FILE_SIZE, backupCount=CMS_RECEIVER_LOG_FILE_COUNT)
         rotate_file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
         rotate_file_handler.setFormatter(formatter)
@@ -206,8 +210,8 @@ def cdr_receiver():
                 if "call" in record_item['callLeg']:
                     call_id = str(record_item['callLeg']['call'])  # забираем  reason
                     cm_sqlupdate(call_id, 'cms_cdr_records', 'call_id', 'callleg_id',callleg_id)  # дополняем информацию о вызове
-                    cms_sql_request(
-                        "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
+                    #cms_sql_request(
+                    #    "UPDATE cms_cdr_records,cms_cdr_calls SET coSpace_name=cms_cdr_calls.name WHERE cms_cdr_calls.id='" + call_id + "';") # берем Имя спэйса из другой таблицы.
 
             if record_item['@type'] == 'callLegEnd':
                 console_output =  cms_ip + ": we get callLegEnd"
