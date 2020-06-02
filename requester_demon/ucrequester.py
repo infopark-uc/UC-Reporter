@@ -9,6 +9,7 @@ from collections import OrderedDict
 import getopt
 import sys
 from multiprocessing import Process
+import threading
 import logging.handlers
 
 
@@ -47,7 +48,7 @@ def sqlrequest(sqlrequest):
 def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
 
     # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "/opt/UC-Reporter/logs/UC-REQUESTER.log"
+    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
     UC_REQUESTER_LOG_FILE_SIZE = 2048000
     UC_REQUESTER_LOG_FILE_COUNT = 5
 
@@ -185,7 +186,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
     CALLLEG_CHECK_REPEATTIME = 1 #пауза между запусками функции callleginfo
 
     # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "/opt/UC-Reporter/logs/UC-REQUESTER.log"
+    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
     UC_REQUESTER_LOG_FILE_SIZE = 2048000
     UC_REQUESTER_LOG_FILE_COUNT = 5
 
@@ -311,7 +312,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 def main(argv):
 
     # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "/opt/UC-Reporter/logs/UC-REQUESTER.log"
+    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
     UC_REQUESTER_LOG_FILE_SIZE = 2048000
     UC_REQUESTER_LOG_FILE_COUNT = 5
 
