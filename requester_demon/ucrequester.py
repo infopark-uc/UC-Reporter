@@ -371,9 +371,9 @@ def main(argv):
             print(console_output) #info
             logger.info(console_output)
             #pprint(cluster_data)
-            p = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
-            p.start() # запуск процедуры в отдельном процессе
-            console_output = "PID " + str(p.pid) + " started for: " + cluster_data['ip']
+            p = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
+            p.start() # запуск процедуры в отдельном потоке
+            console_output = str(p.name) + " PID " + str(p.ident) + " started for: " + cluster_data['ip']
             print(console_output) #info
             logger.info(console_output)
             #p.join() - ждать пока выполниться процедура.
