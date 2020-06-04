@@ -259,3 +259,46 @@ def cmscalllegviewer(callleg_id):
 		"max_loss_values": max_loss_values
 	}
 	return renderdata
+
+def cmsrecordingsviewer():
+	# вывод списка записей
+
+	NETPATH = "\\\\192.168.12.195\\record\\"
+	RECORD_FILE_EXTENTION = ".mp4"
+
+	operationStartTime = datetime.now()
+
+	html_page_title = 'CMS CDR Recordings Report'
+	print("CMS CALLVW: request for recordings")
+
+	form_navigation = SelectNavigation(csrf_enabled=False)
+	if form_navigation.validate_on_submit():
+		console_output = "Нет активного запроса"
+		print(console_output)
+		renderdata = {
+			"rendertype": "redirect",
+			"redirect_to": form_navigation.select_navigation.data
+		}
+		return renderdata
+
+	sql_request_result_string = "SELECT cms_cdr_calls.name, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.StartTime, cms_cdr_calls.durationSeconds, cms_cdr_recordings.path FROM cms_cdr_calls INNER JOIN cms_cdr_recordings ON cms_cdr_recordings.call_id=cms_cdr_calls.id ORDER BY cms_cdr_calls.StartTime DESC;"
+	rows_list = cms_sql_request_dict(sql_request_result_string)
+
+	print("CMS CALLVW: get dict for call recordings")
+
+	for row in rows_list:
+		row["path"] = NETPATH + row["path"].replace("/","\\") + RECORD_FILE_EXTENTION
+
+	operationEndTime = datetime.now()
+	operationDuration = str(operationEndTime - operationStartTime)
+	console_output = "Done in " + operationDuration
+
+	renderdata = {
+		"rendertype": "success",
+		"html_template": "cisco_cmsrecordings.html",
+		"html_page_title": html_page_title,
+		"console_output": console_output,
+		"form_navigation": form_navigation,
+		"rows_list": rows_list
+	}
+	return renderdata
