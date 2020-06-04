@@ -557,8 +557,6 @@ def cdr_receiver():
                 console_output =  cms_ip + ": we get recordingStart"
                 print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
-                pprint(cdr_dict)
-                logger.debug("\n" + pformat(record_item))
 
                 if "@id" in record_item['recording']:
                     recording_id = str(record_item['recording']['@id'])
