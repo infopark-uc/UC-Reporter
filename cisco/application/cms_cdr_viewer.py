@@ -245,7 +245,7 @@ def cmscalllegviewer(callleg_id):
 
 	operationEndTime = datetime.now()
 	operationDuration = str( operationEndTime - operationStartTime)
-	console_output = "Information for: " + rows_list[1]["remoteaddress"] + ". Done in " + operationDuration
+	console_output = "Information for: " + rows_list[0]["remoteaddress"] + ". Done in " + operationDuration
 
 	renderdata = {
 		"rendertype": "success",

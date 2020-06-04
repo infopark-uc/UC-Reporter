@@ -547,6 +547,62 @@ def cdr_receiver():
                         print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     #pprint(cdr_dict)
+                else:
+                    console_output = cms_ip + ": callEnd does not contain CallID"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
+
+
+            if record_item['@type'] == 'recordingStart':
+                console_output =  cms_ip + ": we get recordingStart"
+                print("CMS_RECEIVER " + console_output)
+                logger.debug(console_output)
+                pprint(cdr_dict)
+                logger.debug("\n" + pformat(record_item))
+
+                if "@id" in record_item['recording']:
+                    recording_id = str(record_item['recording']['@id'])
+                    console_output = cms_ip + ": We get RecordingID from recordingStart"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
+
+                    # забираем path
+                    if "path" in record_item['recording']:
+                        recording_path = str(record_item['recording']['path'])
+                        console_output = cms_ip + ": We get path from recordingStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        recording_path = "none"
+
+                    # забираем call_id
+                    if "call" in record_item['recording']:
+                        recording_call_id = str(record_item['recording']['call'])
+                        console_output = cms_ip + ": We get call_id from recordingStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        recording_call_id = "none"
+
+                    # забираем callLeg_id
+                    if "callLeg" in record_item['recording']:
+                        recording_callLeg_id = str(record_item['recording']['callLeg'])
+                        console_output = cms_ip + ": We get callLeg_id from recordingStart"
+                        print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        recording_callLeg_id = "none"
+
+                    ### добавляем информацию о записи в базу
+                    cms_sql_request(
+                        "INSERT INTO cms_recordings SET recording_id='" + recording_id
+                        + "',path='" + recording_path
+                        + "',call_id='" + recording_call_id
+                        + "',callLeg_id='" + recording_callLeg_id + "';")
+
+                    console_output = cms_ip + ":  RecordingID: " + recording_id + " inserted to database"
+                    print("CMS_RECEIVER " + console_output)
+                    logger.debug(console_output)
 
         return('', 204)
 
