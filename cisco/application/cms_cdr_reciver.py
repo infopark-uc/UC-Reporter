@@ -595,7 +595,7 @@ def cdr_receiver():
 
                     ### добавляем информацию о записи в базу
                     cms_sql_request(
-                        "INSERT INTO cms_recordings SET recording_id='" + recording_id
+                        "INSERT INTO cms_cdr_recordings SET recording_id='" + recording_id
                         + "',path='" + recording_path
                         + "',call_id='" + recording_call_id
                         + "',callLeg_id='" + recording_callLeg_id + "';")
