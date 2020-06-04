@@ -6,6 +6,7 @@ from application.roomcontrol import codec,submit_order,get_value,set_value,send_
 from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer
+from application.cms_cospace_viewer import cms_cospace_view
 
 import application.callforward
 
@@ -132,5 +133,28 @@ def cmscallleg(callegid):
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
         console_output=module_result['console_output'],
         formNAV=module_result['form_navigation'])
+
+@app.route('/cmscospace', methods=['GET', 'POST'])
+@app.route('/cmscospace/', methods=['GET', 'POST'])
+def cms_cospace_page():
+
+    module_result = cms_cospace_view()
+
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'],
+                               formCMS=module_result['form_cmsselection'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'],
+                           formCMS=module_result['form_cmsselection'])
+
+
 
 
