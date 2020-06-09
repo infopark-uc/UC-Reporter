@@ -362,11 +362,12 @@ def main(argv):
         getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'])
 
     else:
-        request_configuration_dict = sqlselect_dict("SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_requester_config.running='True'")
+        request_configuration_dict = sqlselect_dict(
+            "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';")
         console_output = "we get config"
         print(console_output) #info
         logger.info(console_output)
-        #pprint(request_configuration_dict)
+        pprint(request_configuration_dict)
         for cluster_data in request_configuration_dict:
             console_output = "start request for: " + cluster_data['ip']
             print(console_output) #info
