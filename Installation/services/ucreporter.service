@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve flask application
+After=network.target
+
+[Service]
+#User=apache
+#Group=apache
+WorkingDirectory=/opt/UC-Reporter/cisco/
+#Environment="PATH=/home/root/flask_rest/flaskvenv/bin"
+ExecStart=/usr/local/bin/gunicorn --config gunicorn_config.py cisco:app
+
+[Install]
+WantedBy=multi-user.target

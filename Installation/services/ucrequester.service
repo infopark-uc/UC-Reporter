@@ -1,0 +1,12 @@
+[Unit]
+Description=UC Requester Service
+After=mariadb.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/UC-Reporter/requester_demon/ucrequester.py -d
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

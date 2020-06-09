@@ -1,0 +1,10 @@
+MySQL
+shell> mysql -uroot -p<пароль>
+mysql> create database ucreporter character set utf8 collate utf8_bin;
+mysql> grant all privileges to sqladmin@'' identified by 'Qwerty123';
+mysql> quit;
+
+
+SQL import
+shell> cd /opt/installation/database/
+shell>mysql -usqladmin -p<пароль> ucreporter < database.sql
