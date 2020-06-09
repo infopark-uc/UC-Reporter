@@ -8,7 +8,7 @@ from application.sqlrequests import sql_request_dict
 def huntreport():
 
     auth_data_list = sql_request_dict(
-        "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cm_name='INFOCELL'")  # получаем лист словарей
+        "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cm_name='Infocell'")  # получаем лист словарей
 
     cucm_ip_address = str(auth_data_list[0]['cm_ip'])
     cucm_login = str(auth_data_list[0]['cm_username'])
