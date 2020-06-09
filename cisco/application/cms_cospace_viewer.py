@@ -12,7 +12,7 @@ from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupda
 from application.forms import SelectNavigation, SelectCMSClusterForCDR
 
 
-def cms_webrequest(http_url,cms_login,cms_password):
+def cms_webrequest(http_url,cms_ip,cms_login,cms_password):
 	http_headers = {'Content-Type': 'text/xml'}
 	requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  # отключаем алерты на сертификаты
 	try:
@@ -45,6 +45,17 @@ def cms_webrequest(http_url,cms_login,cms_password):
 	result = get.text
 	get.close()  # закрываем web сессию
 	return result
+
+
+def cms_cospace_detail(cospace_id,cms_login,cms_password,cms_ip,cms_port):
+	http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/coSpaces/" + cospace_id
+	console_output = cms_ip + ": URL: " + http_url
+	print(console_output)  # debug
+	result = xmltodict.parse(cms_webrequest(http_url,cms_ip,cms_login,cms_password))
+	#pprint(result)
+	return result
+
+
 
 def cms_cospace_view():
 	page_offset = 0
@@ -90,7 +101,7 @@ def cms_cospace_view():
 					page_limit) + "&offset=" + str(page_offset)
 				console_output = cms_ip + ": URL: " + http_url
 				print(console_output)  # debug
-				xml_dict = xmltodict.parse(cms_webrequest(http_url,cms_login,cms_password))
+				xml_dict = xmltodict.parse(cms_webrequest(http_url,cms_ip,cms_login,cms_password))
 				total_coSpaces = xml_dict["coSpaces"]["@total"]
 				console_output = cms_ip + ": Total number of CallLegs: " + total_coSpaces
 				print(console_output)  # debug
@@ -119,24 +130,22 @@ def cms_cospace_view():
 					endOfCycle = False
 				else:
 					endOfCycle = True
-
-
-
-
-
-
-
-
+					#pprint(CoSpace_list)
+			# перебираем все активные callLeg
+			for CoSpace in CoSpace_list:
+				# забираем CoSpace ID, собираем rows_list
+				if "@id" in CoSpace:
+					CoSpace_id = CoSpace["@id"]
+					rows_list.append(cms_cospace_detail(CoSpace_id,cms_login,cms_password,cms_ip,cms_port))
 
 		operationEndTime = datetime.now()
 		operationDuration = str( operationEndTime - operationStartTime)
 		console_output = "Done in " + operationDuration
 
-
-
+		pprint(rows_list)
 		renderdata = {
 			"rendertype": "success",
-			"html_template": "cisco_cmscdr.html",
+			"html_template": "cisco_cms_cospaceview.html",
 			"html_page_title": html_page_title,
 			"console_output": console_output,
 			"form_navigation": form_navigation,
@@ -151,7 +160,7 @@ def cms_cospace_view():
 
 	renderdata = {
 		"rendertype": "Null",
-		"html_template": "cisco_cmscdr.html",
+		"html_template": "cisco_cms_cospaceview.html",
 		"html_page_title": html_page_title,
 		"console_output": console_output,
 		"form_navigation": form_navigation,
