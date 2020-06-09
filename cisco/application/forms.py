@@ -19,5 +19,5 @@ class SelectForwardSearchType(FlaskForm):
     submit = SubmitField('Найти')
 
 class SelectCMSClusterForCDR(FlaskForm):
-    select_CMSCluster = SelectField('Navigation', default="NF", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    select_CMSCluster = SelectField('Navigation', default="NF", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
     submit = SubmitField('Найти')
