@@ -15,7 +15,7 @@ import logging.handlers
 
 def sqlselect_dict(sqlrequest):
     try:
-         con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
+         con = pymysql.connect('172.20.5.19', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
     except:
         console_output = "MySQL DB access error"
         print(console_output) #info
@@ -31,7 +31,7 @@ def sqlselect_dict(sqlrequest):
 
 def sqlrequest(sqlrequest):
     try:
-        con = pymysql.connect('172.20.31.50', 'sqladmin', 'Qwerty123', 'ucreporter')
+        con = pymysql.connect('172.20.5.19', 'sqladmin', 'Qwerty123', 'ucreporter')
     except:
         console_output = "MySQL DB access error"
         print(console_output) #info

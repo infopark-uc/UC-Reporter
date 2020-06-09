@@ -99,18 +99,15 @@
 		.DataTable TH {
 			background: #dbdbdb; /* Цвет фона ячеек */
 			text-align: left;
-
 		}
 		.DataTable TR:nth-child(odd) {
 			height: 23px;
 			background: #f8f8f8;
-
 		}
 
 		.DataTable TR:nth-child(even) {
 			height: 23px;
 			background: #ebebeb;
-
 		}
 	</style>
 </head>
@@ -120,7 +117,7 @@
 			<img src="{{ url_for("static", filename="ciscoLogo.gif") }}"/>
 		</div>
 		<div class="HeaderItem">
-			Cisco Meeting Server CoSpace report
+			 Unified CM Administration
 		</div>
 		<div class="NavigationItem">
 			<form action="" method="post" novalidate>
@@ -134,7 +131,7 @@
 		{% if not rows_list %}
 		<tr>
 			<th>
-				Cisco Meeting Server CDR report
+				Cisco Meeting Server Space report
 			</th>
 		</tr>
 		<tr>
@@ -157,30 +154,40 @@
 		</legend>
 	</fieldset>
 	</div>
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Список комнат CMS:
+			{{ formCMS.select_CMSCluster() }}
+	        {{ formCMS.submit() }}
+		</form>
+	</div>
     {% if rows_list %}
 	<div id="tableWrap">
 	<table class="DataTable">
 		<tr>
 			<th>
-				CoSpace
+				Name
 			</th>
-			<th>
+            <th>
 				Number
 			</th>
 			<th>
-				PassCode
+				Passcode
 			</th>
 		</tr>
 		{% for row in rows_list %}
 		<tr>
 			<td>
-				{{ row.name }}
+				 <a href="  {{ url_for('cmscall',callid=row.call_id) }}">{{ row.cospace_name }}</a>
+			</td>
+            <td>
+				{{ row.cms_ip }}
 			</td>
 			<td>
-				{{ row.callId }}
+				{{ row.starttime }}
 			</td>
-			<td>
-				{{ row.durationseconds }}
+            <td>
+				{{ row.EndTime }}
 			</td>
 		</tr>
 		{% endfor %}
