@@ -1,0 +1,4 @@
+configuration for Firewalld:
+1. firewall-cmd --add-service=mysql --permanent         #для доступа из вне к базе данных
+2. firewall-cmd --add-service=http --permanent
+3. firewall-cmd  --reload
