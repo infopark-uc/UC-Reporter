@@ -4,6 +4,7 @@ After=mariadb.service
 
 [Service]
 Type=simple
+WorkingDirectory=/opt/UC-Reporter/requester_demon/
 ExecStart=/usr/bin/python3 /opt/UC-Reporter/requester_demon/ucrequester.py -d
 Restart=always
 
