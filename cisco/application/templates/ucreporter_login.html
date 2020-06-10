@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% if title %}
+        <title>{{ title }} </title>
+    {% else %}
+        <title>Welcome to UC Reporter</title>
+    {% endif %}
+
+	<style type="text/css">
+        .HeaderLine {
+			display: flex;
+			flex-flow: row nowrap;
+			align-items: center;
+			font-family: Verdana;
+			font-size: 100%;
+			font-weight: bold;
+			color: #2f6681;
+			height: 60px;
+			background: linear-gradient(to right, #ffffff, #2f6681);
+		}
+		.HeaderItem {
+			margin: 5px;
+		}
+
+		.NavigationItem {
+			margin-left: auto;
+			font-size: 80%;
+			color: white;
+		}
+
+        .LoginItem {
+			margin-left: auto;
+			font-size: 80%;
+			color: white;
+		}
+
+		.HeaderTable {
+			border-collapse: collapse;
+			text-align: left;
+			font-family: Verdana;
+			color: white;
+			font-weight: bold;
+			width: 100%;
+			margin-top: 10px;
+		}
+		.HeaderTable th {
+			height: 150px;
+			padding: 10px;
+			font-size: 130%;
+			background: #2f6681;
+		}
+		.HeaderTable td {
+			height: 25px;
+			padding: 10px;
+			font-size: 80%;
+			background: #6d94a7;
+		}
+
+
+
+		.Status {
+			margin: 10;
+			margin-top: 10px;
+		}
+
+		.StatusHeader {
+			font-size: 70%;
+			font-weight: bold;
+			font-family: Verdana;
+			color: black;
+		}
+
+		.StatusItem {
+			margin: 10;
+			font-size: 70%;
+			font-family: Verdana;
+			color: black;
+		}
+
+		.SearchItem {
+			margin: 10;
+			margin-top: 10px;
+			font-size: 80%;
+			font-family: Verdana;
+			color: black;
+		}
+
+		.DataTable {
+			font-size: 70%;
+			font-family: Verdana;
+			color: black;
+			border-collapse: collapse;
+			margin-top: 10px;
+			margin-left: auto;
+            margin-right: auto;
+		}
+		.DataTable TH {
+			background: #dbdbdb; /* Цвет фона ячеек */
+		}
+		.DataTable TR:nth-child(odd) {
+			height: 23px;
+			background: #f8f8f8;
+		}
+
+		.DataTable TR:nth-child(even) {
+			height: 23px;
+			background: #ebebeb;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="HeaderLine">
+		<div class="HeaderItem">
+			<img src="{{ url_for("static", filename="ciscoLogo.gif") }}"/>
+		</div>
+		<div class="HeaderItem">
+			UC Reporter
+		</div>
+		<div class="NavigationItem">
+			<form action="" method="post" novalidate>
+			    Navigation:
+			    {{ formNAV.select_navigation() }}
+		        {{ formNAV.submit() }}
+			</form>
+        </div>
+	</div>
+
+        <table class="HeaderTable">
+            <tr>
+                <th>
+                    UC Reporter
+                </th>
+                <th>
+                    <div class="LoginItem">
+                        Login:<br>
+                        {{ form_login.username()}}<br>
+                        Password:<br>
+                        {{ form_login.password()}}<br>
+                        {{ form_login.submit()}}<br>
+                    </div>
+                </th>
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                </td>
+            </tr>
+        </table>
+
+<body>
+</html>

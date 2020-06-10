@@ -1,4 +1,4 @@
-from flask import render_template, redirect,url_for
+from flask import render_template, redirect, url_for
 from application import app
 from application.huntreport import huntreport
 from application.usersreport import usersreport
@@ -7,6 +7,8 @@ from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
 from application.cms_cospace_viewer import cms_cospace_view
+from flask_login import current_user, login_user,  logout_user
+from application.user_auth import User
 
 import application.callforward
 
@@ -176,3 +178,38 @@ def cms_recordings_page():
 
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        print("User " + current_user.username + " is athenticated")
+        return redirect(url_for('cms_recordings_page'))
+
+    print("User NOT is athenticated")
+
+    u = User("admin")
+    print("New user created")
+
+    login_user(u, remember=True)
+    print("New user logged in")
+    return redirect(url_for('cmspage'))
+
+'''
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        return redirect(url_for('index'))
+    return render_template('login.html', title='Sign In', form=form)
+'''
+
+@app.route('/logout')
+def logout():
+    print("User " + current_user.username + " is logging out")
+    logout_user()
+    print("User is logged out")
+    return redirect(url_for('cmspage'))
+
+app.secret_key = "Super_secret_key"
