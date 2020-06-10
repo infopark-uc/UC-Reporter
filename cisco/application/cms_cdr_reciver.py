@@ -10,7 +10,7 @@ from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupda
 def cdr_receiver():
 
     # Настройка логирования
-    CMS_RECEIVER_LOG_FILE_NAME = "/opt/UC-Reporter/logs/CMS_RECEIVER.log"
+    CMS_RECEIVER_LOG_FILE_NAME = "../logs/CMS_RECEIVER.log"
     CMS_RECEIVER_LOG_FILE_SIZE = 2048000
     CMS_RECEIVER_LOG_FILE_COUNT = 5
 
