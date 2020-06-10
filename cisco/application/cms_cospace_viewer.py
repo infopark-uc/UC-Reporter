@@ -64,7 +64,7 @@ def cms_cospace_view():
 	operationStartTime = datetime.now()
 	html_page_title = 'CMS CoSpace Report'
 
-	SEARCH_FOR_ALL = "all"
+
 	form_navigation = SelectNavigation(csrf_enabled=False)
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
@@ -77,14 +77,6 @@ def cms_cospace_view():
 
 	form_cmsselection = SelectCMSClusterForCospace(csrf_enabled=False)
 	if form_cmsselection.validate_on_submit():
-
-		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
-			rows_list = cms_sql_request_dict(
-				"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
-			print("CMS COSPACE: get config from SQL for all clusters")
-
-		else:
-
 			cluster_config = cms_sql_request_dict(
 				"SELECT DISTINCT login,password,ip,api_port FROM cms_servers WHERE cluster='" + form_cmsselection.select_CMSCluster.data + "' LIMIT 1;")
 			print("CMS COSPACE: get config from SQL for one cluster")
@@ -136,21 +128,21 @@ def cms_cospace_view():
 					CoSpace_id = CoSpace["@id"]
 					rows_list.append(cms_cospace_detail(CoSpace_id,cms_login,cms_password,cms_ip,cms_port))
 
-		operationEndTime = datetime.now()
-		operationDuration = str( operationEndTime - operationStartTime)
-		console_output = "Done in " + operationDuration
+			operationEndTime = datetime.now()
+			operationDuration = str( operationEndTime - operationStartTime)
+			console_output = "Done in " + operationDuration
 
-		#pprint(rows_list)
-		renderdata = {
-			"rendertype": "success",
-			"html_template": "cisco_cms_cospaceview.html",
-			"html_page_title": html_page_title,
-			"console_output": console_output,
-			"form_navigation": form_navigation,
-			"form_cmsselection": form_cmsselection,
-			"rows_list": rows_list
-		}
-		return renderdata
+			#pprint(rows_list)
+			renderdata = {
+				"rendertype": "success",
+				"html_template": "cisco_cms_cospaceview.html",
+				"html_page_title": html_page_title,
+				"console_output": console_output,
+				"form_navigation": form_navigation,
+				"form_cmsselection": form_cmsselection,
+				"rows_list": rows_list
+			}
+			return renderdata
 
 	operationEndTime = datetime.now()
 	operationDuration = str( operationEndTime - operationStartTime)
