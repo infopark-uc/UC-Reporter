@@ -9,7 +9,7 @@ from pprint import pprint
 from pprint import pformat
 import logging.handlers
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate,cms_sql_request_dict
-from application.forms import SelectNavigation, SelectCMSClusterForCDR
+from application.forms import SelectNavigation, SelectCMSClusterForCospace
 
 
 def cms_webrequest(http_url,cms_ip,cms_login,cms_password):
@@ -46,16 +46,14 @@ def cms_webrequest(http_url,cms_ip,cms_login,cms_password):
 	get.close()  # закрываем web сессию
 	return result
 
-
 def cms_cospace_detail(cospace_id,cms_login,cms_password,cms_ip,cms_port):
 	http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/coSpaces/" + cospace_id
 	console_output = cms_ip + ": URL: " + http_url
 	print(console_output)  # debug
-	result = xmltodict.parse(cms_webrequest(http_url,cms_ip,cms_login,cms_password))
+	xml_dict = xmltodict.parse(cms_webrequest(http_url,cms_ip,cms_login,cms_password))
+	result = xml_dict['coSpace']
 	#pprint(result)
 	return result
-
-
 
 def cms_cospace_view():
 	page_offset = 0
@@ -77,7 +75,7 @@ def cms_cospace_view():
 		}
 		return renderdata
 
-	form_cmsselection = SelectCMSClusterForCDR(csrf_enabled=False)
+	form_cmsselection = SelectCMSClusterForCospace(csrf_enabled=False)
 	if form_cmsselection.validate_on_submit():
 
 		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
@@ -142,7 +140,7 @@ def cms_cospace_view():
 		operationDuration = str( operationEndTime - operationStartTime)
 		console_output = "Done in " + operationDuration
 
-		pprint(rows_list)
+		#pprint(rows_list)
 		renderdata = {
 			"rendertype": "success",
 			"html_template": "cisco_cms_cospaceview.html",
