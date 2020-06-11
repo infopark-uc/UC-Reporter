@@ -23,17 +23,16 @@ class User(UserMixin):
         pprint(rows_list)
 
         if not isinstance(rows_list, list):
-            console_output = "В БД нет пользователя: " + form_login.login_field.data
+            console_output = "В БД нет пользователя c id: " + str(id)
             print(console_output)
-            self.id = "99"
+            self.id = "0"
             self.username = "tempuser"
             self.password = "12345"
             self.password_hash = "12345"
-
-
-        self.username = rows_list[0]["username"]
-        self.password = rows_list[0]["password"]
-        self.password_hash = rows_list[0]["password_hash"]
+        else:
+            self.username = rows_list[0]["username"]
+            self.password = rows_list[0]["password"]
+            self.password_hash = rows_list[0]["password_hash"]
 
 
     def set_password(self, password):
