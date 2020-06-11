@@ -190,6 +190,7 @@ def login():
     if module_result['rendertype'] == 'redirect_to_link':  # переход на другую страницу
         return redirect(module_result['redirect_to'])
 
+
     if module_result['rendertype'] == 'success':  # данные получены
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                                console_output=module_result['console_output'],

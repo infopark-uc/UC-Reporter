@@ -22,6 +22,15 @@ class User(UserMixin):
 
         pprint(rows_list)
 
+        if not isinstance(rows_list, list):
+            console_output = "В БД нет пользователя: " + form_login.login_field.data
+            print(console_output)
+            self.id = "99"
+            self.username = "tempuser"
+            self.password = "12345"
+            self.password_hash = "12345"
+
+
         self.username = rows_list[0]["username"]
         self.password = rows_list[0]["password"]
         self.password_hash = rows_list[0]["password_hash"]
