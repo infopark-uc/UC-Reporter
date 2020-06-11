@@ -7,12 +7,11 @@ from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
 from application.cms_cospace_viewer import cms_cospace_view
-from flask_login import current_user, login_user,  logout_user
-from application.user_auth import User
+from application.ucreporter_login import ucreporter_login
+from flask_login import logout_user, current_user, login_required
+
 
 import application.callforward
-
-
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -138,6 +137,7 @@ def cmscallleg(callegid):
 
 @app.route('/cmscospace', methods=['GET', 'POST'])
 @app.route('/cmscospace/', methods=['GET', 'POST'])
+@login_required
 def cms_cospace_page():
 
     module_result = cms_cospace_view()
@@ -159,6 +159,7 @@ def cms_cospace_page():
 
 @app.route('/cmsrec', methods=['GET', 'POST'])
 @app.route('/cmsrec/', methods=['GET', 'POST'])
+@login_required
 def cms_recordings_page():
 
     module_result = cmsrecordingsviewer()
@@ -180,34 +181,28 @@ def cms_recordings_page():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        print("User " + current_user.username + " is athenticated")
-        return redirect(url_for('cms_recordings_page'))
 
-    print("User NOT is athenticated")
+    module_result = ucreporter_login()
 
-    u = User("admin")
-    print("New user created")
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
 
-    login_user(u, remember=True)
-    print("New user logged in")
-    return redirect(url_for('cmspage'))
+    if module_result['rendertype'] == 'redirect_to_link':  # переход на другую страницу
+        return redirect(module_result['redirect_to'])
 
-'''
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
-'''
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               form_login=module_result['form_login'],
+                               formNAV=module_result['form_navigation'])
 
 @app.route('/logout')
 def logout():
-    print("User " + current_user.username + " is logging out")
+    if current_user.is_authenticated:
+        print("User " + current_user.username + " is logging out")
+    else:
+        print("User is logging out")
+
     logout_user()
     print("User is logged out")
     return redirect(url_for('cmspage'))

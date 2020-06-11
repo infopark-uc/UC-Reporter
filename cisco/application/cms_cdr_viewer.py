@@ -26,7 +26,7 @@ def cmsviewer():
 	# Temporary values
 	console_output = "Нет активного запроса"
 
-	form_navigation = SelectNavigation(csrf_enabled=False)
+	form_navigation = SelectNavigation(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
 		print(console_output)
@@ -36,7 +36,7 @@ def cmsviewer():
 		}
 		return renderdata
 
-	form_cmsselection = SelectCMSClusterForCDR(csrf_enabled=False)
+	form_cmsselection = SelectCMSClusterForCDR(meta={'csrf': False})
 	if form_cmsselection.validate_on_submit():
 		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
 			rows_list = cms_sql_request_dict(
@@ -83,7 +83,7 @@ def cmscallviewer(call_id):
 	html_page_title = 'CMS Call Report'
 	print("CMS CALLVW: request for callID: " + call_id)
 
-	form_navigation = SelectNavigation(csrf_enabled=False)
+	form_navigation = SelectNavigation(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
 		print(console_output)
@@ -134,7 +134,7 @@ def cmscalllegviewer(callleg_id):
 	html_page_title = 'CMS CallLeg Report'
 	print("CMS CALLLEGVW: request for calllegID: " + callleg_id)
 
-	form_navigation = SelectNavigation(csrf_enabled=False)
+	form_navigation = SelectNavigation(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
 		print(console_output)
@@ -271,7 +271,7 @@ def cmsrecordingsviewer():
 	html_page_title = 'CMS CDR Recordings Report'
 	print("CMS CALLVW: request for recordings")
 
-	form_navigation = SelectNavigation(csrf_enabled=False)
+	form_navigation = SelectNavigation(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
 		print(console_output)

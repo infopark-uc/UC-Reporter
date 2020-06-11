@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, StringField
+from wtforms import SelectField, SubmitField, StringField, PasswordField
 from wtforms.validators import Optional, Length, Regexp
 
 class SelectNavigation(FlaskForm):
@@ -19,9 +19,14 @@ class SelectForwardSearchType(FlaskForm):
     submit = SubmitField('Найти')
 
 class SelectCMSClusterForCDR(FlaskForm):
-    select_CMSCluster = SelectField('Navigation', default="NF", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    select_CMSCluster = SelectField('Navigation', default="all", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
     submit = SubmitField('Найти')
 
 class SelectCMSClusterForCospace(FlaskForm):
     select_CMSCluster = SelectField('Navigation', choices=[('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
     submit = SubmitField('Найти')
+
+class UCRepoterLogin(FlaskForm):
+    login_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    password_field = PasswordField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    submit = SubmitField('Login')

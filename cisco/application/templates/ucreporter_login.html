@@ -29,12 +29,6 @@
 			color: white;
 		}
 
-        .LoginItem {
-			margin-left: auto;
-			font-size: 80%;
-			color: white;
-		}
-
 		.HeaderTable {
 			border-collapse: collapse;
 			text-align: left;
@@ -50,14 +44,21 @@
 			font-size: 130%;
 			background: #2f6681;
 		}
+
+		.HeaderTable th:last-child {
+			width: 300px;
+			margin-left: auto;
+			font-size: 80%;
+			font-weight: normal;
+			color: white;
+		}
+
 		.HeaderTable td {
 			height: 25px;
 			padding: 10px;
 			font-size: 80%;
 			background: #6d94a7;
 		}
-
-
 
 		.Status {
 			margin: 10;
@@ -133,13 +134,13 @@
                     UC Reporter
                 </th>
                 <th>
-                    <div class="LoginItem">
+                    <form action="" method="post" novalidate>
                         Login:<br>
-                        {{ form_login.username()}}<br>
+                        {{ form_login.login_field()}}<br>
                         Password:<br>
-                        {{ form_login.password()}}<br>
+                        {{ form_login.password_field()}}<br>
                         {{ form_login.submit()}}<br>
-                    </div>
+                    </form>
                 </th>
             </tr>
             <tr>
