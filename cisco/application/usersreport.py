@@ -14,7 +14,7 @@ def usersreport():
     # Temporary values
     console_output = "Нет активного запроса"
 
-    form_navigation = SelectNavigation(csrf_enabled=False)
+    form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         print(console_output)
@@ -24,7 +24,7 @@ def usersreport():
         }
         return renderdata
 
-    form_search = SelectSearchType(csrf_enabled=False)
+    form_search = SelectSearchType(meta={'csrf': False})
     if form_search.validate_on_submit():
         console_output = form_search.select_region.data + " " + form_search.select_field.data + " " + form_search.string_field.data
         #cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", form_search.select_region.data)

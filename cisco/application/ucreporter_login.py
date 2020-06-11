@@ -13,26 +13,32 @@ class User(UserMixin):
     username = ""
     password = ""
     password_hash = ""
+    DB_search_result = False
 
     def __init__(self, id):
         self.id = id
 
+        console_output = "Инициализации нового пользовательского объекта id: " + str(self.username) + ". Выполняется запрос в базу данных."
+        print(console_output)
+
         sql_request_result_string = "SELECT username, password, password_hash FROM ucreporter_users WHERE id='" + str(id) + "';"
         rows_list = cms_sql_request_dict(sql_request_result_string)
 
+        console_output = "Инициализации нового пользовательского объекта. Из базы данных получены данные о пользователе:"
+        print(console_output)
         pprint(rows_list)
 
-        if not isinstance(rows_list, list):
-            console_output = "В БД нет пользователя c id: " + str(id)
-            print(console_output)
-            self.id = "0"
-            self.username = "tempuser"
-            self.password = "12345"
-            self.password_hash = "12345"
-        else:
+        if isinstance(rows_list, list):
             self.username = rows_list[0]["username"]
             self.password = rows_list[0]["password"]
             self.password_hash = rows_list[0]["password_hash"]
+            self.DB_search_result = True
+            console_output = "Инициализации нового пользовательского объекта выполнена username: " + str(self.username)
+            print(console_output)
+        else:
+            console_output = "Ошибка инициализации нового пользовательского объекта - в БД нет пользователя c id: " + str(id)
+            print(console_output)
+            self.DB_search_result = False
 
 
     def set_password(self, password):
@@ -50,9 +56,21 @@ class User(UserMixin):
 
 @login.user_loader
 def load_user(id):
-    print("UserID from user_loader:" + str(id))
+    console_output = "Flask-Login иницировал проверку текущего пользователя"
+    print(console_output)
+
+    console_output = ("Flask-Login извлек UserID текущего пользователя из сеанса:" + str(id))
+    print(console_output)
+
     u = User(id)
-    return u
+    if u.DB_search_result:
+        console_output = "Flask-Login создал объект текушего пользователя c id: " + str(id)
+        print(console_output)
+        return u
+    else:
+        console_output = "Flask-Login не смог получить информацию о текущем пользователе: " + str(id) + ". Производится удаление текущего пользователя из сеанса."
+        print(console_output)
+        return None
 
 def ucreporter_login():
 
@@ -60,7 +78,7 @@ def ucreporter_login():
 
     # Проверяем аутентифицирован ли пользователь
     if current_user.is_authenticated:
-        console_output = "User " + current_user.username + " is athenticated"
+        console_output = "Пользователь " + current_user.username + " аутентифицирован"
         print(console_output)
         renderdata = {
             "rendertype": "redirect",
@@ -69,7 +87,7 @@ def ucreporter_login():
         return renderdata
 
     # Пользователь не аутентифицирован
-    console_output = "User NOT is athenticated"
+    console_output = "Пользователь не аутентифицирован"
     print(console_output)
 
     # Генерируем форму навигации
@@ -154,7 +172,6 @@ def ucreporter_login():
             "redirect_to": next_page
         }
         return renderdata
-
 
     console_output = ""
     renderdata = {
