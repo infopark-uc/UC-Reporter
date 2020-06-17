@@ -158,15 +158,17 @@ def ucreporter_login():
         console_output = "New user logged in"
         print(console_output)
         next_page = request.args.get('next')
-        console_output = "Next page: " + next_page
-        print(console_output)
         if not next_page or url_parse(next_page).netloc != '':
+            console_output = "Next page empty"
+            print(console_output)
             next_page = DEFAULT_PAGE_FOR_REDIRECT
             renderdata = {
                 "rendertype": "redirect",
                 "redirect_to": next_page
             }
             return renderdata
+        console_output = "Next page: " + next_page
+        print(console_output)
         renderdata = {
             "rendertype": "redirect_to_link",
             "redirect_to": next_page

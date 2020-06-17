@@ -3,7 +3,7 @@ from wtforms import SelectField, SubmitField, StringField, PasswordField
 from wtforms.validators import Optional, Length, Regexp
 
 class SelectNavigation(FlaskForm):
-    select_navigation = SelectField('Navigation', choices=[('usersearchpage', 'Поиск пользователей'), ('huntpage', 'Отчет по пользователям Hunt Group'), ('cfa', 'Отчет по переадресациям'), ('cmspage', 'Отчет по конференциям CMS'),('cms_cospace_page', 'Отчет по пин-кодам CMS')])
+    select_navigation = SelectField('Navigation', choices=[('usersearchpage', 'Поиск пользователей'), ('huntpage', 'Отчет по пользователям Hunt Group'), ('cfa', 'Отчет по переадресациям'), ('cmspage', 'Отчет по конференциям CMS'),('cms_cospace_page', 'Отчет по пин-кодам CMS'),('cms_recordings_page', 'Отчет по записанным конференциям')])
     submit = SubmitField('Go')
 
 class SelectSearchType(FlaskForm):

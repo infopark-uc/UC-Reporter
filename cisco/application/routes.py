@@ -1,3 +1,4 @@
+
 from flask import render_template, redirect, url_for
 from application import app
 from application.huntreport import huntreport
@@ -95,10 +96,12 @@ def cmspage():
                                formNAV=module_result['form_navigation'],
                                formCMS=module_result['form_cmsselection'])
 
+
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'],
                            formCMS=module_result['form_cmsselection'])
+
 
 
 
@@ -157,6 +160,7 @@ def cms_cospace_page():
                            formNAV=module_result['form_navigation'],
                            formCMS=module_result['form_cmsselection'])
 
+
 @app.route('/cmsrec', methods=['GET', 'POST'])
 @app.route('/cmsrec/', methods=['GET', 'POST'])
 @login_required
@@ -176,8 +180,6 @@ def cms_recordings_page():
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'])
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

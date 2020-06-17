@@ -5,6 +5,7 @@ from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectCMSClusterForCDR
 from application.sqlrequests import cms_sql_request_dict
+from flask_login import current_user
 import collections
 
 # библиотеки для графиков
@@ -72,7 +73,7 @@ def cmsviewer():
 		"html_page_title": html_page_title,
 		"console_output": console_output,
 		"form_navigation": form_navigation,
-		"form_cmsselection": form_cmsselection,
+		"form_cmsselection": form_cmsselection
 	}
 	return renderdata
 

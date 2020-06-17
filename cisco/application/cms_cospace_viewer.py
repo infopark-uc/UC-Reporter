@@ -10,6 +10,7 @@ from pprint import pformat
 import logging.handlers
 from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate,cms_sql_request_dict
 from application.forms import SelectNavigation, SelectCMSClusterForCospace
+from flask_login import current_user
 
 
 def cms_webrequest(http_url,cms_ip,cms_login,cms_password):
@@ -190,6 +191,6 @@ def cms_cospace_view():
 		"html_page_title": html_page_title,
 		"console_output": console_output,
 		"form_navigation": form_navigation,
-		"form_cmsselection": form_cmsselection,
+		"form_cmsselection": form_cmsselection
 	}
 	return renderdata
