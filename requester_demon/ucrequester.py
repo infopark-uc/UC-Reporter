@@ -14,10 +14,13 @@ import logging.handlers
 
 
 def sqlselect_dict(sqlrequest):
+
+    logger = logger_init_auth()
+
     try:
          con = pymysql.connect('172.20.5.19', 'sqladmin', 'Qwerty123', 'ucreporter', cursorclass=pymysql.cursors.DictCursor)
     except:
-        console_output = "MySQL DB access error"
+        console_output = "sqlselect_dict: MySQL DB access error"
         print(console_output) #info
         logger.info(console_output)
         return None
@@ -30,10 +33,13 @@ def sqlselect_dict(sqlrequest):
     return result
 
 def sqlrequest(sqlrequest):
+
+    logger = logger_init_auth()
+
     try:
         con = pymysql.connect('172.20.5.19', 'sqladmin', 'Qwerty123', 'ucreporter')
     except:
-        console_output = "MySQL DB access error"
+        console_output = "sqlrequest: MySQL DB access error"
         print(console_output) #info
         logger.info(console_output)
         return None
@@ -47,30 +53,7 @@ def sqlrequest(sqlrequest):
 
 def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
 
-    # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
-    UC_REQUESTER_LOG_FILE_SIZE = 2048000
-    UC_REQUESTER_LOG_FILE_COUNT = 5
-
-    # Диспетчер логов
-    logger = logging.getLogger('UC-REQUESTER_CALLLEGINFO')
-    #
-    logger.setLevel(logging.DEBUG)
-
-    # Обработчик логов - запись в файлы с перезаписью
-    if not logger.handlers:
-        console_output = ": no any handlers in Logger - create new one"
-        print("UC-REQUESTER_CALLLEGINFO " + console_output)
-
-        rotate_file_handler = logging.handlers.RotatingFileHandler(UC_REQUESTER_LOG_FILE_NAME, maxBytes=UC_REQUESTER_LOG_FILE_SIZE, backupCount=UC_REQUESTER_LOG_FILE_COUNT)
-        rotate_file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
-        rotate_file_handler.setFormatter(formatter)
-        logger.addHandler(rotate_file_handler)
-    else:
-        console_output = ": handlers are already exists in Logger"
-        print("UC-REQUESTER_CALLLEGINFO " + console_output)
-
+    logger = logger_init_auth()
 
     # URL
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -87,33 +70,34 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     except requests.exceptions.ConnectionError:
         console_output =  cms_ip + ":  Server connection error " + cms_ip
         print(console_output) #info
-        logger.info(console_output)
+        logger.error(console_output)
         get.close()
         return
     except requests.exceptions.RequestException as err:
         console_output = cms_ip + ":Error Something Else" + err
         print(console_output) #info
-        logger.info(console_output)
+        logger.error(console_output)
         get.close()
         return
 
     if get.status_code == 401:
         console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
         print(console_output) #info
-        logger.info(console_output)
+        logger.error(console_output)
         get.close()
         return
 
     if get.status_code != 200:
         console_output = cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
         print(console_output) #info
-        logger.info(console_output)
+        logger.error(console_output)
         get.close()
         return
 
-    console_output = cms_ip + ": we got dict with callLegs"
+    console_output = cms_ip + ": we got dict with callLeg Information"
     print(console_output) #debug
     logger.debug(console_output)
+    get.encoding = 'utf-8'
     xml_dict = xmltodict.parse(get.text)
     get.close()  # закрываем web сессию
     callLeg = xml_dict['callLeg']
@@ -123,6 +107,23 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
         call_id = callLeg['call']
     else:
         call_id="none"
+
+    # забираем Имя
+    if "name" in callLeg:
+        call_id_name = str(callLeg['name'])
+    else:
+        call_id_name = "None"
+
+    # забираем Remote Party
+    if "remoteParty" in callLeg:
+        call_id_remote_party = str(callLeg['remoteParty'])
+    else:
+        call_id_remote_party = "None"
+
+    if call_id_name == "None":
+        current_user = call_id_remote_party
+    else:
+        current_user = call_id_name
 
     # забираем информацию по Аудио
     if "rxAudio" in callLeg['status']:
@@ -167,9 +168,9 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoPacketLossPercentageTX = "0.0"
        VideoRoundTripTimeTX = "0"
 
-    console_output = cms_ip +  " CallID:"+callleg_id + " insert to database"
+    console_output = cms_ip + " CallLeg for user " + current_user + " ID:" + callleg_id + " is inserted to database"
     print(console_output) #debug
-    logger.debug(console_output)
+    logger.info(console_output)
     sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
                     + "',date='" + timenow
@@ -185,36 +186,12 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     CALLLEG_CHECK_REPEATTIME = 1 #пауза между запусками функции callleginfo
 
-    # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
-    UC_REQUESTER_LOG_FILE_SIZE = 2048000
-    UC_REQUESTER_LOG_FILE_COUNT = 5
-
-    # Диспетчер логов
-    logger = logging.getLogger('UC-REQUESTER_GET_CALLLEGS')
-    #
-    logger.setLevel(logging.DEBUG)
-
-    # Обработчик логов - запись в файлы с перезаписью
-    if not logger.handlers:
-        console_output = ": no any handlers in Logger - create new one"
-        print("UC-REQUESTER_GET_CALLLEGS " + console_output)
-
-        rotate_file_handler = logging.handlers.RotatingFileHandler(UC_REQUESTER_LOG_FILE_NAME, maxBytes=UC_REQUESTER_LOG_FILE_SIZE, backupCount=UC_REQUESTER_LOG_FILE_COUNT)
-        rotate_file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
-        rotate_file_handler.setFormatter(formatter)
-        logger.addHandler(rotate_file_handler)
-    else:
-        console_output = ": handlers are already exists in Logger"
-        print("UC-REQUESTER_GET_CALLLEGS " + console_output)
-
-
+    logger = logger_init_auth()
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
         console_output = cms_ip + ": Login, password and port not received"
         print(console_output) #info
-        logger.info(console_output)
+        logger.error(console_output)
         return
 
     # URL
@@ -240,27 +217,27 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
             except requests.exceptions.ConnectionError:
                 console_output = cms_ip + ":  Server connection error " + cms_ip
                 print(console_output) #info
-                logger.info(console_output)
+                logger.error(console_output)
                 get.close()
                 break
             except requests.exceptions.RequestException as err:
                 console_output = cms_ip + ": Error Something Else" + str(err)
                 print(console_output) #info
-                logger.info(console_output)
+                logger.error(console_output)
                 get.close()
                 return #закрываем функцию т.к. мы не знаем что это такое, если бы мы знали, что это такое, мы не знаем, что это такое.
 
             if get.status_code == 401:
                 console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
                 print(console_output) #info
-                logger.info(console_output)
+                logger.error(console_output)
                 get.close()
                 return #закрываем функцию, т.к. можно заблочить пользователя на длительный срок.
 
             if get.status_code != 200:
                 console_output =cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
                 print(console_output) #info
-                logger.info(console_output)
+                logger.error(console_output)
                 get.close()
                 break
             console_output = cms_ip + ": we got dict with calls"
@@ -295,6 +272,9 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 endOfCycle = False
             else:
                 endOfCycle = True
+                if len(callLeg_list) > 0:
+                    console_output = cms_ip + ": Total number of collected CallLegs: " + str(len(callLeg_list))
+                    logger.info(console_output)
 
         # перебираем все активные callLeg
         for callLeg in callLeg_list:
@@ -311,29 +291,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
 def main(argv):
 
-    # Настройка логирования
-    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
-    UC_REQUESTER_LOG_FILE_SIZE = 2048000
-    UC_REQUESTER_LOG_FILE_COUNT = 5
-
-    # Диспетчер логов
-    logger = logging.getLogger('UC-REQUESTER')
-    #
-    logger.setLevel(logging.DEBUG)
-
-    # Обработчик логов - запись в файлы с перезаписью
-    if not logger.handlers:
-        console_output = ": no any handlers in Logger - create new one"
-        print("UC-REQUESTER " + console_output)
-
-        rotate_file_handler = logging.handlers.RotatingFileHandler(UC_REQUESTER_LOG_FILE_NAME, maxBytes=UC_REQUESTER_LOG_FILE_SIZE, backupCount=UC_REQUESTER_LOG_FILE_COUNT)
-        rotate_file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
-        rotate_file_handler.setFormatter(formatter)
-        logger.addHandler(rotate_file_handler)
-    else:
-        console_output = ": handlers are already exists in Logger"
-        print("UC-REQUESTER " + console_output)
+    logger = logger_init_auth()
 
     cms_ip_address = ""
     try:
@@ -343,7 +301,7 @@ def main(argv):
                 cms_ip_address = val
             elif opt=='-d':
                 console_output = "start database mode"
-                print(console_output)  # info
+                print("UC-REQUESTER: " + console_output)  # info
                 logger.info(console_output)
 
     except:
@@ -379,6 +337,45 @@ def main(argv):
             print(console_output) #info
             logger.info(console_output)
             #p.join() - ждать пока выполниться процедура.
+
+def logger_init_auth():
+
+    # Настройка логирования
+    UC_REQUESTER_LOG_FILE_NAME = "../logs/UC-REQUESTER.log"
+    UC_REQUESTER_LOG_FILE_SIZE = 2048000
+    UC_REQUESTER_LOG_FILE_COUNT = 5
+
+    # Диспетчер логов
+    logger = logging.getLogger('UC-REQUESTER')
+    # Уровень логирования, сообщения которого записываются в файл
+    logger.setLevel(logging.INFO)
+
+    # Обработчик логов - запись в файлы с перезаписью
+    if logger.hasHandlers():
+
+        console_output = "handlers are already exists in Logger UC-REQUESTER"
+        print("UC-REQUESTER: " + console_output)
+        logger.debug(console_output)
+
+        return logger
+
+    else:
+        console_output = "no any handlers in Logger UC-REQUESTER - create new one"
+        print("UC-REPORTER_AUTH: " + console_output)
+
+        rotate_file_handler = logging.handlers.RotatingFileHandler(UC_REQUESTER_LOG_FILE_NAME,
+                                                                   maxBytes=UC_REQUESTER_LOG_FILE_SIZE,
+                                                                   backupCount=UC_REQUESTER_LOG_FILE_COUNT)
+        rotate_file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
+        rotate_file_handler.setFormatter(formatter)
+        logger.addHandler(rotate_file_handler)
+
+        logger.info(console_output)
+        console_output = "New handler was created in Logger UC-REQUESTER"
+        print("UC-REQUESTER: " + console_output)
+        logger.info(console_output)
+        return logger
 
 
 if __name__ == "__main__":
