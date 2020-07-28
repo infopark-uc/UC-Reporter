@@ -59,7 +59,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs/" + callleg_id
     console_output =  cms_ip + ": URL: "+ http_url
-    print(console_output) #debug
+    #print(console_output) #debug
     logger.debug(console_output)
 
     http_headers = {'Content-Type': 'text/xml'}
@@ -79,6 +79,13 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
         logger.error(console_output)
         get.close()
         return
+    except BaseException as e:
+        console_output = ('{!r}; callleginfo get exception '.format(e) + ' ' + cms_ip)
+        print(console_output)
+        logger.error(console_output)
+        #get.close() #закоменчен т.к. нечего закрывать.
+        return
+
 
     if get.status_code == 401:
         console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
@@ -95,7 +102,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
         return
 
     console_output = cms_ip + ": we got dict with callLeg Information"
-    print(console_output) #debug
+    #print(console_output) #debug
     logger.debug(console_output)
     get.encoding = 'utf-8'
     xml_dict = xmltodict.parse(get.text)
@@ -190,7 +197,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
         console_output = cms_ip + ": Login, password and port not received"
-        print(console_output) #info
+        #print(console_output) #info
         logger.error(console_output)
         return
 
@@ -199,6 +206,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
     http_headers = {'Content-Type': 'text/xml'}
 
     # запускаем цикл
+
     while True:
         timenow = str(datetime.datetime.now())
         page_offset = 0
@@ -209,7 +217,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
         while not endOfCycle:
             http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs?limit=" + str(page_limit) + "&offset=" + str(page_offset)
             console_output =  cms_ip + ": URL: " + http_url
-            print(console_output) #debug
+            #print(console_output) #debug
             logger.debug(console_output)
 
             try:
@@ -226,6 +234,12 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 logger.error(console_output)
                 get.close()
                 return #закрываем функцию т.к. мы не знаем что это такое, если бы мы знали, что это такое, мы не знаем, что это такое.
+            except BaseException as e:
+                console_output = ('{!r}; getCallLegs get exception '.format(e)  + ' ' + cms_ip)
+                print(console_output)
+                logger.error(console_output)
+                #get.close() #нечего закрывать.
+                return
 
             if get.status_code == 401:
                 console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
@@ -241,13 +255,13 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 get.close()
                 break
             console_output = cms_ip + ": we got dict with calls"
-            print(console_output) #debug
+            #print(console_output) #debug
             logger.debug(console_output)
             xml_dict = xmltodict.parse(get.text)
             get.close() #закрываем web сессию
             totalCallLegs = xml_dict["callLegs"]["@total"]
             console_output =  cms_ip + ": Total number of CallLegs: " + totalCallLegs
-            print(console_output) #debug
+            #print(console_output) #debug
             logger.debug(console_output)
 
             # проверям что есть активные CallLeg
@@ -256,15 +270,15 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 if type(xml_dict["callLegs"]["callLeg"]) is OrderedDict:
                     callLeg_list.append(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: 1"
-                    print(console_output) #debug
+                    #print(console_output) #debug
                     logger.debug(console_output)
                 elif type(xml_dict["callLegs"]["callLeg"]) is list:
                     callLeg_list.extend(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"]))
-                    print(console_output) #debug
+                    #print(console_output) #debug
                     logger.debug(console_output)
             console_output =  cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
-            print(console_output) #debug
+            #print(console_output) #debug
             logger.debug(console_output)
 
             if int(totalCallLegs) > len(callLeg_list):
@@ -320,23 +334,59 @@ def main(argv):
         getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'])
 
     else:
+        threads_dict = {} #объявляем словарь для работы с потоками
+
+
         request_configuration_dict = sqlselect_dict(
             "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';")
         console_output = "we get config"
         print(console_output) #info
         logger.info(console_output)
-        pprint(request_configuration_dict)
+        #pprint(request_configuration_dict)
+        thread_index = 1
         for cluster_data in request_configuration_dict:
+            thread_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
             print(console_output) #info
             logger.info(console_output)
             #pprint(cluster_data)
-            p = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
-            p.start() # запуск процедуры в отдельном потоке
-            console_output = str(p.name) + " PID " + str(p.ident) + " started for: " + cluster_data['ip']
-            print(console_output) #info
-            logger.info(console_output)
-            #p.join() - ждать пока выполниться процедура.
+            #threads_dict[thread_index] = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
+            #threads_dict[thread_index].start() # запуск процедуры в отдельном потоке
+
+            thread_information["thread"] = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
+            thread_information["cluster_data"] = cluster_data
+            thread_information["thread"].setName(cluster_data['ip'])
+            thread_information["thread"].start()
+
+            #console_output = str(threads_dict[thread_index].name) + " PID " + str(threads_dict[thread_index].ident) + " started for: " + cluster_data['ip']
+            #print(console_output)  # info
+            #logger.info(console_output)
+
+
+            threads_dict[thread_index] =  thread_information
+            thread_index = thread_index + 1  # увеличиваем счетчик
+
+
+        endOfCycle = False
+        while not endOfCycle:
+           for key in threads_dict:
+                if threads_dict[key]['thread'].is_alive():
+                    console_output = " Thread for " + str(threads_dict[key]['cluster_data']['ip']) + " PID " + str(threads_dict[key]['thread'].ident) + " running status {}".format(threads_dict[key]['thread'].is_alive())
+                    print(console_output)
+                else:
+                    #threads_dict[key]['thread'] = threading.Thread(target=getCallLegs, args=(threads_dict[key]['cluster_data']['login'],threads_dict[key]['cluster_data']['password'],threads_dict[key]['cluster_data']['ip'],threads_dict[key]['cluster_data']['api_port'],threads_dict[key]['cluster_data']['repeat_check'],))
+                    #threads_dict[key]['thread'].setName(threads_dict[key]['cluster_data']['ip'])
+                    #threads_dict[key]['thread'].start()
+
+                    console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Thread was restart for " + str(threads_dict[key]['cluster_data']['ip']) + "  PID " + str(threads_dict[key]['thread'].ident) + " running status {}".format(threads_dict[key]['thread'].is_alive())
+                    print(console_output)
+
+
+
+           time.sleep(threads_dict[key]['cluster_data']['repeat_check'])
+
+
+           #p.join() - ждать пока выполниться процедура.
 
 def logger_init_auth():
 
