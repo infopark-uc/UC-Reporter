@@ -69,19 +69,19 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
     except requests.exceptions.ConnectionError:
         console_output =  cms_ip + ":  Server connection error " + cms_ip
-        print(console_output) #info
+        #print(console_output) #info
         logger.error(console_output)
         get.close()
         return
     except requests.exceptions.RequestException as err:
         console_output = cms_ip + ":Error Something Else" + err
-        print(console_output) #info
+        #print(console_output) #info
         logger.error(console_output)
         get.close()
         return
     except BaseException as e:
         console_output = ('{!r}; callleginfo get exception '.format(e) + ' ' + cms_ip)
-        print(console_output)
+        #print(console_output)
         logger.error(console_output)
         #get.close() #закоменчен т.к. нечего закрывать.
         return
@@ -89,14 +89,14 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
 
     if get.status_code == 401:
         console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
-        print(console_output) #info
+        #print(console_output) #info
         logger.error(console_output)
         get.close()
         return
 
     if get.status_code != 200:
         console_output = cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
-        print(console_output) #info
+        #print(console_output) #info
         logger.error(console_output)
         get.close()
         return
@@ -176,7 +176,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoRoundTripTimeTX = "0"
 
     console_output = cms_ip + " CallLeg for user " + current_user + " ID:" + callleg_id + " is inserted to database"
-    print(console_output) #debug
+    #print(console_output) #debug
     logger.info(console_output)
     sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
@@ -224,33 +224,33 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
             except requests.exceptions.ConnectionError:
                 console_output = cms_ip + ":  Server connection error " + cms_ip
-                print(console_output) #info
+                #print(console_output) #info
                 logger.error(console_output)
                 get.close()
                 break
             except requests.exceptions.RequestException as err:
                 console_output = cms_ip + ": Error Something Else" + str(err)
-                print(console_output) #info
+                #print(console_output) #info
                 logger.error(console_output)
                 get.close()
                 return #закрываем функцию т.к. мы не знаем что это такое, если бы мы знали, что это такое, мы не знаем, что это такое.
             except BaseException as e:
                 console_output = ('{!r}; getCallLegs get exception '.format(e)  + ' ' + cms_ip)
-                print(console_output)
+                #print(console_output)
                 logger.error(console_output)
                 #get.close() #нечего закрывать.
                 return
 
             if get.status_code == 401:
                 console_output = cms_ip + ": User " + cms_login + " deny by " + cms_ip
-                print(console_output) #info
+                #print(console_output) #info
                 logger.error(console_output)
                 get.close()
                 return #закрываем функцию, т.к. можно заблочить пользователя на длительный срок.
 
             if get.status_code != 200:
                 console_output =cms_ip + ": Connect error: " + str(get.status_code) + ": " + get.reason
-                print(console_output) #info
+                #print(console_output) #info
                 logger.error(console_output)
                 get.close()
                 break
@@ -315,12 +315,12 @@ def main(argv):
                 cms_ip_address = val
             elif opt=='-d':
                 console_output = "start database mode"
-                print("UC-REQUESTER: " + console_output)  # info
+                #print("UC-REQUESTER: " + console_output)  # info
                 logger.info(console_output)
 
     except:
         console_output = "usage: ucrequester.py -s <CMS ip address>"
-        print(console_output) #info
+        #print(console_output) #info
         logger.info(console_output)
         sys.exit(2)
 
@@ -340,14 +340,14 @@ def main(argv):
         request_configuration_dict = sqlselect_dict(
             "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';")
         console_output = "we get config"
-        print(console_output) #info
+        #print(console_output) #info
         logger.info(console_output)
         #pprint(request_configuration_dict)
         thread_index = 1
         for cluster_data in request_configuration_dict:
             process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
-            print(console_output) #info
+            #print(console_output) #info
             logger.info(console_output)
             #pprint(cluster_data)
 
@@ -381,7 +381,7 @@ def main(argv):
                     #process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process need to restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     #print(console_output)
-                    logger.info(console_output)
+                    logger.error(console_output)
 
 
 
@@ -406,14 +406,14 @@ def logger_init_auth():
     if logger.hasHandlers():
 
         console_output = "handlers are already exists in Logger UC-REQUESTER"
-        print("UC-REQUESTER: " + console_output)
+        #print("UC-REQUESTER: " + console_output)
         logger.debug(console_output)
 
         return logger
 
     else:
         console_output = "no any handlers in Logger UC-REQUESTER - create new one"
-        print("UC-REPORTER_AUTH: " + console_output)
+        #print("UC-REPORTER_AUTH: " + console_output)
 
         rotate_file_handler = logging.handlers.RotatingFileHandler(UC_REQUESTER_LOG_FILE_NAME,
                                                                    maxBytes=UC_REQUESTER_LOG_FILE_SIZE,
@@ -425,7 +425,7 @@ def logger_init_auth():
 
         logger.info(console_output)
         console_output = "New handler was created in Logger UC-REQUESTER"
-        print("UC-REQUESTER: " + console_output)
+        #print("UC-REQUESTER: " + console_output)
         logger.info(console_output)
         return logger
 
