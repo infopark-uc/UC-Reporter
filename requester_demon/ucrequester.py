@@ -8,9 +8,9 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
-from multiprocessing import Process
 import threading
 import logging.handlers
+from multiprocessing import Process
 
 
 def sqlselect_dict(sqlrequest):
@@ -334,7 +334,7 @@ def main(argv):
         getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'])
 
     else:
-        threads_dict = {} #объявляем словарь для работы с потоками
+        process_dict = {} #объявляем словарь для работы с потоками
 
 
         request_configuration_dict = sqlselect_dict(
@@ -345,45 +345,47 @@ def main(argv):
         #pprint(request_configuration_dict)
         thread_index = 1
         for cluster_data in request_configuration_dict:
-            thread_information = {}  # словарь для сопоставления номера потока и IP ноды
+            process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
             print(console_output) #info
             logger.info(console_output)
             #pprint(cluster_data)
-            #threads_dict[thread_index] = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
-            #threads_dict[thread_index].start() # запуск процедуры в отдельном потоке
 
-            thread_information["thread"] = threading.Thread(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
-            thread_information["cluster_data"] = cluster_data
-            thread_information["thread"].setName(cluster_data['ip'])
-            thread_information["thread"].start()
 
-            #console_output = str(threads_dict[thread_index].name) + " PID " + str(threads_dict[thread_index].ident) + " started for: " + cluster_data['ip']
+            process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
+            process_information["cluster_data"] = cluster_data
+            #process_information['Process'].name(cluster_data['ip'])
+            process_information['Process'].start()
+
+            #console_output = str(process_dict[thread_index].name) + " PID " + str(process_dict[thread_index].ident) + " started for: " + cluster_data['ip']
             #print(console_output)  # info
             #logger.info(console_output)
 
 
-            threads_dict[thread_index] =  thread_information
+            process_dict[thread_index] =  process_information
             thread_index = thread_index + 1  # увеличиваем счетчик
 
 
         endOfCycle = False
         while not endOfCycle:
-           for key in threads_dict:
-                if threads_dict[key]['thread'].is_alive():
-                    console_output = " Thread for " + str(threads_dict[key]['cluster_data']['ip']) + " PID " + str(threads_dict[key]['thread'].ident) + " running status {}".format(threads_dict[key]['thread'].is_alive())
-                    print(console_output)
+           for key in process_dict:
+                if process_dict[key]['Process'].is_alive():
+                    console_output = " Process for " + str(process_dict[key]['cluster_data']['ip']) + " PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
+                    #print(console_output)
+                    logger.info(console_output)
                 else:
-                    #threads_dict[key]['thread'] = threading.Thread(target=getCallLegs, args=(threads_dict[key]['cluster_data']['login'],threads_dict[key]['cluster_data']['password'],threads_dict[key]['cluster_data']['ip'],threads_dict[key]['cluster_data']['api_port'],threads_dict[key]['cluster_data']['repeat_check'],))
-                    #threads_dict[key]['thread'].setName(threads_dict[key]['cluster_data']['ip'])
-                    #threads_dict[key]['thread'].start()
+                    process_dict[key]['Process'].terminate()
 
-                    console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Thread was restart for " + str(threads_dict[key]['cluster_data']['ip']) + "  PID " + str(threads_dict[key]['thread'].ident) + " running status {}".format(threads_dict[key]['thread'].is_alive())
-                    print(console_output)
+                    process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check'],))
+                    #process_dict[key]['Process'].setNdame(process_dict[key]['cluster_data']['ip'])
+                    #process_dict[key]['Process'].start()
+                    console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process need to restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
+                    #print(console_output)
+                    logger.info(console_output)
 
 
 
-           time.sleep(threads_dict[key]['cluster_data']['repeat_check'])
+           time.sleep(process_dict[key]['cluster_data']['repeat_check'])
 
 
            #p.join() - ждать пока выполниться процедура.
