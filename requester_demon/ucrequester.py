@@ -315,12 +315,12 @@ def main(argv):
                 cms_ip_address = val
             elif opt=='-d':
                 console_output = "start database mode"
-                #print("UC-REQUESTER: " + console_output)  # info
+                print("UC-REQUESTER: " + console_output)  # info
                 logger.info(console_output)
 
     except:
         console_output = "usage: ucrequester.py -s <CMS ip address>"
-        #print(console_output) #info
+        print(console_output) #info
         logger.info(console_output)
         sys.exit(2)
 
@@ -374,12 +374,11 @@ def main(argv):
                     #print(console_output)
                     logger.info(console_output)
                 else:
-                    process_dict[key]['Process'].terminate()
-
+                    #process_dict[key]['Process'].terminate()
                     process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check'],))
                     #process_dict[key]['Process'].setNdame(process_dict[key]['cluster_data']['ip'])
-                    #process_dict[key]['Process'].start()
-                    console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process need to restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
+                    process_dict[key]['Process'].start()
+                    console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     #print(console_output)
                     logger.error(console_output)
 
