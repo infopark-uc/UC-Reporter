@@ -372,7 +372,7 @@ def main(argv):
                 if process_dict[key]['Process'].is_alive():
                     console_output = " Process for " + str(process_dict[key]['cluster_data']['ip']) + " PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     #print(console_output)
-                    logger.info(console_output)
+                    logger.debug(console_output)
                 else:
                     #process_dict[key]['Process'].terminate()
                     process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check'],))
