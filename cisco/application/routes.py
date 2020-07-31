@@ -9,6 +9,7 @@ from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
+from application.ucreporter_settings import ucreporter_settings_mainpage
 from flask_login import logout_user, current_user, login_required
 
 
@@ -65,11 +66,13 @@ def cfa():
 
 @app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
+    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
     codec("0") # "0" - index roomsystem from database
     return "roomrequest done"
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
+    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
     return submit_order("0") # "0" - index roomsystem from database
 
 @app.route('/ucsendmail', methods=['POST'])
@@ -209,5 +212,26 @@ def logout():
     logout_user()
     print("User is logged out")
     return redirect(url_for('cmspage'))
+
+@app.route('/platform', methods=['GET', 'POST'])
+@app.route('/platform/', methods=['GET', 'POST'])
+@login_required
+def platform():
+
+    module_result = ucreporter_settings_mainpage()
+
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               console_output=module_result['console_output'],
+                               formNAV=module_result['form_navigation'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           html_page_header=module_result['html_page_header'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'])
 
 app.secret_key = "Super_secret_key"
