@@ -6,118 +6,13 @@
     {% else %}
         <title>Welcome to UC Report</title>
     {% endif %}
-	<script type="text/javascript" src="{{ url_for("static" , filename="jquery-1.9.0.js") }} "></script>
-    <script type="text/javascript" charset="utf-8">
-    $(function(){
-        $('#ExportXLS').click(function(){
-            var url='data:application/vnd.ms-excel,' + encodeURIComponent($('#tableWrap').html())
-            location.href=url
-            return false
-        })
-    })
-    </script>
 
-	<style type="text/css">
-        .HeaderLine {
-			display: flex;
-			flex-flow: row nowrap;
-			align-items: center;
-			font-family: Verdana;
-			font-size: 100%;
-			font-weight: bold;
-			color: #2f6681;
-			height: 60px;
-			background: linear-gradient(to right, #ffffff, #2f6681);
-		}
-		.HeaderItem {
-			margin: 5px;
-		}
+	<link rel="stylesheet" href="{{ url_for('static', filename='settings_menubar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='base_template.css') }}">
 
-		.NavigationItem {
-			margin-left: auto;
-			font-size: 80%;
-			color: white;
-		}
 
-		.login:link {
-			color: white;
-		}
 
-		.login:visited {
-			color: white;
-		}
 
-		.HeaderTable {
-			border-collapse: collapse;
-			text-align: left;
-			font-family: Verdana;
-			color: white;
-			font-weight: bold;
-			width: 100%;
-			margin-top: 10px;
-		}
-		.HeaderTable th {
-			height: 150px;
-			padding: 10px;
-			font-size: 130%;
-			background: #2f6681;
-		}
-		.HeaderTable td {
-			height: 25px;
-			padding: 10px;
-			font-size: 80%;
-			background: #6d94a7;
-		}
-
-		.Status {
-			margin: 10;
-			margin-top: 10px;
-		}
-
-		.StatusHeader {
-			font-size: 70%;
-			font-weight: bold;
-			font-family: Verdana;
-			color: black;
-		}
-
-		.StatusItem {
-			margin: 10;
-			font-size: 70%;
-			font-family: Verdana;
-			color: black;
-		}
-
-		.SearchItem {
-			margin: 10;
-			margin-top: 10px;
-			font-size: 80%;
-			font-family: Verdana;
-			color: black;
-		}
-
-		.DataTable {
-			font-size: 70%;
-			font-family: Verdana;
-			color: black;
-			width: 100%;
-			border-collapse: collapse;
-			margin-top: 10px;
-		}
-		.DataTable TH {
-			background: #dbdbdb; /* Цвет фона ячеек */
-			text-align: left;
-		}
-		.DataTable TR:nth-child(odd) {
-			height: 23px;
-			background: #f8f8f8;
-		}
-
-		.DataTable TR:nth-child(even) {
-			height: 23px;
-			background: #ebebeb;
-		}
-	</style>
 </head>
 <body>
 	<div class="HeaderLine">
@@ -141,6 +36,46 @@
     			{% endif %}
         </div>
 	</div>
+	<table>
+
+		<nav>
+			<ul class="topmenu">
+				<li><a href="" class="active">Users<span class="fa fa-angle-down"></span></a>
+					<ul class="submenu">
+						<li><a href="">меню второго уровня</a></li>
+						<li><a href="">меню второго уровня<span class="fa fa-angle-down"></span></a>
+							<ul class="submenu">
+								<li><a href="">меню третьего уровня</a></li>
+								<li><a href="">меню третьего уровня</a></li>
+								<li><a href="">меню третьего уровня</a></li>
+							</ul>
+						</li>
+						<li><a href="">меню второго уровня</a></li>
+					</ul>
+				</li>
+				<li><a href="" class="active">Servers<span class="fa fa-angle-down"></span></a>
+				     <ul class="submenu">
+						 <li><a href="">меню второго уровня</a></li>
+						 <li><a href="">меню второго уровня</a></li>
+					 </ul>
+				</li>
+				<li><a href="" class="active">UC Requester<span class="fa fa-angle-down"></span></a>
+				     <ul class="submenu">
+						 <li><a href="">меню второго уровня</a></li>
+						 <li><a href="">меню второго уровня</a></li>
+					 </ul>
+				</li>
+				<li><a href="" class="active">RoomControll<span class="fa fa-angle-down"></span></a>
+				     <ul class="submenu">
+						 <li><a href="">Terminals</a></li>
+						 <li><a href="">Phones</a></li>
+					 </ul>
+				</li>
+
+			</ul>
+		</nav>
+
+	</table>
 	<table class="HeaderTable">
 		<tr>
 			<th>

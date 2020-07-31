@@ -1,4 +1,65 @@
-{% extends "base_templates/base_template.html" %}
+{% extends "base_templates/settings_template.html" %}
 {% block Content %}
+    {% if content_type == user_settings %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				Name
+			</th>
+            <th>
+				CallID
+			</th>
+			<th>
+				URI
+			</th>
+			<th>
+				Passcode
+			</th>
+
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+            <td>
+				{{ row.name }}
+			</td>
+			<td>
+				{{ row.callId }}
+			</td>
+			<td>
+				{{ row.uri }}
+			</td>
+            <td>
+				{{ row.passcode }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+    {% if content_type == server_settings %}
+    <div id="tableWrap">
+    <fieldset>
+	<legend>
+			Server Information
+	</legend>
+	<table class="content-form" summary="Server Information">
+		<tbody><tr>
+			<td><label>Server Type</label></td>
+			<td>CUCM Voice/Video</td>
+		</tr>
+			<tr>
+				<td><label>Database Replication</label></td>
+				<td>Publisher</td>
+			</tr>
+			<tr><td><label id="NAME_ID" for="NAME">Host Name/IP Address</label></td><td><input id="NAME" name="name" maxlength="63" value="ccm-pub-msk.sibserv.com" size="50" onchange="isNameValid(this)" type="text"></td></tr>
+		    <tr><td><label id="IPV6NAME_ID" for="IPV6NAME">IPv6 Address (for dual IPv4/IPv6)</label></td><td><input id="IPV6NAME" name="ipv6name" maxlength="255" value="" size="50" onchange="isipv6nameValid(this)" type="text"></td></tr>
+			<tr><td><label id="MAC_ID" for="MAC">MAC Address</label></td><td><input id="MAC" name="mac" maxlength="12" value="00145E881BE8" size="50" onchange="isMacValid(this)" type="text"></td></tr>
+		    <tr><td><label id="DESCRIPTION_ID" for="DESCRIPTION">Description</label></td><td><input id="DESCRIPTION" name="description" maxlength="50" value="" size="50" onchange="isDescriptionValid(this)" type="text"></td></tr>
+	</tbody></table>
+    </fieldset>
+    </div>
+    {% endif %}
+
 
 {% endblock %}

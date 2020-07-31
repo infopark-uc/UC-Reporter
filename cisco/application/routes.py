@@ -227,11 +227,13 @@ def platform():
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                                html_page_header=module_result['html_page_header'],
                                console_output=module_result['console_output'],
+                               content_type=module_result['content_type'],
                                formNAV=module_result['form_navigation'])
 
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            html_page_header=module_result['html_page_header'],
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'])
+
 
 app.secret_key = "Super_secret_key"

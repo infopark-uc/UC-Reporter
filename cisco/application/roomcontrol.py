@@ -85,11 +85,8 @@ def codec(systemindex):
 
     return 'OK'
 
-
 def submit_order(systemindex):
-    #roomkit_access_data_ip = cm_sqlselect("room_ip", "cm_roomsystems_table", "room_index", systemindex)
-    #roomkit_access_data_login = cm_sqlselect("room_user", "cm_roomsystems_table", "room_index", systemindex)
-    #roomkit_access_data_password = cm_sqlselect("room_password", "cm_roomsystems_table", "room_index", systemindex)
+
     auth_data_list = sql_request_dict(
         "SELECT room_ip,room_user,room_password FROM cm_roomsystems_table WHERE room_index='" + systemindex + "'")  # получаем лист словарей
     roomkit_access_data_ip = str(auth_data_list[0]['room_ip']) # забираем IP
