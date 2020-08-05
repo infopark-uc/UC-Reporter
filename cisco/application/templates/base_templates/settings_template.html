@@ -42,27 +42,18 @@
 			<ul class="topmenu">
 				<li><a href="" class="active">Users<span class="fa fa-angle-down"></span></a>
 					<ul class="submenu">
-						<li><a href="">меню второго уровня</a></li>
-						<li><a href="">меню второго уровня<span class="fa fa-angle-down"></span></a>
-							<ul class="submenu">
-								<li><a href="">меню третьего уровня</a></li>
-								<li><a href="">меню третьего уровня</a></li>
-								<li><a href="">меню третьего уровня</a></li>
-							</ul>
-						</li>
-						<li><a href="">меню второго уровня</a></li>
+						<li><a href="{{ url_for('platform_users') }}">End Users</a></li>
 					</ul>
 				</li>
 				<li><a href="" class="active">Servers<span class="fa fa-angle-down"></span></a>
 				     <ul class="submenu">
-						 <li><a href="">меню второго уровня</a></li>
-						 <li><a href="">меню второго уровня</a></li>
+						 <li><a href="{{ url_for('platform_CUCMservers') }}">CUCM Servers</a></li>
+						 <li><a href="{{ url_for('platform_CMSservers') }}">CMS Servers</a></li>
 					 </ul>
 				</li>
 				<li><a href="" class="active">UC Requester<span class="fa fa-angle-down"></span></a>
 				     <ul class="submenu">
-						 <li><a href="">меню второго уровня</a></li>
-						 <li><a href="">меню второго уровня</a></li>
+						 <li><a href="">Servers</a></li>
 					 </ul>
 				</li>
 				<li><a href="" class="active">RoomControll<span class="fa fa-angle-down"></span></a>

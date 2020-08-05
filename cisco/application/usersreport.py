@@ -32,7 +32,7 @@ def usersreport():
         #cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", form_search.select_region.data)
 
         auth_data_list = sql_request_dict(
-            "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cm_name='"+ form_search.select_region.data + "'")  # получаем лист словарей
+            "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cluster='"+ form_search.select_region.data + "'")  # получаем лист словарей
 
         cucm_ip_address = str(auth_data_list[0]['cm_ip'])
         cucm_login = str(auth_data_list[0]['cm_username'])
