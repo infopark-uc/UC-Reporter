@@ -116,7 +116,7 @@ def ucreporter_settings_CMSservers(server_id):
 	form_edit_CMS = CMSServerInformation(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		renderdata = {
-			"rendertype": "redirect",
+			"content_type": "redirect",
 			"redirect_to": form_navigation.select_navigation.data
 		}
 		return renderdata
@@ -177,7 +177,7 @@ def ucreporter_settings_CUCMservers(server_id):
 
 	if form_navigation.validate_on_submit():
 		renderdata = {
-			"rendertype": "redirect",
+			"content_type": "redirect",
 			"redirect_to": form_navigation.select_navigation.data
 		}
 		return renderdata
