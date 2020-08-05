@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, StringField, PasswordField
-from wtforms.validators import Optional, Length, Regexp
+from wtforms.validators import Optional, Length, Regexp, DataRequired
 
 class SelectNavigation(FlaskForm):
     select_navigation = SelectField('Navigation', choices=[('usersearchpage', 'Поиск пользователей'), ('huntpage', 'Отчет по пользователям Hunt Group'), ('cfa', 'Отчет по переадресациям'), ('cmspage', 'Отчет по конференциям CMS'),('cms_cospace_page', 'Отчет по пин-кодам CMS'),('cms_recordings_page', 'Отчет по записанным конференциям')])
@@ -32,16 +32,24 @@ class UCRepoterLogin(FlaskForm):
     submit = SubmitField('Login')
 
 class UserInformation(FlaskForm):
-    UserName_field = StringField()
+    UserName_field = StringField('')
     Descriotion_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
-    Password_field = PasswordField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    Password_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
     DeleteSubmit = SubmitField('Delete')
 
-class ServerInformation(FlaskForm):
-    ServerName_field = StringField()
+class CUCMServerInformation(FlaskForm):
+    Cluster_field = StringField('',validators=[DataRequired()])
+    username_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    ip_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    password_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."),Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    SaveSubmit = SubmitField('Save')
+    DeleteSubmit = SubmitField('Delete')
+
+class CMSServerInformation(FlaskForm):
+    ServerName_field = StringField('')
     Descriotion_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
-    ip_field = PasswordField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    ip_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
     DeleteSubmit = SubmitField('Delete')
 

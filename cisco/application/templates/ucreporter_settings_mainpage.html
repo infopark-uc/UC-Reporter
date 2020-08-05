@@ -28,7 +28,6 @@
 	</div>
 	{% endif %}
 
-
 {# Страница редактирования пользователя #}
     {% if content_type == "user_edit" %}
 	    <div id="tableWrap">
@@ -62,13 +61,16 @@
 	</div>
 	{% endif %}
 
-{# Вывод листинга серверов #}
-    {% if content_type == "server_list" %}
+{# Вывод листинга серверов CMS#}
+    {% if content_type == "cms_server_list" %}
 	<div id="tableWrap">
 	<table class="DataTable">
 		<tr>
 			<th>
-				Name
+				ID
+			</th>
+			<th>
+				IP
 			</th>
             <th>
 				Cluster
@@ -76,11 +78,46 @@
 		</tr>
 		{% for row in rows_list %}
 		<tr>
+			<td>
+				<a href="{{ url_for('platform_CMSservers',server_id=row.id) }}">{{ row.id }}</a>
+			</td>
             <td>
-				<a href="{{ url_for('platform_users',userid=row.id) }}">{{ row.username }}</a>
+				<a href="{{ url_for('platform_CMSservers',server_id=row.id) }}">{{ row.ip }}</a>
 			</td>
 			<td>
-				{{ row.description }}
+				{{ row.cluster }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+
+{# Вывод листинга серверов CUCM#}
+    {% if content_type == "cucm_server_list" %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				ID
+			</th>
+			<th>
+				IP
+			</th>
+            <th>
+				Cluster
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+			<td>
+				<a href="{{ url_for('platform_CUCMservers',server_id=row.id) }}">{{ row.id }}</a>
+			</td>
+            <td>
+				<a href="{{ url_for('platform_CUCMservers',server_id=row.id) }}">{{ row.cm_ip }}</a>
+			</td>
+			<td>
+				{{ row.cluster }}
 			</td>
 		</tr>
 		{% endfor %}
@@ -89,32 +126,39 @@
 	{% endif %}
 
 {# Страница редактирования сервера #}
-    {% if content_type == "server_edit" %}
+    {% if content_type == "cucm_server_edit" %}
     <div id="tableWrap">
 		<fieldset>
 			<legend>
-				Server Information
+				Sever Information
 			</legend>
 			<table class="content-form" summary="Server Information">
 				<tbody>
 				<tr>
-					<td><label id="NAME_ID" for="NAME">Host Name/IP Address</label></td>
-					<td><input id="NAME" name="name" maxlength="63" value="ccm-pub-msk.sibserv.com" size="50"
-							   onchange="isNameValid(this)" type="text"></td>
+					<td><label id="NAME_ID">Server Cluster</label></td>
+					<td>{{ form_edit_server.Cluster_field}}</td>
 				</tr>
 				<tr>
-					<td><label id="MAC_ID" for="MAC">MAC Address</label></td>
-					<td><input id="MAC" name="mac" maxlength="12" value="00145E881BE8" size="50"
-							   onchange="isMacValid(this)" type="text"></td>
+					<td><label id="Password_ID">IP Address</label></td>
+					<td>{{ form_edit_server.ip_field}}</td>
 				</tr>
 				<tr>
-					<td><label id="DESCRIPTION_ID" for="DESCRIPTION">Description</label></td>
-					<td><input id="DESCRIPTION" name="description" maxlength="50" value="" size="50"
-							   onchange="isDescriptionValid(this)" type="text"></td>
+					<td><label id="DESCRIPTION_ID">API Username</label></td>
+					<td>{{ form_edit_server.username_field }}</td>
+				</tr>
+				<tr>
+					<td><label id="DESCRIPTION_ID">API Password</label></td>
+					<td>{{ form_edit_server.password_field }}</td>
 				</tr>
 				</tbody>
+
 			</table>
 		</fieldset>
+			<table>
+				<td>{{ form_edit_server.SaveSubmit()}}</td>
+				<td>{{ form_edit_server.DeleteSubmit()}}</td>
+
+			</table>
 	</div>
     {% endif %}
 

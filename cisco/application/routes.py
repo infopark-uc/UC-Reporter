@@ -9,8 +9,9 @@ from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
-from application.ucreporter_settings import ucreporter_settings_mainpage
 from flask_login import logout_user, current_user, login_required
+from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users
+from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
 
 
 import application.callforward
@@ -213,11 +214,15 @@ def logout():
     print("User is logged out")
     return redirect(url_for('cmspage'))
 
+
+
+#Модуль настроек платформы
 @app.route('/platform', methods=['GET', 'POST'])
 @app.route('/platform/', methods=['GET', 'POST'])
+@app.route('/platform/servers/', methods=['GET', 'POST'])
 @login_required
 def platform():
-
+#начальная страница
     module_result = ucreporter_settings_mainpage()
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
@@ -235,5 +240,106 @@ def platform():
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'])
 
+@app.route('/platform/users/', defaults={'userid': None}, methods=['GET', 'POST'])
+@app.route('/platform/users/<string:userid>/', methods=['GET', 'POST'])
+@login_required
+def platform_users(userid):
+    module_result = ucreporter_settings_users(userid)
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+
+    if module_result['content_type'] == 'user_list':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'])
+
+    if module_result['content_type'] == 'user_edit':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               form_edit_user=module_result['form_edit_user'],
+                               formNAV=module_result['form_navigation'])
+
+    #отрисовка путой страницы
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           html_page_header=module_result['html_page_header'],
+                           content_type=module_result['content_type'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'])
+
+
+
+@app.route('/platform/servers/cucm/', defaults={'server_id': None }, methods=['GET', 'POST'])
+@app.route('/platform/servers/cucm/<string:server_id>/', methods=['GET', 'POST'])
+@login_required
+def platform_CUCMservers(server_id):
+    module_result = ucreporter_settings_CUCMservers(server_id)
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['content_type'] == 'cucm_server_list':  # отрисовка страницы со списоком серверов
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'])
+
+    if module_result['content_type'] == 'cucm_server_edit':  # отрисовка страницы изменения данных
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               form_edit_server=module_result['form_edit_server'],
+                               formNAV=module_result['form_navigation'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           html_page_header=module_result['html_page_header'],
+                           content_type=module_result['content_type'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'])
+
+@app.route('/platform/servers/cms/', defaults={'server_id': None }, methods=['GET', 'POST'])
+@app.route('/platform/servers/cms/<string:server_id>/', methods=['GET', 'POST'])
+@login_required
+def platform_CMSservers(server_id):
+    module_result = ucreporter_settings_CMSservers(server_id)
+
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['content_type'] == 'server_list':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           html_page_header=module_result['html_page_header'],
+                           content_type=module_result['content_type'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'])
+
+@app.route('/platform/requester/<string:server_id>/',defaults={'server_id': None }, methods=['GET', 'POST'])
+@login_required
+def platform_requester(server_id):
+    module_result = ucrequester_settings(server_id)
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           html_page_header=module_result['html_page_header'],
+                           content_type=module_result['content_type'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'])
 
 app.secret_key = "Super_secret_key"
