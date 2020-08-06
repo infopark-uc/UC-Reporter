@@ -10,10 +10,8 @@ from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from flask_login import logout_user, current_user, login_required
-from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users
+from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users,ucreporter_settings_ucrequester
 from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
-
-
 import application.callforward
 
 
@@ -254,6 +252,7 @@ def platform_users(userid):
                                html_page_header=module_result['html_page_header'],
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
+                               form_edit_user=module_result['form_edit_user'],
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
@@ -288,6 +287,7 @@ def platform_CUCMservers(server_id):
                                html_page_header=module_result['html_page_header'],
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
+                               form_CUCM_server=module_result['form_CUCM_server'],
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
@@ -297,14 +297,8 @@ def platform_CUCMservers(server_id):
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
                                rows_list=module_result['rows_list'],
-                               form_edit_server=module_result['form_edit_server'],
+                               form_CUCM_server=module_result['form_CUCM_server'],
                                formNAV=module_result['form_navigation'])
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           html_page_header=module_result['html_page_header'],
-                           content_type=module_result['content_type'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'])
 
 @app.route('/platform/servers/cms/', defaults={'server_id': None }, methods=['GET', 'POST'])
 @app.route('/platform/servers/cms/<string:server_id>/', methods=['GET', 'POST'])
@@ -315,31 +309,47 @@ def platform_CMSservers(server_id):
     if module_result['content_type'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))
 
-    if module_result['content_type'] == 'server_list':  # данные получены
+    if module_result['content_type'] == 'cms_server_list':  # данные получены
         return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                                html_page_header=module_result['html_page_header'],
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
                                rows_list=module_result['rows_list'],
+                               form_CMS_server=module_result['form_CMS_server'],
                                formNAV=module_result['form_navigation'])
 
+    if module_result['content_type'] == 'cms_server_edit':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               content_type=module_result['content_type'],
+                               console_output=module_result['console_output'],
+                               form_CMS_server=module_result['form_CMS_server'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'])
+
+    #отрисовка путой страницы
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            html_page_header=module_result['html_page_header'],
                            content_type=module_result['content_type'],
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'])
 
-@app.route('/platform/requester/<string:server_id>/',defaults={'server_id': None }, methods=['GET', 'POST'])
+
+@app.route('/platform/requester/', defaults={'server_id': None }, methods=['GET', 'POST'])
+@app.route('/platform/requester/<string:server_id>/', methods=['GET', 'POST'])
 @login_required
 def platform_requester(server_id):
-    module_result = ucrequester_settings(server_id)
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+    module_result = ucreporter_settings_ucrequester(server_id)
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))
 
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                            html_page_header=module_result['html_page_header'],
                            content_type=module_result['content_type'],
                            console_output=module_result['console_output'],
+                           rows_list=module_result['rows_list'],
                            formNAV=module_result['form_navigation'])
+
+
 
 app.secret_key = "Super_secret_key"

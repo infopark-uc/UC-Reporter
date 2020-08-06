@@ -37,7 +37,6 @@
         </div>
 	</div>
 	<table>
-
 		<nav>
 			<ul class="topmenu">
 				<li><a href="" class="active">Users<span class="fa fa-angle-down"></span></a>
@@ -53,7 +52,8 @@
 				</li>
 				<li><a href="" class="active">UC Requester<span class="fa fa-angle-down"></span></a>
 				     <ul class="submenu">
-						 <li><a href="">Servers</a></li>
+						 <li><a href="{{ url_for('platform_requester') }}">Servers</a></li>
+						 <li><a href="{{ url_for('platform_requester') }}">Service Status</a></li>
 					 </ul>
 				</li>
 				<li><a href="" class="active">RoomControll<span class="fa fa-angle-down"></span></a>

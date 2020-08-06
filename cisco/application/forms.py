@@ -37,19 +37,32 @@ class UserInformation(FlaskForm):
     Password_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
     DeleteSubmit = SubmitField('Delete')
+    AddSubmit = SubmitField('Add New')
 
 class CUCMServerInformation(FlaskForm):
     Cluster_field = StringField('',validators=[DataRequired()])
     username_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     ip_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
-    password_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."),Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    password_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."),Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
     DeleteSubmit = SubmitField('Delete')
+    AddSubmit = SubmitField('Add New')
 
 class CMSServerInformation(FlaskForm):
-    ServerName_field = StringField('')
-    Descriotion_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
-    ip_field = PasswordField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    API_Port_field = StringField('')
+    cluster_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    ip_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    username_field = StringField('', validators=[DataRequired(),Length(max=32, message=" Длина запроса не более 32 символов."),Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    password_field = StringField('', validators=[DataRequired(),Length(max=32, message=" Длина запроса не более 32 символов."),Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
     DeleteSubmit = SubmitField('Delete')
+    AddSubmit = SubmitField('Add New')
+
+class UcrequesterInformation(FlaskForm):
+    ServerName_field = StringField('')
+    Descriotion_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    ip_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
+    SaveSubmit = SubmitField('Save')
+    DeleteSubmit = SubmitField('Delete')
+    AddSubmit = SubmitField('Add New')
 

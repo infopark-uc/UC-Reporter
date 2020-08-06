@@ -1,10 +1,12 @@
 {% extends "base_templates/settings_template.html" %}
 {% block Content %}
 
-
  {# вывод листинга пользователей #}
     {% if content_type == "user_list" %}
 	<div id="tableWrap">
+		<table>
+				<td>{{ form_edit_user.AddSubmit()}}</td>
+		</table>
 	<table class="DataTable">
 		<tr>
 			<th>
@@ -93,9 +95,53 @@
 	</div>
 	{% endif %}
 
+{# Страница редактирования сервера CMS#}
+    {% if content_type == "cms_server_edit" %}
+    <div id="tableWrap">
+		<fieldset>
+			<legend>
+				Sever Information
+			</legend>
+			<table class="content-form" summary="Server Information">
+				<tbody>
+				<tr>
+					<td><label id="NAME_ID">Server Cluster</label></td>
+					<td>{{ form_CMS_server.cluster_field}}</td>
+				</tr>
+				<tr>
+					<td><label id="Password_ID">IP Address</label></td>
+					<td>{{ form_CMS_server.ip_field}}</td>
+				</tr>
+				<tr>
+					<td><label id="DESCRIPTION_ID">API port</label></td>
+					<td>{{ form_CMS_server.API_Port_field }}</td>
+				</tr>
+				<tr>
+					<td><label id="DESCRIPTION_ID">API Username</label></td>
+					<td>{{ form_CMS_server.username_field }}</td>
+				</tr>
+				<tr>
+					<td><label id="DESCRIPTION_ID">API Password</label></td>
+					<td>{{ form_CMS_server.password_field }}</td>
+				</tr>
+				</tbody>
+
+			</table>
+		</fieldset>
+			<table>
+				<td>{{ form_CMS_server.SaveSubmit()}}</td>
+				<td>{{ form_CMS_server.DeleteSubmit()}}</td>
+
+			</table>
+	</div>
+    {% endif %}
+
 {# Вывод листинга серверов CUCM#}
     {% if content_type == "cucm_server_list" %}
 	<div id="tableWrap">
+	<table>
+				<td>{{ form_CUCM_server.AddSubmit()}}</td>
+	</table>
 	<table class="DataTable">
 		<tr>
 			<th>
@@ -122,10 +168,11 @@
 		</tr>
 		{% endfor %}
 	</table>
+
 	</div>
 	{% endif %}
 
-{# Страница редактирования сервера #}
+{# Страница редактирования сервера CUCM#}
     {% if content_type == "cucm_server_edit" %}
     <div id="tableWrap">
 		<fieldset>
@@ -136,27 +183,27 @@
 				<tbody>
 				<tr>
 					<td><label id="NAME_ID">Server Cluster</label></td>
-					<td>{{ form_edit_server.Cluster_field}}</td>
+					<td>{{ form_CUCM_server.Cluster_field}}</td>
 				</tr>
 				<tr>
 					<td><label id="Password_ID">IP Address</label></td>
-					<td>{{ form_edit_server.ip_field}}</td>
+					<td>{{ form_CUCM_server.ip_field}}</td>
 				</tr>
 				<tr>
 					<td><label id="DESCRIPTION_ID">API Username</label></td>
-					<td>{{ form_edit_server.username_field }}</td>
+					<td>{{ form_CUCM_server.username_field }}</td>
 				</tr>
 				<tr>
 					<td><label id="DESCRIPTION_ID">API Password</label></td>
-					<td>{{ form_edit_server.password_field }}</td>
+					<td>{{ form_CUCM_server.password_field }}</td>
 				</tr>
 				</tbody>
 
 			</table>
 		</fieldset>
 			<table>
-				<td>{{ form_edit_server.SaveSubmit()}}</td>
-				<td>{{ form_edit_server.DeleteSubmit()}}</td>
+				<td>{{ form_CUCM_server.SaveSubmit()}}</td>
+				<td>{{ form_CUCM_server.DeleteSubmit()}}</td>
 
 			</table>
 	</div>
@@ -164,26 +211,39 @@
 
     {% if content_type == "requester_server_list" %}
     <div id="tableWrap">
-    <fieldset>
-	<legend>
-			Server Information
-	</legend>
-	<table class="content-form" summary="Server Information">
-		<tbody><tr>
-			<td><label>Server Type</label></td>
-			<td>CUCM Voice/Video</td>
+	<table class="DataTable">
+		<tr>
+			<th>
+				ID
+			</th>
+			<th>
+				Cluster
+			</th>
+            <th>
+				IP
+			</th>
+			<th>
+				Enable
+			</th>
 		</tr>
-			<tr>
-				<td><label>Database Replication</label></td>
-				<td>Publisher</td>
-			</tr>
-			<tr><td><label id="NAME_ID" for="NAME">Host Name/IP Address</label></td><td><input id="NAME" name="name" maxlength="63" value="ccm-pub-msk.sibserv.com" size="50" onchange="isNameValid(this)" type="text"></td></tr>
-		    <tr><td><label id="IPV6NAME_ID" for="IPV6NAME">IPv6 Address (for dual IPv4/IPv6)</label></td><td><input id="IPV6NAME" name="ipv6name" maxlength="255" value="" size="50" onchange="isipv6nameValid(this)" type="text"></td></tr>
-			<tr><td><label id="MAC_ID" for="MAC">MAC Address</label></td><td><input id="MAC" name="mac" maxlength="12" value="00145E881BE8" size="50" onchange="isMacValid(this)" type="text"></td></tr>
-		    <tr><td><label id="DESCRIPTION_ID" for="DESCRIPTION">Description</label></td><td><input id="DESCRIPTION" name="description" maxlength="50" value="" size="50" onchange="isDescriptionValid(this)" type="text"></td></tr>
-	</tbody></table>
-    </fieldset>
-    </div>
+		{% for row in rows_list %}
+		<tr>
+			<td>
+				<a href="{{ url_for('platform_requester',server_id=row.id) }}">{{ row.id }}</a>
+			</td>
+            <td>
+				<a href="{{ url_for('platform_requester',server_id=row.id) }}">{{ row.cluster }}</a>
+			</td>
+			<td>
+				{{ row.ip }}
+			</td>
+			<td>
+				{{ row.running }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
     {% endif %}
 
     {% if content_type == "requester_server_edit" %}
