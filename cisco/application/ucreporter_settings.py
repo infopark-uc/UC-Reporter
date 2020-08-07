@@ -183,6 +183,16 @@ def ucreporter_settings_CUCMservers(server_id):
 			"redirect_to": form_navigation.select_navigation.data
 		}
 		return renderdata
+	if form_CUCM_server.validate_on_submit():
+		renderdata = {
+			"content_type": "redirect",
+			"redirect_to": "platform_CUCMservers",
+			"server_id": "new"
+		}
+		return renderdata
+
+
+
 
 	#отрисовка страницы изменения серверов.
 	if server_id:
