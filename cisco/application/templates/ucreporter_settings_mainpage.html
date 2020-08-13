@@ -5,7 +5,7 @@
     {% if content_type == "user_list" %}
 	<div id="tableWrap">
 		<table>
-				<td>{{ form_edit_user.AddSubmit()}}</td>
+			<button type="button" onclick="window.location.href='{{ url_for( 'platform_users' , userid='AddNew' ) }}';">Add New</button>
 		</table>
 	<table class="DataTable">
 		<tr>
@@ -33,6 +33,7 @@
 {# Страница редактирования пользователя #}
     {% if content_type == "user_edit" %}
 	    <div id="tableWrap">
+		<form action="" method="post" novalidate>
 		<fieldset>
 			<legend>
 				User Information
@@ -40,32 +41,36 @@
 			<table class="content-form" summary="User Information">
 				<tbody>
 				<tr>
-					<td><label id="NAME_ID">UserName</label></td>
-					<td>{{ form_edit_user.UserName_field(default=rows_list.username)}}</td>
+					<td><label>id</label></td>
+					<td>{{ form_edit_user.id_field}}</td>
 				</tr>
 				<tr>
-					<td><label id="Password_ID">Password</label></td>
-					<td>{{ form_edit_user.Password_field(default=rows_list.password)}}</td>
+					<td><label >UserName</label></td>
+					<td>{{ form_edit_user.UserName_field}}</td>
 				</tr>
 				<tr>
-					<td><label id="DESCRIPTION_ID">Description</label></td>
-					<td>{{ form_edit_user.Descriotion_field(default=rows_list.description)}}</td>
+					<td><label>Password</label></td>
+					<td>{{ form_edit_user.Password_field}}</td>
+				</tr>
+				<tr>
+					<td><label>Description</label></td>
+					<td>{{ form_edit_user.Descriotion_field}}</td>
 				</tr>
 				</tbody>
 
 			</table>
 		</fieldset>
-			<table>
-				<td>{{ form_edit_user.SaveSubmit()}}</td>
-				<td>{{ form_edit_user.DeleteSubmit()}}</td>
+		{{ form_edit_user.SaveSubmit()}}
+		</form>
 
-			</table>
+
 	</div>
 	{% endif %}
 
 {# Вывод листинга серверов CMS#}
     {% if content_type == "cms_server_list" %}
 	<div id="tableWrap">
+		<button type="button" onclick="window.location.href='{{ url_for( 'platform_CMSservers' , server_id='AddNew' ) }}';">Add New</button>
 	<table class="DataTable">
 		<tr>
 			<th>
@@ -76,6 +81,9 @@
 			</th>
             <th>
 				Cluster
+			</th>
+			<th>
+				CallLeg requester
 			</th>
 		</tr>
 		{% for row in rows_list %}
@@ -89,6 +97,8 @@
 			<td>
 				{{ row.cluster }}
 			</td>
+			<td>
+			</td>
 		</tr>
 		{% endfor %}
 	</table>
@@ -97,51 +107,53 @@
 
 {# Страница редактирования сервера CMS#}
     {% if content_type == "cms_server_edit" %}
-    <div id="tableWrap">
-		<fieldset>
-			<legend>
-				Sever Information
-			</legend>
-			<table class="content-form" summary="Server Information">
-				<tbody>
-				<tr>
-					<td><label id="NAME_ID">Server Cluster</label></td>
-					<td>{{ form_CMS_server.cluster_field}}</td>
-				</tr>
-				<tr>
-					<td><label id="Password_ID">IP Address</label></td>
-					<td>{{ form_CMS_server.ip_field}}</td>
-				</tr>
-				<tr>
-					<td><label id="DESCRIPTION_ID">API port</label></td>
-					<td>{{ form_CMS_server.API_Port_field }}</td>
-				</tr>
-				<tr>
-					<td><label id="DESCRIPTION_ID">API Username</label></td>
-					<td>{{ form_CMS_server.username_field }}</td>
-				</tr>
-				<tr>
-					<td><label id="DESCRIPTION_ID">API Password</label></td>
-					<td>{{ form_CMS_server.password_field }}</td>
-				</tr>
-				</tbody>
+<div id="tableWrap">
+	<fieldset>
+		<legend>
+			Sever Information
+		</legend>
+		<table class="content-form" summary="Server Information">
+			<tbody>
+			<tr>
+				<td><label id="NAME_ID">Server Cluster</label></td>
+				<td>{{ form_CMS_server.cluster_field}}</td>
+			</tr>
+			<tr>
+				<td><label id="Password_ID">IP Address</label></td>
+				<td>{{ form_CMS_server.ip_field}}</td>
+			</tr>
+			<tr>
+				<td><label id="DESCRIPTION_ID">API port</label></td>
+				<td>{{ form_CMS_server.API_Port_field }}</td>
+			</tr>
+			<tr>
+				<td><label id="DESCRIPTION_ID">API Username</label></td>
+				<td>{{ form_CMS_server.username_field }}</td>
+			</tr>
+			<tr>
+				<td><label id="DESCRIPTION_ID">API Password</label></td>
+				<td>{{ form_CMS_server.password_field }}</td>
+			</tr>
+			<tr>
+				<td><label id="DESCRIPTION_ID">CallLeg Request information</label></td>
+				<td>{{ form_CMS_server.Requester_field }}</td>
+			</tr>
+			</tbody>
 
-			</table>
-		</fieldset>
-			<table>
-				<td>{{ form_CMS_server.SaveSubmit()}}</td>
-				<td>{{ form_CMS_server.DeleteSubmit()}}</td>
-
-			</table>
-	</div>
+		</table>
+	</fieldset>
+	<table>
+		<tr>
+			<td>{{ form_CMS_server.SaveSubmit()}}</td>
+		</tr>
+	</table>
+</div>
     {% endif %}
 
 {# Вывод листинга серверов CUCM#}
     {% if content_type == "cucm_server_list" %}
 	<div id="tableWrap">
-	<table>
-				<td>{{ form_CUCM_server.AddSubmit()}}</td>
-	</table>
+			<button type="button" onclick="window.location.href='{{ url_for( 'platform_CUCMservers' , server_id='AddNew' ) }}';">Add New</button>
 	<table class="DataTable">
 		<tr>
 			<th>
@@ -182,6 +194,10 @@
 			<table class="content-form" summary="Server Information">
 				<tbody>
 				<tr>
+					<td><label>id</label></td>
+					<td>{{ form_CUCM_server.id_field}}</td>
+				</tr>
+				<tr>
 					<td><label id="NAME_ID">Server Cluster</label></td>
 					<td>{{ form_CUCM_server.Cluster_field}}</td>
 				</tr>
@@ -201,11 +217,8 @@
 
 			</table>
 		</fieldset>
-			<table>
-				<td>{{ form_CUCM_server.SaveSubmit()}}</td>
-				<td>{{ form_CUCM_server.DeleteSubmit()}}</td>
+				{{ form_CUCM_server.SaveSubmit()}}
 
-			</table>
 	</div>
     {% endif %}
 

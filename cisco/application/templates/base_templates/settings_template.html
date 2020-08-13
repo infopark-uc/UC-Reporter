@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html>
+<link rel="stylesheet" href="{{ url_for('static', filename='settings_menubar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='base_template.css') }}">
 <head>
 	{% if html_page_title %}
         <title>{{ html_page_title }} </title>
@@ -7,8 +9,7 @@
         <title>Welcome to UC Report</title>
     {% endif %}
 
-	<link rel="stylesheet" href="{{ url_for('static', filename='settings_menubar.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='base_template.css') }}">
+
 
 
 
@@ -36,7 +37,7 @@
     			{% endif %}
         </div>
 	</div>
-	<table>
+
 		<nav>
 			<ul class="topmenu">
 				<li><a href="" class="active">Users<span class="fa fa-angle-down"></span></a>
@@ -65,8 +66,6 @@
 
 			</ul>
 		</nav>
-
-	</table>
 	<table class="HeaderTable">
 		<tr>
 			<th>
@@ -79,11 +78,10 @@
 			<div class="StatusItem">
 				{{ console_output }}
 			</div>
-		</legend>
 	</fieldset>
 
 	{% block Content %}{% endblock %}
-<body>
+</body>
 </html>
 
 
