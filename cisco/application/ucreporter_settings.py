@@ -1,4 +1,4 @@
-from application.forms import SelectNavigation,UserInformation,CUCMServerInformation,CMSServerInformation,DeleteForm,AddNewForm
+from application.forms import SelectNavigation,UserInformation,CUCMServerInformation,CMSServerInformation
 from datetime import datetime
 from application.sqlrequests import sql_request_dict,sql_execute
 from pprint import pprint

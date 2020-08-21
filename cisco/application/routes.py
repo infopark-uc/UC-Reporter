@@ -10,7 +10,7 @@ from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from flask_login import logout_user, current_user, login_required
-from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users,ucreporter_settings_ucrequester
+from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users
 from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
 import application.callforward
 
@@ -327,28 +327,6 @@ def platform_CMSservers(server_id):
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
-    #отрисовка путой страницы
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           html_page_header=module_result['html_page_header'],
-                           content_type=module_result['content_type'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'])
-
-
-@app.route('/platform/requester/', defaults={'server_id': None }, methods=['GET', 'POST'])
-@app.route('/platform/requester/<string:server_id>/', methods=['GET', 'POST'])
-@login_required
-def platform_requester(server_id):
-    module_result = ucreporter_settings_ucrequester(server_id)
-    if module_result['content_type'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           html_page_header=module_result['html_page_header'],
-                           content_type=module_result['content_type'],
-                           console_output=module_result['console_output'],
-                           rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'])
 
 
 
