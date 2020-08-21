@@ -71,7 +71,7 @@ def roomrequest():
 
 @app.route('/SubmitOrder', methods=['GET', 'POST'])
 def order():
-    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
+    #ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
     return submit_order("0") # "0" - index roomsystem from database
 
 @app.route('/ucsendmail', methods=['POST'])
