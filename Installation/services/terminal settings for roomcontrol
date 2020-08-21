@@ -1,0 +1,7 @@
+For enable HttpFeedback:
+
+xCommand HttpFeedback Register FeedbackSlot: 1 ServerURL: "http://<ip flask>/roomrequest" Format: JSON Expression: "Event/UserInterface/Extensions/Event" Expression: "Event/UserInterface/Extensions/Panel"
+
+Check status:
+
+xStatus HttpFeedback 1
