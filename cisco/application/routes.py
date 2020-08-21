@@ -65,7 +65,7 @@ def cfa():
 
 @app.route('/roomrequest', methods=['GET', 'POST'])
 def roomrequest():
-    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
+    #ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
     codec("0") # "0" - index roomsystem from database
     return "roomrequest done"
 
