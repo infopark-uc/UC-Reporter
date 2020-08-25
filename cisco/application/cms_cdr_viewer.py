@@ -22,7 +22,7 @@ def cmsviewer():
 
 	SEARCH_FOR_ALL = "all"
 
-	html_page_title = 'CMS CDR Report'
+	html_page_title = 'Cisco Meetings Server CDR Report'
 
 	# Temporary values
 	console_output = "Нет активного запроса"

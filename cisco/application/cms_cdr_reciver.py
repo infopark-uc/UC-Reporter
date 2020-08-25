@@ -22,7 +22,7 @@ def cdr_receiver():
     # Обработчик логов - запись в файлы с перезаписью
     if not logger.handlers:
         console_output = ": no any handlers in Logger - create new one"
-        print("CMS_RECEIVER " + console_output)
+        #print("CMS_RECEIVER " + console_output)
 
         rotate_file_handler = logging.handlers.RotatingFileHandler(CMS_RECEIVER_LOG_FILE_NAME, maxBytes=CMS_RECEIVER_LOG_FILE_SIZE, backupCount=CMS_RECEIVER_LOG_FILE_COUNT)
         rotate_file_handler.setLevel(logging.DEBUG)
@@ -31,7 +31,7 @@ def cdr_receiver():
         logger.addHandler(rotate_file_handler)
     else:
         console_output = ": handlers are already exists in Logger"
-        print("CMS_RECEIVER " + console_output)
+        #print("CMS_RECEIVER " + console_output)
 
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
@@ -40,45 +40,45 @@ def cdr_receiver():
 
         if type (cdr_dict['records']['record']) is list:
             console_output = cms_ip + ": We get record list"
-            print("CMS_RECEIVER " + console_output)
+            #print("CMS_RECEIVER " + console_output)
             logger.debug(console_output)
             record_list = cdr_dict['records']['record']
         else:
             console_output =  cms_ip + ": We get not record list"
-            print("CMS_RECEIVER " + console_output)
+            #print("CMS_RECEIVER " + console_output)
             logger.debug(console_output)
             record_list = [cdr_dict['records']['record']]
 
         console_output = cms_ip + ": Number of records in list: " + str(len(record_list))
-        print("CMS_RECEIVER " + console_output)
+        #print("CMS_RECEIVER " + console_output)
         logger.debug(console_output)
 
         for record_item in record_list:
             console_output = "CMS_RECEIVER " + cms_ip + ": record_item"
-            print(console_output)
+            #print(console_output)
             logger.debug(console_output)
             pprint(record_item)
             logger.debug("\n" + pformat(record_item))
 
             if record_item['@type'] == 'callLegStart':  #проверяем что, это новый коллег
                 console_output =  cms_ip + ": We get callLegStart"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
                 console_output =  cms_ip + ": Start to process callLegStart"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
 
                 if "@id" in record_item['callLeg']:
                     callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID
                     console_output =  cms_ip + ": We get callLegID from callLegStart"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     # забираем sipcall_id
                     if "sipCallId" in record_item['callLeg']:
                         sipcall_id = str(record_item['callLeg']['sipCallId'])
                         console_output =  cms_ip + ": We get sipCallID from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         sipcall_id = "none"
@@ -87,7 +87,7 @@ def cdr_receiver():
                     if "call" in record_item['callLeg']:
                         call_id = str(record_item['callLeg']['call'])
                         console_output =  cms_ip + ": We get callID from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         call_id = "none"
@@ -96,7 +96,7 @@ def cdr_receiver():
                     if "remoteAddress" in record_item['callLeg']:
                         remoteAddress = str(record_item['callLeg']['remoteAddress'])
                         console_output =  cms_ip + ": We get remoteAddress from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         remoteAddress = "none"
@@ -105,7 +105,7 @@ def cdr_receiver():
                     if "remoteParty" in record_item['callLeg']:
                         remoteParty = str(record_item['callLeg']['remoteParty'])
                         console_output =  cms_ip + ": We get remoteParty from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         remoteParty = "none"
@@ -114,7 +114,7 @@ def cdr_receiver():
                     if "localAddress" in record_item['callLeg']:
                         localAddress = str(record_item['callLeg']['localAddress'])
                         console_output =  cms_ip + ": We get localAddress from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         localAddress = "none"
@@ -123,7 +123,7 @@ def cdr_receiver():
                     if "displayName" in record_item['callLeg']:
                         displayName = str(record_item['callLeg']['displayName'])
                         console_output =  cms_ip + ": We get displayName from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         displayName = "none"
@@ -133,7 +133,7 @@ def cdr_receiver():
                         callLegStartTime = str(record_item['@time'])
                         callLegStartTimeMSK = str(datetime.datetime.strptime(callLegStartTime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output =  cms_ip + ": We get callLegTime from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLegStartTime = "none"
@@ -145,7 +145,7 @@ def cdr_receiver():
                     if "guestConnection" in record_item['callLeg']:
                         guestConnection = str(record_item['callLeg']['guestConnection'])
                         console_output =  cms_ip + ": We get guestConnection from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                          guestConnection = "none"
@@ -154,7 +154,7 @@ def cdr_receiver():
                     if "recording" in record_item['callLeg']:
                         recording = str(record_item['callLeg']['recording'])
                         console_output =  cms_ip + ": We get recording from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                          recording = "none"
@@ -163,7 +163,7 @@ def cdr_receiver():
                     if "type" in record_item['callLeg']:
                         callLeg_type = str(record_item['callLeg']['type'])
                         console_output =  cms_ip + ": We get type from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLeg_type = "none"
@@ -172,7 +172,7 @@ def cdr_receiver():
                     if "subType" in record_item['callLeg']:
                         callLeg_subtype = str(record_item['callLeg']['subType'])
                         console_output =  cms_ip + ": We get subType from callLegStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLeg_subtype = "none"
@@ -195,16 +195,16 @@ def cdr_receiver():
                         + "',remoteAddress='" + remoteAddress + "';")
 
                     console_output =  cms_ip + ":     SIP ID: " + sipcall_id + " and " + callleg_id + " inserted to database"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
                 else:
                     console_output =  cms_ip + ": CallLeg Id not found in callLegStart - nothing was inserted in DB"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
             if record_item['@type'] == 'callLegUpdate':
                 console_output =  cms_ip + ": we get callLegUpdate"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
                 callleg_id = str(record_item['callLeg']['@id'])  # забираем callleg ID для обновления базы данных
                 if "call" in record_item['callLeg']:
@@ -215,21 +215,21 @@ def cdr_receiver():
 
             if record_item['@type'] == 'callLegEnd':
                 console_output =  cms_ip + ": we get callLegEnd"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
 
                 # забираем callleg ID для обновления базы данных
                 if "@id" in record_item['callLeg']:
                     callleg_id = str(record_item['callLeg']['@id'])
                     console_output =  cms_ip + ": We get callLegID from callLegEnd"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     # забираем  durationSeconds
                     if "durationSeconds" in record_item['callLeg']:
                         durationSeconds = str(record_item['callLeg']['durationSeconds'])  # забираем  durationSeconds
                         console_output =  cms_ip + ": We get durationSeconds from callLegEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         durationSeconds = "none"
@@ -238,7 +238,7 @@ def cdr_receiver():
                     if "reason" in record_item['callLeg']:
                         reason = str(record_item['callLeg']['reason'])
                         console_output =  cms_ip + ": We get reason from callLegEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         reason = "none"
@@ -247,7 +247,7 @@ def cdr_receiver():
                     if "remoteTeardown" in record_item['callLeg']:
                         remoteTeardown = str(record_item['callLeg']['remoteTeardown'])
                         console_output =  cms_ip + ": We get remoteTeardown from callLegEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         remoteTeardown = "none"
@@ -257,7 +257,7 @@ def cdr_receiver():
                         callLegEndTime = str(record_item['@time'])
                         callLegEndTimeMSK = str(datetime.datetime.strptime(callLegEndTime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output =  cms_ip + ": We get callLegEndTime from callLegEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         callLegEndTime = "none"
@@ -396,7 +396,7 @@ def cdr_receiver():
 
                     ### обновляем информацию о вызове
                     console_output =  cms_ip + ": insert CallLegEnd data to database"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
                     cms_sql_request("UPDATE cms_cdr_records SET txAudio_codec='" + acodectx
                                     + "',endTime='" + callLegEndTimeMSK
@@ -421,30 +421,30 @@ def cdr_receiver():
                                     + "' WHERE callleg_id='" + callleg_id + "';")
 
                     console_output =  cms_ip + ":  call detail updated from callLegEnd"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
                     #pprint(cdr_dict)
                 else:
                     console_output =  cms_ip + ": CallLeg Id not found in callLegEnd - nothing was inserted in DB"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
             if record_item['@type'] == 'callStart':
                 console_output =  cms_ip + ": we get callStart"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
 
                 if "@id" in record_item['call']:
                     call_id = str(record_item['call']['@id'])  # забираем call ID
                     console_output =  cms_ip + ": We get callID from callStart"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     # забираем coSpace
                     if "coSpace" in record_item['call']:
                         coSpace = str(record_item['call']['coSpace'])
                         console_output =  cms_ip + ": We get coSpace from callStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         coSpace = "none"
@@ -453,7 +453,7 @@ def cdr_receiver():
                     if "name" in record_item['call']:
                         name = str(record_item['call']['name'])
                         console_output =  cms_ip + ": We get name from callStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         name = "none"
@@ -463,22 +463,22 @@ def cdr_receiver():
                         starttime = str(record_item['@time'])
                         starttimeMSK = str(datetime.datetime.strptime(starttime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output =  cms_ip + ": We get start time from callStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                         console_output = cms_ip + ": Call start time:" + starttimeMSK
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         starttime = "none"
                         starttimeMSK = "none"
 
                     console_output = cms_ip + ": cospace: " + coSpace + " time: " + starttime
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
                         console_output = cms_ip + ": insert CALL to database"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                         # insert IDs to database
                         cms_sql_request(
@@ -489,25 +489,25 @@ def cdr_receiver():
                             + "',name='" + name + "';")
                     else:
                         console_output =  cms_ip + ": Space ID data already presence"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
 
 
             if record_item['@type'] == 'callEnd':
                 console_output =  cms_ip + ": we get callEnd"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
                 if "@id" in record_item['call']:
                     call_id = str(record_item['call']['@id'])
                     console_output = cms_ip + ": We get callID from callEnd"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     # забираем call_callLegsMaxActive
                     if "callLegsMaxActive" in record_item['call']:
                         call_callLegsMaxActive = str(record_item['call']['callLegsMaxActive'])
                         console_output = cms_ip + ": We get call_callLegsMaxActive from callEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         call_callLegsMaxActive = "none"
@@ -516,7 +516,7 @@ def cdr_receiver():
                     if "durationSeconds" in record_item['call']:
                         call_durationSeconds = str(record_item['call']['durationSeconds'])
                         console_output = cms_ip + ": We get call_durationSeconds from callEnd"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         call_durationSeconds = "none"
@@ -526,7 +526,7 @@ def cdr_receiver():
                         call_endtime = str(record_item['@time'])
                         call_endtimeMSK = str(datetime.datetime.strptime(call_endtime, "%Y-%m-%dT%H:%M:%SZ") + datetime.timedelta(hours=3))
                         console_output = cms_ip + ": Call end time: " + call_endtimeMSK
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         call_endtime = "none"
@@ -534,7 +534,7 @@ def cdr_receiver():
 
                     if cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
                         console_output =  cms_ip + ": update CALL to database"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                         # insert IDs to database
                         cms_sql_request(
@@ -544,31 +544,31 @@ def cdr_receiver():
                             + "' WHERE cms_cdr_calls.id='" + call_id + "';")
                     else:
                         console_output =  cms_ip + ": Call " + call_id + " is not found in DB"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     #pprint(cdr_dict)
                 else:
                     console_output = cms_ip + ": callEnd does not contain CallID"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
 
             if record_item['@type'] == 'recordingStart':
                 console_output =  cms_ip + ": we get recordingStart"
-                print("CMS_RECEIVER " + console_output)
+                #print("CMS_RECEIVER " + console_output)
                 logger.debug(console_output)
 
                 if "@id" in record_item['recording']:
                     recording_id = str(record_item['recording']['@id'])
                     console_output = cms_ip + ": We get RecordingID from recordingStart"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
                     # забираем path
                     if "path" in record_item['recording']:
                         recording_path = str(record_item['recording']['path'])
                         console_output = cms_ip + ": We get path from recordingStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         recording_path = "none"
@@ -577,7 +577,7 @@ def cdr_receiver():
                     if "call" in record_item['recording']:
                         recording_call_id = str(record_item['recording']['call'])
                         console_output = cms_ip + ": We get call_id from recordingStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         recording_call_id = "none"
@@ -586,7 +586,7 @@ def cdr_receiver():
                     if "callLeg" in record_item['recording']:
                         recording_callLeg_id = str(record_item['recording']['callLeg'])
                         console_output = cms_ip + ": We get callLeg_id from recordingStart"
-                        print("CMS_RECEIVER " + console_output)
+                        #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     else:
                         recording_callLeg_id = "none"
@@ -599,7 +599,7 @@ def cdr_receiver():
                         + "',callLeg_id='" + recording_callLeg_id + "';")
 
                     console_output = cms_ip + ":  RecordingID: " + recording_id + " inserted to database"
-                    print("CMS_RECEIVER " + console_output)
+                    #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
         return('', 204)

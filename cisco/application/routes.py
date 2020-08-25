@@ -16,6 +16,7 @@ import application.callforward
 
 
 @app.route("/", methods=['GET', 'POST'])
+@app.route("/phones", methods=['GET', 'POST'])
 @app.route("/index", methods=['GET', 'POST'])
 def usersearchpage():
      module_result = usersreport() #получаем данные из модуля

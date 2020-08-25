@@ -9,7 +9,7 @@ def usersreport():
     SEARCH_BY_DN = "Number"
     SEARCH_BY_USER = "User"
 
-    html_page_title = 'CUCM Report Beta'
+    html_page_title = 'CUCM Users report'
 
     # Temporary values
     console_output = "Нет активного запроса"

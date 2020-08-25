@@ -8,7 +8,7 @@ from application.sqlrequests import sql_request_dict
 def render():
     SEARCH_BY_DN = "DN"
     SEARCH_BY_TRANSFER = "Transfer"
-    html_page_title = 'CUCM Report Beta'
+    html_page_title = 'CUCM CallForward Report'
     # Temporary values
     console_output = "Нет активного запроса"
     form_navigation = SelectNavigation(csrf_enabled=False)
