@@ -1,0 +1,100 @@
+                .HeaderLine {
+                        display: flex;
+                        flex-flow: row nowrap;
+                        align-items: center;
+                        font-family: Verdana;
+                        font-size: 100%;
+                        font-weight: bold;
+                        color: #2f6681;
+                        height: 60px;
+                        background: linear-gradient(to right, #ffffff, #2f6681);
+                }
+                .HeaderItem {
+                        margin: 5px;
+                }
+
+                .NavigationItem {
+                        margin-left: auto;
+                        font-size: 80%;
+                        color: white;
+                }
+
+                .HeaderTable {
+                        border-collapse: collapse;
+                        text-align: left;
+                        font-family: Verdana;
+                        color: white;
+                        font-weight: bold;
+                        width: 100%;
+                        margin-top: 10px;
+                }
+                .HeaderTable th {
+                        height: 150px;
+                        padding: 10px;
+                        font-size: 130%;
+                        background: #2f6681;
+                }
+
+                .HeaderTable th:last-child {
+                        width: 300px;
+                        margin-left: auto;
+                        font-size: 80%;
+                        font-weight: normal;
+                        color: white;
+                }
+
+                .HeaderTable td {
+                        height: 25px;
+                        padding: 10px;
+                        font-size: 80%;
+                        background: #6d94a7;
+                }
+
+                .Status {
+                        margin: 10;
+                        margin-top: 10px;
+                }
+
+                .StatusHeader {
+                        font-size: 70%;
+                        font-weight: bold;
+                        font-family: Verdana;
+                        color: black;
+                }
+
+                .StatusItem {
+                        margin: 10;
+                        font-size: 70%;
+                        font-family: Verdana;
+                        color: black;
+                }
+
+                .SearchItem {
+                        margin: 10;
+                        margin-top: 10px;
+                        font-size: 80%;
+                        font-family: Verdana;
+                        color: black;
+                }
+
+                .DataTable {
+                        font-size: 70%;
+                        font-family: Verdana;
+                        color: black;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                        margin-left: auto;
+            margin-right: auto;
+                }
+                .DataTable TH {
+                        background: #dbdbdb; /* ???? ???? ????? */
+                }
+                .DataTable TR:nth-child(odd) {
+                        height: 23px;
+                        background: #f8f8f8;
+                }
+
+                .DataTable TR:nth-child(even) {
+                        height: 23px;
+                        background: #ebebeb;
+                }

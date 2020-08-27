@@ -282,7 +282,7 @@ def cmsrecordingsviewer():
 		}
 		return renderdata
 
-	sql_request_result_string = "SELECT cms_cdr_calls.name, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.StartTime, cms_cdr_calls.durationSeconds, cms_cdr_recordings.path FROM cms_cdr_calls INNER JOIN cms_cdr_recordings ON cms_cdr_recordings.call_id=cms_cdr_calls.id ORDER BY cms_cdr_calls.StartTime DESC;"
+	sql_request_result_string = "SELECT cms_cdr_calls.name, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.StartTime, cms_cdr_calls.durationSeconds, cms_cdr_recordings.path, cms_cdr_recordings.recording_id FROM cms_cdr_calls INNER JOIN cms_cdr_recordings ON cms_cdr_recordings.call_id=cms_cdr_calls.id ORDER BY cms_cdr_calls.StartTime DESC;"
 	rows_list = cms_sql_request_dict(sql_request_result_string)
 
 	print("CMS CALLVW: get dict for call recordings")

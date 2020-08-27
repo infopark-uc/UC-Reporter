@@ -168,8 +168,6 @@ def ucreporter_settings_CMSservers(server_id):
 
 	form_navigation = SelectNavigation(meta={'csrf': False})
 	form_CMS_server = CMSServerInformation(meta={'csrf': False})
-	form_addnew = DeleteForm(meta={'csrf': False})
-	form_delete = AddNewForm(meta={'csrf': False})
 	if form_navigation.validate_on_submit():
 		renderdata = {
 			"content_type": "redirect",
@@ -200,8 +198,6 @@ def ucreporter_settings_CMSservers(server_id):
 				"html_page_header": html_page_header,
 				"console_output": console_output,
 				"form_CMS_server": form_CMS_server,
-				"form_addnew": form_addnew,
-				"form_delete": form_delete,
 				"rows_list": rows_list,
 				"form_navigation": form_navigation,
 			}
@@ -221,8 +217,6 @@ def ucreporter_settings_CMSservers(server_id):
 			"html_page_header": html_page_header,
 			"console_output": console_output,
 			"form_CMS_server": form_CMS_server,
-			"form_addnew": form_addnew,
-			"form_delete": form_delete,
 			"rows_list": rows_list,
 			"form_navigation": form_navigation,
 		}
