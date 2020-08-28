@@ -54,7 +54,7 @@
 			</td>
 			<td>
 				<div>
-					<img width="20" height="20" class="play-btn" data-toggle="modal" data-target="#id_{{row.recording_id}}" src="{{ url_for("static", filename="icon_play.png") }}" />
+					<img width="20" height="20" class="play-btn" data-toggle="modal" data-target="#id_{{row.recording_id}}" src="{{ url_for('static', filename='icon_play.png') }}" />
 				</div>
 			</td>
 		</tr>
@@ -62,16 +62,20 @@
 		{% endfor %}
 	</table>
 	</div>
+
         {% for row in rows_list %}
 <div class="modal fade" id="id_{{row.recording_id}}" role="dialog" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-body">
+
 				<video width="100%" controls>
-					<source src="{{row.path}}" type="video/mp4">
+					<source src="file://195.168.12.195/record/{{row.original_path}}" type='video/mp4'>
 					{# Если браузер не поддерживает видео тэг выводим сообщение: #}
 					Your browser does not support video.
 				</video>
+
+
 			</div>
 		</div>
 	</div>

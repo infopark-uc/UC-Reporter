@@ -5,6 +5,7 @@ from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectCMSClusterForCDR
 from application.sqlrequests import cms_sql_request_dict
+import time
 from flask_login import current_user
 import collections
 
@@ -288,6 +289,11 @@ def cmsrecordingsviewer():
 	print("CMS CALLVW: get dict for call recordings")
 
 	for row in rows_list:
+		row["original_path"] = row["path"]
+		#переводим секунлы в нормальное время
+		if row["durationSeconds"]:
+			row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
+		#формируем путь к файлу
 		row["path"] = NETPATH + row["path"].replace("/","\\") + RECORD_FILE_EXTENTION
 
 	operationEndTime = datetime.now()
