@@ -41,13 +41,23 @@ def cmsviewer():
 	form_cmsselection = SelectCMSClusterForCDR(meta={'csrf': False})
 	if form_cmsselection.validate_on_submit():
 		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
-			rows_list = cms_sql_request_dict(
-				"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
-			print("CMS VW: get dict")
+			if not form_cmsselection.confroom_filter.data:
+				rows_list = cms_sql_request_dict(
+					"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC")
+				#print("CMS VW: get dict")
+			else:
+				rows_list = cms_sql_request_dict(
+					"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls WHERE (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC")
+				#print("CMS VW: get dict")
 		else:
-			rows_list = cms_sql_request_dict(
-				"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC;")
-			print("CMS VW: get dict")
+			if not form_cmsselection.confroom_filter.data:
+				rows_list = cms_sql_request_dict(
+					"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC;")
+				#print("CMS VW: get dict")
+			else:
+				rows_list = cms_sql_request_dict(
+					"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "'AND (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC;")
+				#print("CMS VW: get dict")
 
 		operationEndTime = datetime.now()
 		operationDuration = str( operationEndTime - operationStartTime)

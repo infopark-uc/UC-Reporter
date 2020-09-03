@@ -20,6 +20,7 @@ class SelectForwardSearchType(FlaskForm):
 
 class SelectCMSClusterForCDR(FlaskForm):
     select_CMSCluster = SelectField('Navigation', default="all", choices=[('all', 'Все кластеры'), ('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    confroom_filter = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     submit = SubmitField('Найти')
 
 class SelectCMSClusterForCospace(FlaskForm):
@@ -48,6 +49,7 @@ class CUCMServerInformation(FlaskForm):
 
 class CMSServerInformation(FlaskForm):
     API_Port_field = StringField('')
+    id_field = Label('id', text='')
     Requester_field = SelectField('', default="True", choices=[('True', 'Enable'), ('False', 'Disable')])
     cluster_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     ip_field = StringField('',validators=[DataRequired(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])

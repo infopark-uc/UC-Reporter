@@ -1,13 +1,15 @@
-from application.forms import SelectNavigation,UserInformation,CUCMServerInformation,CMSServerInformation
+from application.forms import SelectNavigation, UserInformation, CUCMServerInformation, CMSServerInformation
 from datetime import datetime
-from application.sqlrequests import sql_request_dict,sql_execute
+from application.sqlrequests import sql_request_dict, sql_execute
 from pprint import pprint
 import subprocess
 
-def run_linux_command(command):
-    return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
-#отрировка главной странички
+def run_linux_command(command):
+	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+
+
+# отрировка главной странички
 def ucreporter_settings_mainpage():
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration'
@@ -37,7 +39,8 @@ def ucreporter_settings_mainpage():
 	}
 	return renderdata
 
-#страница настроек пользователей
+
+# страница настроек пользователей
 def ucreporter_settings_users(user_id):
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration '
@@ -45,8 +48,7 @@ def ucreporter_settings_users(user_id):
 	form_navigation = SelectNavigation(meta={'csrf': False})
 	form_edit_user = UserInformation(meta={'csrf': False})
 
-
-	#нажака нопка перехода на другую страницу
+	# нажака нопка перехода на другую страницу
 	if form_navigation.validate_on_submit():
 		renderdata = {
 			"content_type": "redirect",
@@ -54,7 +56,7 @@ def ucreporter_settings_users(user_id):
 		}
 		return renderdata
 
-	#нажака нопка SAVE
+	# нажака нопка SAVE
 	if form_edit_user.validate_on_submit():
 		# запрашиваем ID в базе
 		sql_request_result_string = "SELECT * FROM ucreporter_users WHERE id=" + str(form_edit_user.id_field.text) + ";"
@@ -84,24 +86,21 @@ def ucreporter_settings_users(user_id):
 		}
 		return renderdata
 
-
-
-
 	if user_id:
 		if user_id == "AddNew":
-			#Новый пользователь, считаем номер нового ID
-			sql_request_result_string = "SELECT MAX(id) FROM ucreporter_users;" #забираем максимальный
+			# Новый пользователь, считаем номер нового ID
+			sql_request_result_string = "SELECT MAX(id) FROM ucreporter_users;"  # забираем максимальный
 			rows_list = sql_request_dict(sql_request_result_string)
-			#заполняем форму
+			# заполняем форму
 			index_data = int(rows_list[0]['MAX(id)']) + 1
 			form_edit_user.id_field.text = index_data
 			form_edit_user.UserName_field.data = str("username")
 			form_edit_user.Password_field.data = str("password")
 			form_edit_user.Descriotion_field.data = str("description")
 		else:
-			sql_request_result_string = "SELECT * FROM ucreporter_users WHERE id="+user_id+";"
+			sql_request_result_string = "SELECT * FROM ucreporter_users WHERE id=" + user_id + ";"
 			rows_list = sql_request_dict(sql_request_result_string)
-			#заполняем форму
+			# заполняем форму
 			form_edit_user.id_field.text = (rows_list[0]['id'])
 			form_edit_user.UserName_field.data = str(rows_list[0]['username'])
 			form_edit_user.Password_field.data = str(rows_list[0]['password'])
@@ -118,7 +117,7 @@ def ucreporter_settings_users(user_id):
 				"html_page_title": html_page_title,
 				"html_page_header": html_page_header,
 				"console_output": console_output,
-                "form_edit_user":form_edit_user,
+				"form_edit_user": form_edit_user,
 				"rows_list": rows_list,
 				"form_navigation": form_navigation,
 			}
@@ -127,7 +126,6 @@ def ucreporter_settings_users(user_id):
 	else:
 		sql_request_result_string = "SELECT * FROM ucreporter_users;"
 		rows_list = sql_request_dict(sql_request_result_string)
-
 
 		content_type = "user_list"
 		operationEndTime = datetime.now()
@@ -145,7 +143,6 @@ def ucreporter_settings_users(user_id):
 		}
 		return renderdata
 
-
 	operationEndTime = datetime.now()
 	operationDuration = str(operationEndTime - operationStartTime)
 	console_output = "Done in " + operationDuration
@@ -160,7 +157,8 @@ def ucreporter_settings_users(user_id):
 	}
 	return renderdata
 
-#страница настроек CMS
+
+# страница настроек CMS
 def ucreporter_settings_CMSservers(server_id):
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration'
@@ -176,17 +174,32 @@ def ucreporter_settings_CMSservers(server_id):
 		return renderdata
 
 
+
 	if server_id:
-		sql_request_result_string = "SELECT * FROM cms_servers WHERE id=" + server_id + ";"
-		rows_list = sql_request_dict(sql_request_result_string)
-		if rows_list:
-			#заполняем форму
+		if server_id == "AddNew":
+			# Новый пользователь, считаем номер нового ID
+			sql_request_result_string = "SELECT MAX(id) FROM cms_servers;"  # забираем максимальный
+			rows_list = sql_request_dict(sql_request_result_string)
+			# заполняем форму
+			index_data = int(rows_list[0]['MAX(id)']) + 1
+			form_CMS_server.id_field.text = index_data
+			form_CMS_server.API_Port_field.data = str('api_port')
+			form_CMS_server.ip_field.data = str('ip')
+			form_CMS_server.cluster_field.data = str('cluster')
+			form_CMS_server.password_field.data = str('password')
+			form_CMS_server.username_field.data = str('login')
+
+		else:
+			sql_request_result_string = "SELECT * FROM cms_servers WHERE id=" + server_id + ";"
+			rows_list = sql_request_dict(sql_request_result_string)
+			# заполняем форму
 			form_CMS_server.API_Port_field.data = str(rows_list[0]['api_port'])
 			form_CMS_server.ip_field.data = str(rows_list[0]['ip'])
 			form_CMS_server.cluster_field.data = str(rows_list[0]['cluster'])
 			form_CMS_server.password_field.data = str(rows_list[0]['password'])
 			form_CMS_server.username_field.data = str(rows_list[0]['login'])
 
+		if rows_list:
 			content_type = "cms_server_edit"
 			operationEndTime = datetime.now()
 			operationDuration = str(operationEndTime - operationStartTime)
@@ -202,7 +215,7 @@ def ucreporter_settings_CMSservers(server_id):
 				"form_navigation": form_navigation,
 			}
 			return renderdata
-#отрисовка данных списка серверов в случае, если не пришел ID сервера.
+	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
 	else:
 		sql_request_result_string = "SELECT * FROM cms_servers;"
 		rows_list = sql_request_dict(sql_request_result_string)
@@ -222,7 +235,8 @@ def ucreporter_settings_CMSservers(server_id):
 		}
 		return renderdata
 
-#страница настроек CUCM
+
+# страница настроек CUCM
 def ucreporter_settings_CUCMservers(server_id):
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration'
@@ -238,13 +252,13 @@ def ucreporter_settings_CUCMservers(server_id):
 		}
 		return renderdata
 
-	#отрисовка страницы изменения серверов.
+	# отрисовка страницы изменения серверов.
 	if server_id:
 		if server_id == "AddNew":
-			#Новый пользователь, считаем номер нового ID
-			sql_request_result_string = "SELECT MAX(id) FROM ucreporter_users;" #забираем максимальный
+			# Новый пользователь, считаем номер нового ID
+			sql_request_result_string = "SELECT MAX(id) FROM ucreporter_users;"  # забираем максимальный
 			rows_list = sql_request_dict(sql_request_result_string)
-			#заполняем форму
+			# заполняем форму
 			index_data = int(rows_list[0]['MAX(id)']) + 1
 			form_CUCM_server.id_field.text = index_data
 			form_CUCM_server.Cluster_field.data = str(rows_list[0]['cluster'])
@@ -278,8 +292,7 @@ def ucreporter_settings_CUCMservers(server_id):
 			}
 			return renderdata
 
-
-		# отрисовка данных списка серверов в случае, если не пришел ID сервера.
+	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
 	else:
 		sql_request_result_string = "SELECT * FROM cm_servers_list;"
 		rows_list = sql_request_dict(sql_request_result_string)
@@ -299,6 +312,7 @@ def ucreporter_settings_CUCMservers(server_id):
 		}
 		return renderdata
 
+
 def ucreporter_settings_ucrequester(server_id):
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration'
@@ -314,7 +328,7 @@ def ucreporter_settings_ucrequester(server_id):
 		}
 		return renderdata
 
-	#отрисовка страницы изменения серверов.
+	# отрисовка страницы изменения серверов.
 	if server_id:
 		sql_request_result_string = "SELECT * FROM cms_requester_config WHERE id=" + server_id + ";"
 		rows_list = sql_request_dict(sql_request_result_string)
@@ -342,8 +356,7 @@ def ucreporter_settings_ucrequester(server_id):
 			}
 			return renderdata
 
-
-		# отрисовка данных списка серверов в случае, если не пришел ID сервера.
+	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
 	else:
 		sql_request_result_string = "SELECT * FROM cms_requester_config;"
 		rows_list = sql_request_dict(sql_request_result_string)
@@ -361,4 +374,3 @@ def ucreporter_settings_ucrequester(server_id):
 			"form_navigation": form_navigation,
 		}
 		return renderdata
-

@@ -1,0 +1,21 @@
+                .GraphDataTable {
+                        font-size: 70%;
+                        font-family: Verdana;
+                        color: black;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                        margin-left: auto;
+                        margin-right: auto;
+                }
+                .GraphDataTable TH {
+                        background: #dbdbdb;
+                }
+                .GraphDataTable TR:nth-child(odd) {
+                        height: 23px;
+                        background: #f8f8f8;
+                }
+
+                .GraphDataTable TR:nth-child(even) {
+                        height: 23px;
+                        background: #ebebeb;
+                }

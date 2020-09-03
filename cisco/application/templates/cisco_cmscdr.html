@@ -4,6 +4,8 @@
 		<form action="" method="post" novalidate>
 		    Поиск вызовов в кластере CMS:
 			{{ formCMS.select_CMSCluster() }}
+            где имя спейса содержит:
+			{{ formCMS.confroom_filter() }}
 	        {{ formCMS.submit() }}
 		</form>
 	</div>

@@ -2,6 +2,7 @@
 <html>
 <link rel="stylesheet" href="{{ url_for('static', filename='base_menubar.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='base_template.css') }}">
+{% block style %}{% endblock %}
 
 <head>
 	{% if html_page_title %}
@@ -23,7 +24,7 @@
 <body>
 	<div class="HeaderLine">
 		<div class="HeaderItem">
-			<img src="{{ url_for("static", filename="ciscoLogo.gif") }}"/>
+			<img width="70" src="{{ url_for("static", filename="infologo.png") }}"/>
 		</div>
 		<div class="HeaderItem">
 			 UC Reporter
@@ -63,27 +64,34 @@
 			</ul>
 		</nav>
 	<table class="HeaderTable">
-        {% if not rows_list %}
-		<tr>
-			<th>
-				{{ html_page_header }}
-				{% if not html_page_header %}
-
-				{{ html_page_title }}
-
-				{% endif %}
-			</th>
-		</tr>
-		<tr>
-			<td>
-			</td>
-		</tr>
+		{% if max_loss_values%}
+			<tr>
+				<td>
+				</td>
+			</tr>
 		{% else %}
-		<tr>
-			<td>
-				<button id="ExportXLS">Export to Excel</button>
-			</td>
-		</tr>
+			{% if not rows_list %}
+			<tr>
+				<th>
+					{{ html_page_header }}
+					{% if not html_page_header %}
+
+					{{ html_page_title }}
+
+					{% endif %}
+				</th>
+			</tr>
+			<tr>
+				<td>
+				</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td>
+					<button id="ExportXLS">Export to Excel</button>
+				</td>
+			</tr>
+			{% endif %}
 		{% endif %}
 	</table>
 	<fieldset class="Status">

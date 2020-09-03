@@ -1,5 +1,18 @@
 {% extends "base_templates/base_template.html" %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='base_packetloss_graph.css') }}">
+{% endblock %}
+
 {% block Content %}
+
+
+
+
+    {% if resources %}
+            {{ resources|safe }}
+    {% endif %}
+
+
 
     {% if div %}
 	    {{ div|safe }}
@@ -10,7 +23,7 @@
 
     {% if max_loss_values %}
         <div id="tableWrap">
-        <table class="DataTable">
+        <table class="GraphDataTable">
             <tr>
                 <td>
                     Max Audio Packet Loss Percentage RX:
