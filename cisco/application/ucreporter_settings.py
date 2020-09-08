@@ -193,6 +193,7 @@ def ucreporter_settings_CMSservers(server_id):
 			sql_request_result_string = "SELECT * FROM cms_servers WHERE id=" + server_id + ";"
 			rows_list = sql_request_dict(sql_request_result_string)
 			# заполняем форму
+			form_CMS_server.id_field.text = str(rows_list[0]['id'])
 			form_CMS_server.API_Port_field.data = str(rows_list[0]['api_port'])
 			form_CMS_server.ip_field.data = str(rows_list[0]['ip'])
 			form_CMS_server.cluster_field.data = str(rows_list[0]['cluster'])
@@ -256,15 +257,15 @@ def ucreporter_settings_CUCMservers(server_id):
 	if server_id:
 		if server_id == "AddNew":
 			# Новый пользователь, считаем номер нового ID
-			sql_request_result_string = "SELECT MAX(id) FROM ucreporter_users;"  # забираем максимальный
+			sql_request_result_string = "SELECT MAX(id) FROM cm_servers_list;"  # забираем максимальный
 			rows_list = sql_request_dict(sql_request_result_string)
 			# заполняем форму
 			index_data = int(rows_list[0]['MAX(id)']) + 1
 			form_CUCM_server.id_field.text = index_data
-			form_CUCM_server.Cluster_field.data = str(rows_list[0]['cluster'])
-			form_CUCM_server.username_field.data = str(rows_list[0]['cm_username'])
-			form_CUCM_server.ip_field.data = str(rows_list[0]['cm_ip'])
-			form_CUCM_server.password_field.data = str(rows_list[0]['cm_password'])
+			form_CUCM_server.Cluster_field.data = str('cluster')
+			form_CUCM_server.username_field.data = str('cm_username')
+			form_CUCM_server.ip_field.data = str('cm_ip')
+			form_CUCM_server.password_field.data = str('cm_password')
 		else:
 			sql_request_result_string = "SELECT * FROM cm_servers_list WHERE id=" + server_id + ";"
 			rows_list = sql_request_dict(sql_request_result_string)

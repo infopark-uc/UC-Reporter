@@ -18,6 +18,7 @@ import application.callforward
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/phones", methods=['GET', 'POST'])
 @app.route("/index", methods=['GET', 'POST'])
+@login_required
 def usersearchpage():
      module_result = usersreport() #получаем данные из модуля
      if module_result['rendertype'] == 'success': #проверка если данные получены
@@ -36,6 +37,7 @@ def usersearchpage():
                            formSRCH=module_result['form_search'])
 
 @app.route("/hunt", methods=['GET', 'POST'])
+@login_required
 def huntpage():
      module_result = huntreport()
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
@@ -47,6 +49,7 @@ def huntpage():
                             formNAV=module_result['form_navigation'])
 
 @app.route("/cfa", methods=['GET', 'POST'])
+@login_required
 def cfa():
      module_result = application.callforward.render()
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
@@ -85,6 +88,7 @@ def cdr():
 
 @app.route('/cms', methods=['GET', 'POST'])
 @app.route('/cms/', methods=['GET', 'POST'])
+@login_required
 def cmspage():
 
     module_result = cmsviewer()
@@ -109,6 +113,7 @@ def cmspage():
 
 
 @app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
+@login_required
 def cmscall(callid):
     module_result = cmscallviewer(callid)
 
@@ -122,6 +127,7 @@ def cmscall(callid):
 
 
 @app.route('/cms/callleg/<string:callegid>/', methods=['GET', 'POST'])
+@login_required
 def cmscallleg(callegid):
     module_result = cmscalllegviewer(callegid)
 
