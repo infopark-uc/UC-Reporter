@@ -108,6 +108,7 @@
 {# Страница редактирования сервера CMS#}
     {% if content_type == "cms_server_edit" %}
 <div id="tableWrap">
+	<form action="" method="post" novalidate>
 	<fieldset>
 		<legend>
 			Sever Information
@@ -151,6 +152,7 @@
 			<td>{{ form_CMS_server.SaveSubmit()}}</td>
 		</tr>
 	</table>
+	</form>
 </div>
     {% endif %}
 
@@ -191,6 +193,7 @@
 {# Страница редактирования сервера CUCM#}
     {% if content_type == "cucm_server_edit" %}
     <div id="tableWrap">
+		<form action="" method="post" novalidate>
 		<fieldset>
 			<legend>
 				Sever Information
@@ -210,11 +213,11 @@
 					<td>{{ form_CUCM_server.ip_field}}</td>
 				</tr>
 				<tr>
-					<td><label id="DESCRIPTION_ID">API Username</label></td>
+					<td><label id="DESCRIPTION_ID">AXL Username</label></td>
 					<td>{{ form_CUCM_server.username_field }}</td>
 				</tr>
 				<tr>
-					<td><label id="DESCRIPTION_ID">API Password</label></td>
+					<td><label id="DESCRIPTION_ID">AXL Password</label></td>
 					<td>{{ form_CUCM_server.password_field }}</td>
 				</tr>
 				</tbody>
@@ -222,6 +225,7 @@
 			</table>
 		</fieldset>
 				{{ form_CUCM_server.SaveSubmit()}}
+		</form>
 
 	</div>
     {% endif %}

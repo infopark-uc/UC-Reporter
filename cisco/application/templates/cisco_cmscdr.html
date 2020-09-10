@@ -1,13 +1,18 @@
 {% extends "base_templates/base_template.html" %}
 {% block Content %}
 	<div class="SearchItem">
-		<form action="" method="post" novalidate>
-		    Поиск вызовов в кластере CMS:
-			{{ formCMS.select_CMSCluster() }}
-            где имя спейса содержит:
-			{{ formCMS.confroom_filter() }}
+
+
+		  <form action="" method="post" novalidate>
+			Поиск вызовов в кластере CMS: {{ formCMS.select_CMSCluster() }}  где имя спейса содержит: {{ formCMS.confroom_filter() }}
 	        {{ formCMS.submit() }}
-		</form>
+
+			элементов на странице:
+			{{ formCMS.limit_field() }}
+
+		  </form>
+
+
 	</div>
     {% if rows_list %}
 	<div id="tableWrap">

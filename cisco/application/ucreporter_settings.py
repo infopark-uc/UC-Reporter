@@ -173,7 +173,35 @@ def ucreporter_settings_CMSservers(server_id):
 		}
 		return renderdata
 
-
+	if form_CMS_server.validate_on_submit():
+		# проверяем наличие ID в базе
+		sql_request_result_string = "SELECT * FROM cms_servers WHERE id=" + str(form_CMS_server.id_field.text) + ";"
+		save_data = sql_request_dict(sql_request_result_string)
+		# если ID отсутствует, создаем запись, если есть обновляем
+		if not save_data:
+			sql_execute(
+				"INSERT INTO ucreporter_users SET id=" + str(form_CMS_server.id_field.text)
+				+ ",cluster='" + form_CMS_server.cluster_field.data
+				+ "',api_port='" + form_CMS_server.API_Port_field.data
+				+ "',login='" + form_CMS_server.username_field.data
+				+ "',password='" + form_CMS_server.password_field.data
+				+ "',ip='" + form_CMS_server.ip_field.data
+				+ "';")
+		else:
+			sql_execute(
+				"UPDATE ucreporter_users SET cluster='" + form_CMS_server.cluster_field.data
+				+ "',api_port='" + form_CMS_server.API_Port_field.data
+				+ "',login='" + form_CMS_server.username_field.data
+				+ "',password='" + form_CMS_server.password_field.data
+				+ "',ip='" + form_CMS_server.ip_field.data
+				+ "' WHERE id=" + str(form_CMS_server.id_field.text)
+				+ ";")
+		# переходим на список
+		renderdata = {
+				"content_type": "redirect",
+				"redirect_to": "platform_CMSservers"
+				}
+		return renderdata
 
 	if server_id:
 		if server_id == "AddNew":
@@ -199,6 +227,8 @@ def ucreporter_settings_CMSservers(server_id):
 			form_CMS_server.cluster_field.data = str(rows_list[0]['cluster'])
 			form_CMS_server.password_field.data = str(rows_list[0]['password'])
 			form_CMS_server.username_field.data = str(rows_list[0]['login'])
+
+
 
 		if rows_list:
 			content_type = "cms_server_edit"
@@ -251,6 +281,35 @@ def ucreporter_settings_CUCMservers(server_id):
 			"content_type": "redirect",
 			"redirect_to": form_navigation.select_navigation.data
 		}
+		return renderdata
+
+
+	if form_CUCM_server.validate_on_submit():
+		# проверяем наличие ID в базе
+		sql_request_result_string = "SELECT * FROM cm_servers_list WHERE id=" + str(form_CUCM_server.id_field.text) + ";"
+		save_data = sql_request_dict(sql_request_result_string)
+		# если ID отсутствует, создаем запись, если есть обновляем
+		if not save_data:
+			sql_execute(
+				"INSERT INTO ucreporter_users SET id=" + str(form_CUCM_server.id_field.text)
+				+ ",cluster='" + form_CUCM_server.Cluster_field.data
+				+ "',cm_username='" + form_CUCM_server.username_field.data
+				+ "',cm_password='" + form_CUCM_server.password_field.data
+				+ "',cm_ip='" + form_CUCM_server.ip_field.data
+				+ "';")
+		else:
+			sql_execute(
+				"UPDATE ucreporter_users SET cluster='" + form_CUCM_server.Cluster_field.data
+				+ "',cm_username='" + form_CUCM_server.username_field.data
+				+ "',cm_password='" + form_CUCM_server.password_field.data
+				+ "',cm_ip='" + form_CUCM_server.ip_field.data
+				+ "' WHERE id=" + str(form_CUCM_server.id_field.text)
+				+ ";")
+		# переходим на список
+		renderdata = {
+				"content_type": "redirect",
+				"redirect_to": "platform_CUCMservers"
+				}
 		return renderdata
 
 	# отрисовка страницы изменения серверов.
