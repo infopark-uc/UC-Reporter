@@ -382,14 +382,12 @@ def ucreporter_settings_status_gunicorn():
 	form_status = ServiceStatus(meta={'csrf': False})
 	form_navigation = SelectNavigation(meta={'csrf': False})
 
-	restart_command = "systemctl restart ucreporter"
-	status_command = "systemctl status ucreporter"
 
-	command_output = subprocess.check_output(status_command, encoding='utf8')
+	command_output = subprocess.check_output('systemctl status ucreporter', encoding='utf8')
 	form_status.Status_field.data = command_output
 
 	if form_status.validate_on_submit():
-		command_output = subprocess.check_output(restart_command, encoding='utf8')
+		command_output = subprocess.check_output('systemctl restart ucreporter', encoding='utf8')
 		form_status.Status_field.data = command_output
 
 	if form_navigation.validate_on_submit():
@@ -425,14 +423,11 @@ def ucreporter_settings_status_requester():
 	form_status = ServiceStatus(meta={'csrf': False})
 	form_navigation = SelectNavigation(meta={'csrf': False})
 
-	restart_command = "systemctl restart ucrequester"
-	status_command = "systemctl status ucrequester"
-
-	command_output = subprocess.check_output(status_command, encoding='utf8')
+	command_output = subprocess.check_output('systemctl status ucrequester', encoding='utf8')
 	form_status.Status_field.data = command_output
 
 	if form_status.validate_on_submit():
-		command_output = subprocess.check_output(restart_command, encoding='utf8')
+		command_output = subprocess.check_output('systemctl restart ucrequester', encoding='utf8')
 		form_status.Status_field.data = command_output
 
 	if form_navigation.validate_on_submit():
