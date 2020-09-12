@@ -336,7 +336,7 @@ def platform_CMSservers(server_id):
 
 @app.route('/platform/status/web/', methods=['GET', 'POST'])
 @login_required
-def platform_webstatus():
+def platform_web_status():
     module_result = ucreporter_settings_status_gunicorn()
 
     if module_result['content_type'] == 'redirect':  # переход на другую страницу
