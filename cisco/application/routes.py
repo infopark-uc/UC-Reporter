@@ -335,35 +335,7 @@ def platform_CMSservers(server_id):
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
-@app.route('/platform/status/web/', methods=['GET', 'POST'])
-@login_required
-def platform_web_status():
-    module_result = ucreporter_settings_status_gunicorn()
 
-    if module_result['content_type'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               html_page_header=module_result['html_page_header'],
-                               console_output=module_result['console_output'],
-                               content_type=module_result['content_type'],
-                               form_status=module_result['form_status'],
-                               formNAV=module_result['form_navigation'])
-
-@app.route('/platform/status/requester/', methods=['GET', 'POST'])
-@login_required
-def platform_requester_status():
-    module_result = ucreporter_settings_status_requester()
-
-    if module_result['content_type'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               html_page_header=module_result['html_page_header'],
-                               console_output=module_result['console_output'],
-                               content_type=module_result['content_type'],
-                               form_status=module_result['form_status'],
-                               formNAV=module_result['form_navigation'])
 
 
 
