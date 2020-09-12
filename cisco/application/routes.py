@@ -353,7 +353,7 @@ def platform_web_status():
 @app.route('/platform/status/requester/', methods=['GET', 'POST'])
 @login_required
 def platform_requester_status():
-    module_result = ucreporter_settings_status_gunicorn()
+    module_result = ucreporter_settings_status_requester()
 
     if module_result['content_type'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))
