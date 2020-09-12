@@ -133,7 +133,8 @@ def cmscallviewer(call_id):
 	console_output = "Done in " + operationDuration
 	for row in rows_list:
 		if row["durationseconds"]:
-			row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
+			if type(row["durationseconds"]) is int:
+				row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
 
 	renderdata = {
 		"rendertype": "success",
