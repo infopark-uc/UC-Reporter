@@ -225,6 +225,7 @@ def logout():
 @app.route('/platform', methods=['GET', 'POST'])
 @app.route('/platform/', methods=['GET', 'POST'])
 @app.route('/platform/servers/', methods=['GET', 'POST'])
+@app.route('/platform/status/', methods=['GET', 'POST'])
 @login_required
 def platform():
 #начальная страница
