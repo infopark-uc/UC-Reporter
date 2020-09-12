@@ -1,12 +1,10 @@
-from application.forms import SelectNavigation, UserInformation, CUCMServerInformation, CMSServerInformation
+from application.forms import SelectNavigation, UserInformation, CUCMServerInformation, CMSServerInformation, ServiceStatus
 from datetime import datetime
 from application.sqlrequests import sql_request_dict, sql_execute
 from pprint import pprint
+import os
 import subprocess
 
-
-def run_linux_command(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
 
 # отрировка главной странички
@@ -180,7 +178,7 @@ def ucreporter_settings_CMSservers(server_id):
 		# если ID отсутствует, создаем запись, если есть обновляем
 		if not save_data:
 			sql_execute(
-				"INSERT INTO ucreporter_users SET id=" + str(form_CMS_server.id_field.text)
+				"INSERT INTO cms_servers SET id=" + str(form_CMS_server.id_field.text)
 				+ ",cluster='" + form_CMS_server.cluster_field.data
 				+ "',api_port='" + form_CMS_server.API_Port_field.data
 				+ "',login='" + form_CMS_server.username_field.data
@@ -189,7 +187,7 @@ def ucreporter_settings_CMSservers(server_id):
 				+ "';")
 		else:
 			sql_execute(
-				"UPDATE ucreporter_users SET cluster='" + form_CMS_server.cluster_field.data
+				"UPDATE cms_servers SET cluster='" + form_CMS_server.cluster_field.data
 				+ "',api_port='" + form_CMS_server.API_Port_field.data
 				+ "',login='" + form_CMS_server.username_field.data
 				+ "',password='" + form_CMS_server.password_field.data
@@ -290,22 +288,23 @@ def ucreporter_settings_CUCMservers(server_id):
 		save_data = sql_request_dict(sql_request_result_string)
 		# если ID отсутствует, создаем запись, если есть обновляем
 		if not save_data:
+			print("INSERT")
 			sql_execute(
-				"INSERT INTO ucreporter_users SET id=" + str(form_CUCM_server.id_field.text)
+				"INSERT INTO cm_servers_list SET id=" + str(form_CUCM_server.id_field.text)
 				+ ",cluster='" + form_CUCM_server.Cluster_field.data
 				+ "',cm_username='" + form_CUCM_server.username_field.data
 				+ "',cm_password='" + form_CUCM_server.password_field.data
-				+ "',cm_ip='" + form_CUCM_server.ip_field.data
-				+ "';")
+				+ "',cm_ip='" + form_CUCM_server.ip_field.data 	+ "';")
 		else:
+			print("UPDATE")
 			sql_execute(
-				"UPDATE ucreporter_users SET cluster='" + form_CUCM_server.Cluster_field.data
+				"UPDATE cm_servers_list SET cluster='" + form_CUCM_server.Cluster_field.data
 				+ "',cm_username='" + form_CUCM_server.username_field.data
 				+ "',cm_password='" + form_CUCM_server.password_field.data
 				+ "',cm_ip='" + form_CUCM_server.ip_field.data
-				+ "' WHERE id=" + str(form_CUCM_server.id_field.text)
-				+ ";")
+				+ "' WHERE id='" + str(form_CUCM_server.id_field.text) + "'")
 		# переходим на список
+		print("REDIRECT")
 		renderdata = {
 				"content_type": "redirect",
 				"redirect_to": "platform_CUCMservers"
@@ -373,13 +372,25 @@ def ucreporter_settings_CUCMservers(server_id):
 		return renderdata
 
 
-def ucreporter_settings_ucrequester(server_id):
+
+
+def ucreporter_settings_status_gunicorn():
+
 	operationStartTime = datetime.now()
 	html_page_title = 'UC Reporter administration'
 	html_page_header = 'UC Requester administration'
-
+	form_status = ServiceStatus(meta={'csrf': False})
 	form_navigation = SelectNavigation(meta={'csrf': False})
-	form_edit_server = CUCMServerInformation(meta={'csrf': False})
+
+	restart_command = "systemctl restart ucreporter"
+	status_command = "systemctl status ucreporter"
+
+	command_output = subprocess.check_output(status_command, encoding='utf8')
+	form_status.Status_field.data = command_output
+
+	if form_status.validate_on_submit():
+		command_output = subprocess.check_output(restart_command, encoding='utf8')
+		form_status.Status_field.data = command_output
 
 	if form_navigation.validate_on_submit():
 		renderdata = {
@@ -388,49 +399,62 @@ def ucreporter_settings_ucrequester(server_id):
 		}
 		return renderdata
 
-	# отрисовка страницы изменения серверов.
-	if server_id:
-		sql_request_result_string = "SELECT * FROM cms_requester_config WHERE id=" + server_id + ";"
-		rows_list = sql_request_dict(sql_request_result_string)
-		# заполняем форму
-		pprint(rows_list)
-		form_edit_server.Cluster_field.data = str(rows_list[0]['cluster'])
-		form_edit_server.username_field.data = str(rows_list[0]['cm_username'])
-		form_edit_server.ip_field.data = str(rows_list[0]['cm_ip'])
-		form_edit_server.password_field.data = str(rows_list[0]['cm_password'])
 
-		if rows_list:
-			content_type = "cucm_server_edit"
-			operationEndTime = datetime.now()
-			operationDuration = str(operationEndTime - operationStartTime)
-			console_output = "Done in " + operationDuration
-			renderdata = {
-				"content_type": content_type,
-				"html_template": "ucreporter_settings_mainpage.html",
-				"html_page_title": html_page_title,
-				"html_page_header": html_page_header,
-				"console_output": console_output,
-				"form_edit_server": form_edit_server,
-				"rows_list": rows_list,
-				"form_navigation": form_navigation,
-			}
-			return renderdata
+	operationEndTime = datetime.now()
+	operationDuration = str(operationEndTime - operationStartTime)
+	console_output = "Done in " + operationDuration
 
-	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
-	else:
-		sql_request_result_string = "SELECT * FROM cms_requester_config;"
-		rows_list = sql_request_dict(sql_request_result_string)
-		content_type = "requester_server_list"
-		operationEndTime = datetime.now()
-		operationDuration = str(operationEndTime - operationStartTime)
-		console_output = "Done in " + operationDuration
+	content_type = "service_status"
+	renderdata = {
+		"content_type": content_type,
+		"form_status": form_status,
+		"html_template": "ucreporter_settings_mainpage.html",
+		"html_page_title": html_page_title,
+		"html_page_header": html_page_header,
+		"console_output": console_output,
+		"form_navigation": form_navigation,
+	}
+	return renderdata
+
+
+def ucreporter_settings_status_requester():
+
+	operationStartTime = datetime.now()
+	html_page_title = 'UC Reporter administration'
+	html_page_header = 'UC Requester administration'
+	form_status = ServiceStatus(meta={'csrf': False})
+	form_navigation = SelectNavigation(meta={'csrf': False})
+
+	restart_command = "systemctl restart ucrequester"
+	status_command = "systemctl status ucrequester"
+
+	command_output = subprocess.check_output(status_command, encoding='utf8')
+	form_status.Status_field.data = command_output
+
+	if form_status.validate_on_submit():
+		command_output = subprocess.check_output(restart_command, encoding='utf8')
+		form_status.Status_field.data = command_output
+
+	if form_navigation.validate_on_submit():
 		renderdata = {
-			"content_type": content_type,
-			"html_template": "ucreporter_settings_mainpage.html",
-			"html_page_title": html_page_title,
-			"html_page_header": html_page_header,
-			"console_output": console_output,
-			"rows_list": rows_list,
-			"form_navigation": form_navigation,
+			"content_type": "redirect",
+			"redirect_to": form_navigation.select_navigation.data
 		}
 		return renderdata
+
+
+	operationEndTime = datetime.now()
+	operationDuration = str(operationEndTime - operationStartTime)
+	console_output = "Done in " + operationDuration
+
+	content_type = "service_status"
+	renderdata = {
+		"content_type": content_type,
+		"form_status": form_status,
+		"html_template": "ucreporter_settings_mainpage.html",
+		"html_page_title": html_page_title,
+		"html_page_header": html_page_header,
+		"console_output": console_output,
+		"form_navigation": form_navigation,
+	}
+	return renderdata

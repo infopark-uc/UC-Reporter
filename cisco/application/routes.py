@@ -10,8 +10,8 @@ from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from flask_login import logout_user, current_user, login_required
-from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users
-from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
+from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users,ucreporter_settings_status_gunicorn
+from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers,ucreporter_settings_status_requester
 import application.callforward
 
 
@@ -332,6 +332,36 @@ def platform_CMSservers(server_id):
                                console_output=module_result['console_output'],
                                form_CMS_server=module_result['form_CMS_server'],
                                rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'])
+
+@app.route('/platform/status/web/', methods=['GET', 'POST'])
+@login_required
+def platform_webstatus():
+    module_result = ucreporter_settings_status_gunicorn()
+
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               console_output=module_result['console_output'],
+                               content_type=module_result['content_type'],
+                               form_status=module_result['form_status'],
+                               formNAV=module_result['form_navigation'])
+
+@app.route('/platform/status/requester/', methods=['GET', 'POST'])
+@login_required
+def platform_requester_status():
+    module_result = ucreporter_settings_status_gunicorn()
+
+    if module_result['content_type'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               html_page_header=module_result['html_page_header'],
+                               console_output=module_result['console_output'],
+                               content_type=module_result['content_type'],
+                               form_status=module_result['form_status'],
                                formNAV=module_result['form_navigation'])
 
 

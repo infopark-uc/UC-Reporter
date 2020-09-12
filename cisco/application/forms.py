@@ -67,7 +67,6 @@ class UcrequesterInformation(FlaskForm):
     DeleteSubmit = SubmitField('Delete')
     AddSubmit = SubmitField('Add New')
 
-
 class ServiceStatus(FlaskForm):
     Status_field = TextAreaField('')
     RestartSubmit = SubmitField('Restart')
