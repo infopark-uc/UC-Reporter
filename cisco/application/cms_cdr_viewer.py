@@ -17,6 +17,17 @@ from bokeh.models import DatetimeTickFormatter, HoverTool, ColumnDataSource
 from math import pi
 from datetime import datetime
 
+def is_digit(string):
+    if string.isdigit():
+       return True
+    else:
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
+
+
 def cmsviewer():
 
 	operationStartTime = datetime.now()
@@ -133,7 +144,7 @@ def cmscallviewer(call_id):
 	console_output = "Done in " + operationDuration
 	for row in rows_list:
 		if row["durationseconds"]:
-			if type(row["durationseconds"]) is int:
+			if is_digit(row["durationseconds"]):
 				row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
 
 	renderdata = {
@@ -312,7 +323,9 @@ def cmsrecordingsviewer():
 		row["original_path"] = row["path"]
 		#переводим секунлы в нормальное время
 		if row["durationSeconds"]:
-			row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
+			if is_digit(row["durationseconds"]):
+				row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
+
 		#формируем путь к файлу
 		row["path"] = NETPATH + row["path"].replace("/","\\") + RECORD_FILE_EXTENTION
 
