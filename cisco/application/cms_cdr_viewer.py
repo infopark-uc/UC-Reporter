@@ -323,7 +323,7 @@ def cmsrecordingsviewer():
 		row["original_path"] = row["path"]
 		#переводим секунлы в нормальное время
 		if row["durationSeconds"]:
-			if is_digit(row["durationseconds"]):
+			if is_digit(row["durationSeconds"]):
 				row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
 
 		#формируем путь к файлу
