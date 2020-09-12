@@ -423,8 +423,9 @@ def ucreporter_settings_status_requester():
 	form_status = ServiceStatus(meta={'csrf': False})
 	form_navigation = SelectNavigation(meta={'csrf': False})
 
-	command_output = subprocess.check_output('systemctl status ucrequester', encoding='utf8')
-	form_status.Status_field.data = command_output
+	#command_output = subprocess.check_output('systemctl status ucrequester', encoding='utf8')
+	command_output =  subprocess.Popen(['systemctl status ucrequester'], encoding='utf8', stdout=subprocess.PIPE)
+	form_status.Status_field.data = command_output.communicate()
 
 	if form_status.validate_on_submit():
 		command_output = subprocess.check_output('systemctl restart ucrequester', encoding='utf8')
