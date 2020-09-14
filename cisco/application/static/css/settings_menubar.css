@@ -1,4 +1,3 @@
-
 nav {background: #d4d0c8;}
 nav ul {
   margin: 0;
@@ -24,6 +23,7 @@ nav a {
 .topmenu > li > a {  
   padding: 5px 8px;
   font-size: 10px;
+  font-family: Verdana;
   color: Black;
   letter-spacing: 1px;
 }
