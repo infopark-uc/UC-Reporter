@@ -12,6 +12,11 @@ class SelectSearchType(FlaskForm):
     string_field = StringField('',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."), Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     submit = SubmitField('Найти')
 
+class SelectCUCMCluster(FlaskForm):
+    select_cluster = SelectField('Navigation', default="NF",
+                                choices=[('MSK', 'Московский филиал'),('NF', 'Нефтеюганский филиал'),('Infocell', 'Инфосэл')])
+    submit = SubmitField('Найти')
+
 class SelectForwardSearchType(FlaskForm):
     select_region = SelectField('Navigation', default="NF", choices=[('MSK', 'Московский филиал'), ('KF', 'Красноярский филиал'), ('NF', 'Нефтеюганский филиал'), ('TF', 'Томский филиал'), ('NU', 'Ямальский филиал (Новый Уренгой)'), ('Infocell', 'Инфосэл')])
     select_field = SelectField('Navigation', choices=[('DN', 'номер абонента'), ('Transfer', 'номер переадресации')])

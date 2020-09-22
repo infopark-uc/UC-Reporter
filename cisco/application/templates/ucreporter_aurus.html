@@ -1,0 +1,47 @@
+{% extends "base_templates/base_template.html" %}
+{% block Content %}
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Проверка для региона:
+			{{ formCUCM.select_cluster() }}
+	        {{ formCUCM.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				Device Type
+			</th>
+            <th>
+				Device Name
+			</th>
+			<th>
+				DN
+			</th>
+			<th>
+				Description
+			</th>
+
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+            <td>
+				{{ row.devicetype }}
+			</td>
+			<td>
+				{{ row.devicename }}
+			</td>
+			<td>
+				{{ row.dnorpattern }}
+			</td>
+            <td>
+				{{ row.description }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+{% endblock %}

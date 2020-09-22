@@ -13,6 +13,7 @@ from flask_login import logout_user, current_user, login_required
 from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users,ucreporter_settings_status_gunicorn
 from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers,ucreporter_settings_status_requester
 import application.callforward
+from application.aurus_consistency_checker import aurus_consistency_check
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -335,9 +336,27 @@ def platform_CMSservers(server_id):
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
+@app.route('/aurus', methods=['GET', 'POST'])
+@app.route('/aurus/', methods=['GET', 'POST'])
+@login_required
+def aurus_consitency_check():
 
+    module_result = aurus_consistency_check()
 
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
 
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'],
+                               formCUCM=module_result['form_cluster_selection'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'],
+                           formCUCM=module_result['form_cluster_selection'])
 
 
 app.secret_key = "Super_secret_key"
