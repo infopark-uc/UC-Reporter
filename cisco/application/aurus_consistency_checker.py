@@ -1,220 +1,14 @@
 import requests
 import xmltodict
 import collections
+import json
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectCUCMCluster
 from application.sqlrequests import sql_request_dict
 from datetime import datetime
 from pprint import pprint
 
-
-def aurus_consistency_check():
-
-    operationStartTime = datetime.now()
-
-    console_output = "Consistency check started"
-    print(console_output)
-
-    html_page_title = 'CUCM with Aurus consistency report'
-
-    form_navigation = SelectNavigation(meta={'csrf': False})
-    if form_navigation.validate_on_submit():
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
-
-    console_output = "Creating cluster selection form"
-    print(console_output)
-
-    form_cluster_selection = SelectCUCMCluster(meta={'csrf': False})
-    if form_cluster_selection.validate_on_submit():
-
-        auth_data_list = sql_request_dict(
-            "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cluster='" + form_cluster_selection.select_cluster.data + "'")  # получаем лист словарей
-
-        cucm_ip_address = str(auth_data_list[0]['cm_ip'])
-        cucm_login = str(auth_data_list[0]['cm_username'])
-        cucm_password = str(auth_data_list[0]['cm_password'])
-
-        # CUCM URL's
-        cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
-
-        console_output = cucm_url + "\n"
-        print(console_output)
-
-        # V12 CUCM Headers
-        headers11query = {'Content-Type': 'text/xml', 'SOAPAction': 'CUCM:DB ver=11.5 executeSQLQuery'}
-
-        # ----------------------------------------------------------
-        # Get information about lines with recorded option from CUCM
-        # ----------------------------------------------------------
-
-        msg_begin = """
-               <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.cisco.com/AXL/API/11.5">
-                   <soapenv:Header/>
-                   <soapenv:Body>
-                       <ns:executeSQLQuery>
-                           <sql>"""
-        msg_query = """select rec.name,tm.name as devicetype,d.name as devicename,n.dnorpattern,n.description,trec.name AS recflag from recordingdynamic AS rd 
-                        INNER JOIN devicenumplanmap AS mdn ON mdn.pkid==rd.fkdevicenumplanmap
-                        INNER JOIN numplan AS n ON n.pkid==mdn.fknumplan
-                        INNER JOIN typerecordingflag AS trec ON trec.enum==rd.tkrecordingflag 
-                        INNER JOIN device AS d ON d.pkid=mdn.fkdevice
-                        INNER JOIN typemodel as tm on d.tkmodel = tm.enum
-                        INNER JOIN recordingprofile as rec on mdn.fkrecordingprofile = rec.pkid"""
-        msg_end = """
-                           </sql>
-                       </ns:executeSQLQuery>
-                   </soapenv:Body>
-               </soapenv:Envelope>"""
-
-        msg = msg_begin + msg_query + msg_end
-        console_output = msg + "\n"
-        print(console_output)
-
-        # disable warning about untrusted certs
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-        # Create the Requests Connection
-        try:
-            post = requests.post(cucm_url, data=msg.encode('utf-8'), headers=headers11query, verify=False,
-                                 auth=(cucm_login, cucm_password))
-        except requests.exceptions.ConnectionError:
-            console_output = "Ошибка соединения с сервером " + cucm_ip_address
-            print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
-            }
-            return renderdata
-
-        except:
-            console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + cucm_ip_address
-            print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
-            }
-            return renderdata
-
-        # Check is answer is successful
-        if post.status_code == 401:
-            console_output = "Пользователь " + cucm_login + " не авторизован для подключения к серверу " + cucm_ip_address
-            print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
-            }
-            return renderdata
-
-        if post.status_code != 200:
-            console_output = "Ошибка при подключении к серверу: " + str(post.status_code) + ": " + post.reason
-            print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
-            }
-            return renderdata
-
-        # Convert output to Dict
-        console_output = "Данные получены из CUCM " + cucm_ip_address
-        print(console_output)
-
-        xml_dict = xmltodict.parse(post.text)
-
-        # Get Dict with phones
-        if type(xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"][
-                    "return"]) is collections.OrderedDict:
-            if "row" in xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"]:
-                if type(xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"][
-                            "row"]) is list:
-                    rows_list = xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"][
-                        "row"]
-                elif type(xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"][
-                              "row"]) is collections.OrderedDict:
-                    rows_list = [
-                        xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"]["row"]]
-            else:
-                console_output = "DN с включеной записью не найдено"
-                print(console_output)
-                renderdata = {
-                    "rendertype": "null",
-                    "html_template": "ucreporter_aurus.html",
-                    "html_page_title": html_page_title,
-                    "console_output": console_output,
-                    "form_navigation": form_navigation,
-                    "form_cluster_selection": form_cluster_selection
-                }
-                return renderdata
-        else:
-            console_output = "DN с включеной записью не найдено"
-            print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
-            }
-            return renderdata
-
-        console_output = "Найдено записей: " + str(len(rows_list))
-        print(console_output)
-
-        pprint(rows_list)
-
-
-
-        operationEndTime = datetime.now()
-        operationDuration = str(operationEndTime - operationStartTime)
-        console_output = "Done in " + operationDuration
-
-
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection,
-            "rows_list": rows_list
-        }
-        return renderdata
-
-    renderdata = {
-        "rendertype": "null",
-        "html_template": "ucreporter_aurus.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_cluster_selection": form_cluster_selection
-    }
-    return renderdata
-
-
 def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_query):
-    # ----------------------------------------------------------
-    # Get information about lines with recorded option from CUCM
-    # ----------------------------------------------------------
 
     msg_begin = """
            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.cisco.com/AXL/API/11.5">
@@ -241,28 +35,22 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
         post = requests.post(cucm_url, data=msg.encode('utf-8'), headers=headers11query, verify=False,
                              auth=(cucm_login, cucm_password))
     except requests.exceptions.ConnectionError:
-        console_output = "Ошибка соединения с сервером " + cucm_ip_address
+        console_output = "Ошибка соединения с сервером " + cucm_url
         print(console_output)
         renderdata = {
             "rendertype": "null",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
             "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection
         }
         return renderdata
 
     except:
-        console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + cucm_ip_address
+        console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + cucm_url
+
         print(console_output)
+
         renderdata = {
             "rendertype": "null",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
             "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection
         }
         return renderdata
 
@@ -272,11 +60,7 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
         print(console_output)
         renderdata = {
             "rendertype": "null",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
             "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection
         }
         return renderdata
 
@@ -285,16 +69,12 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
         print(console_output)
         renderdata = {
             "rendertype": "null",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
             "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection
         }
         return renderdata
 
     # Convert output to Dict
-    console_output = "Данные получены из CUCM " + cucm_ip_address
+    console_output = "Данные получены из CUCM " + cucm_url
     print(console_output)
 
     xml_dict = xmltodict.parse(post.text)
@@ -316,11 +96,7 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
             print(console_output)
             renderdata = {
                 "rendertype": "null",
-                "html_template": "ucreporter_aurus.html",
-                "html_page_title": html_page_title,
                 "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cluster_selection": form_cluster_selection
             }
             return renderdata
     else:
@@ -328,11 +104,7 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
         print(console_output)
         renderdata = {
             "rendertype": "null",
-            "html_template": "ucreporter_aurus.html",
-            "html_page_title": html_page_title,
             "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cluster_selection": form_cluster_selection
         }
         return renderdata
 
@@ -340,3 +112,279 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
     print(console_output)
 
     pprint(rows_list)
+
+    renderdata = {
+        "rendertype": "success",
+        "console_output": console_output,
+        "rows_list": rows_list
+    }
+    return renderdata
+
+def get_dict_from_aurus(phoneup_url, phoneup_login, phoneup_password):
+
+    # disable warning about untrusted certs
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+    # Create the Requests Connection
+    try:
+        get = requests.get(phoneup_url, verify=False, auth=(phoneup_login, phoneup_password))
+    except requests.exceptions.ConnectionError:
+        console_output = "Ошибка соединения с сервером " + phoneup_url
+        print(console_output)
+        renderdata = {
+            "rendertype": "null",
+            "console_output": console_output,
+        }
+        return renderdata
+
+    except:
+        console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + phoneup_url
+
+        print(console_output)
+
+        renderdata = {
+            "rendertype": "null",
+            "console_output": console_output,
+        }
+        return renderdata
+
+    # Check is answer is successful
+    if get.status_code == 401:
+        console_output = "Пользователь " + cucm_login + " не авторизован для подключения к серверу " + phoneup_url
+        print(console_output)
+        renderdata = {
+            "rendertype": "null",
+            "console_output": console_output,
+        }
+        return renderdata
+
+    if get.status_code != 200:
+        console_output = "Ошибка при подключении к серверу: " + str(post.status_code) + ": " + post.reason
+        print(console_output)
+        renderdata = {
+            "rendertype": "null",
+            "console_output": console_output,
+        }
+        return renderdata
+
+    # Convert output to Dict
+    console_output = "Данные получены из PhoneUP " + phoneup_url
+    print(console_output)
+
+    rows_list = json.loads(get.text)
+    pprint (rows_list)
+
+    # Get Dict with phones
+    if len(rows_list) == 0:
+        console_output = "Устройств активированных для модуля запись в PhoneUP не найдено"
+        print(console_output)
+        renderdata = {
+            "rendertype": "null",
+            "console_output": console_output,
+        }
+        return renderdata
+
+    console_output = "Найдено записей: " + str(len(rows_list))
+    print(console_output)
+
+    renderdata = {
+        "rendertype": "success",
+        "console_output": console_output,
+        "rows_list": rows_list
+    }
+    return renderdata
+
+def aurus_consistency_check():
+
+    operationStartTime = datetime.now()
+
+    console_output = "Consistency check started"
+    print(console_output)
+
+    html_page_title = 'CUCM with Aurus consistency report'
+
+    form_navigation = SelectNavigation(meta={'csrf': False})
+    if form_navigation.validate_on_submit():
+        renderdata = {
+            "rendertype": "redirect",
+            "redirect_to": form_navigation.select_navigation.data
+        }
+        return renderdata
+
+    console_output = "Creating cluster selection form"
+    print(console_output)
+
+    form_cluster_selection = SelectCUCMCluster(meta={'csrf': False})
+    if form_cluster_selection.validate_on_submit():
+
+        auth_data_list = sql_request_dict(
+            "SELECT cm_ip,cm_username,cm_password,phoneup_ip,phoneup_username,phoneup_password,phoneup_app_user FROM cm_servers_list WHERE cluster='" + form_cluster_selection.select_cluster.data + "'")  # получаем лист словарей
+
+        cucm_ip_address = str(auth_data_list[0]['cm_ip'])
+        cucm_login = str(auth_data_list[0]['cm_username'])
+        cucm_password = str(auth_data_list[0]['cm_password'])
+        phoneup_ip_address = str(auth_data_list[0]['phoneup_ip'])
+        phoneup_login = str(auth_data_list[0]['phoneup_username'])
+        phoneup_password = str(auth_data_list[0]['phoneup_password'])
+        phoneup_app_user = str(auth_data_list[0]['phoneup_app_user'])
+
+        # CUCM URL's
+        cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
+
+        console_output = cucm_url + "\n"
+        print(console_output)
+
+        # V12 CUCM Headers
+        headers11query = {'Content-Type': 'text/xml', 'SOAPAction': 'CUCM:DB ver=11.5 executeSQLQuery'}
+
+        # ----------------------------------------------------------
+        # Get information about lines with recorded option from CUCM
+        # ----------------------------------------------------------
+        sql_query = """select rec.name,tm.name as devicetype,d.name as devicename,n.dnorpattern,n.description,trec.name AS recflag from recordingdynamic AS rd 
+                        INNER JOIN devicenumplanmap AS mdn ON mdn.pkid==rd.fkdevicenumplanmap
+                        INNER JOIN numplan AS n ON n.pkid==mdn.fknumplan
+                        INNER JOIN typerecordingflag AS trec ON trec.enum==rd.tkrecordingflag 
+                        INNER JOIN device AS d ON d.pkid=mdn.fkdevice
+                        INNER JOIN typemodel as tm on d.tkmodel = tm.enum
+                        INNER JOIN recordingprofile as rec on mdn.fkrecordingprofile = rec.pkid"""
+
+        renderdata = get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_query)
+
+        if renderdata["rendertype"] == "success":
+            devices_with_enabled_record_list = renderdata["rows_list"]
+        else:
+            devices_with_enabled_record_list = {}
+
+        # -----------------------------------------------------------
+        # Get information about devices in application user "phoneup"
+        # -----------------------------------------------------------
+        sql_query = """select n.dnorpattern,mdn.display,tm.name as devicetype,device.name as devicename from applicationuserdevicemap
+                                INNER JOIN applicationuser ON applicationuser.pkid = applicationuserdevicemap.fkapplicationuser
+                                INNER JOIN devicenumplanmap AS mdn ON mdn.fkdevice=applicationuserdevicemap.fkdevice
+                                INNER JOIN numplan AS n ON n.pkid==mdn.fknumplan
+                                INNER JOIN device ON device.pkid=applicationuserdevicemap.fkdevice
+                                INNER JOIN typemodel as tm on device.tkmodel = tm.enum
+                                where applicationuser.name = 'phoneup'"""
+
+        renderdata = get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_query)
+
+        if renderdata["rendertype"] == "success":
+            devices_in_application_user_list = renderdata["rows_list"]
+        else:
+            devices_in_application_user_list = {}
+
+        # -------------------------------------------------------------
+        # Get information about devices enabled for record from PhoneUP
+        # -------------------------------------------------------------
+
+        # phonUP URL's
+        phoneup_url = "http://" + phoneup_ip_address + "/coreapi/api/Core/GetActivatedDevices?moduleName=record"
+
+        console_output = phoneup_url + "\n"
+        print(console_output)
+
+        renderdata = get_dict_from_aurus(phoneup_url, phoneup_login, phoneup_password)
+
+        if renderdata["rendertype"] == "success":
+            phoneup_activated_devices_list = renderdata["rows_list"]
+        else:
+            phoneup_activated_devices_list = {}
+
+        # -------------------------------------------------------------
+        # Get information about lines enabled for record from PhoneUP
+        # -------------------------------------------------------------
+
+        # phonUP URL's
+        phoneup_url = "http://" + phoneup_ip_address + "/coreapi/api/Record/GetRecordedLines"
+
+        console_output = phoneup_url + "\n"
+        print(console_output)
+
+        renderdata = get_dict_from_aurus(phoneup_url, phoneup_login, phoneup_password)
+
+        if renderdata["rendertype"] == "success":
+            phoneup_activated_lines_list = renderdata["rows_list"]
+        else:
+            phoneup_activated_lines_list = {}
+
+        result_dict = {}
+        # Add enabled devices to result dict
+        for enabled_device in devices_with_enabled_record_list:
+            result_dict[enabled_device["devicename"]] = {
+                "devicetype" : enabled_device["devicetype"],
+                "devicename" : enabled_device["devicename"],
+                "dnorpattern" : enabled_device["dnorpattern"],
+                "description" : enabled_device["description"]
+            }
+
+        # Add devices from application user to result dict
+        for device_in_app in devices_in_application_user_list:
+            if device_in_app["devicename"] in result_dict:
+                result_dict[device_in_app["devicename"]]["app_devicename"] = device_in_app["devicename"]
+                result_dict[device_in_app["devicename"]]["app_display"] = device_in_app["display"]
+            else:
+                result_dict[device_in_app["devicename"]] = {
+                    "app_devicename": device_in_app["devicename"],
+                    "app_display": device_in_app["display"],
+                    "dnorpattern": device_in_app["dnorpattern"],
+                    "devicetype": device_in_app["devicetype"]
+                }
+
+        # Add activated devices from PhoneUP to result dict
+        for phoneup_activated_device in phoneup_activated_devices_list:
+            if phoneup_activated_device["Name"] in result_dict:
+                result_dict[phoneup_activated_device["Name"]]["phoneup_devicename"] = phoneup_activated_device["Name"]
+                result_dict[phoneup_activated_device["Name"]]["phoneup_devicetype"] = phoneup_activated_device["Type"]
+            else:
+                result_dict[phoneup_activated_device["Name"]] = {
+                    "phoneup_devicename": phoneup_activated_device["Name"],
+                    #"dnorpattern": phoneup_activated_device["PhoneLines"],
+                    "phoneup_devicetype": phoneup_activated_device["Type"]
+                }
+
+        # Add recorded lines from PhoneUP to result dict
+        pprint(phoneup_activated_lines_list)
+        for phoneup_activated_lines in phoneup_activated_lines_list:
+            if phoneup_activated_lines["DeviceNames"][0] in result_dict:
+                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_devicename"] = phoneup_activated_lines["DeviceNames"][0]
+                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_display"] = phoneup_activated_lines["Contacts"][0]
+                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_dnorpattern"] = phoneup_activated_lines["PhoneLine"]
+            else:
+                result_dict[phoneup_activated_lines["DeviceNames"]] = {
+                    "line_devicename": phoneup_activated_lines["DeviceNames"][0],
+                    "line_dnorpattern": phoneup_activated_lines["PhoneLine"],
+                    "line_display": phoneup_activated_lines["Contacts"][0]
+                }
+
+        console_output = "result_dict: "
+        print(console_output)
+        pprint(result_dict)
+
+
+        operationEndTime = datetime.now()
+        operationDuration = str(operationEndTime - operationStartTime)
+        console_output = " (Done in " + operationDuration + ")"
+
+        renderdata = {
+            "rendertype": "success",
+            "html_template": "ucreporter_aurus.html",
+            "html_page_title": html_page_title,
+            "console_output": console_output,
+            "form_navigation": form_navigation,
+            "form_cluster_selection": form_cluster_selection,
+            "rows_list": result_dict
+        }
+
+        return renderdata
+
+    renderdata = {
+        "rendertype": "null",
+        "html_template": "ucreporter_aurus.html",
+        "html_page_title": html_page_title,
+        "console_output": console_output,
+        "form_navigation": form_navigation,
+        "form_cluster_selection": form_cluster_selection
+    }
+    return renderdata
+
+

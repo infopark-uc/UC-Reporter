@@ -12,20 +12,29 @@
 	<table class="DataTable">
 		<tr>
 			<th>
-				Device Type
+				CUCM Device Type
 			</th>
             <th>
-				Device Name
+				CUCM Device Name
 			</th>
 			<th>
-				DN
+				CUCM enabled DN
 			</th>
 			<th>
-				Description
+				CUCM Description
+			</th>
+            <th>
+				CUCM AppUser
+			</th>
+            <th>
+				Aurus Activated Device
+			</th>
+            <th>
+				Aurus Recorded Line
 			</th>
 
 		</tr>
-		{% for row in rows_list %}
+		{% for row in rows_list.values() %}
 		<tr>
             <td>
 				{{ row.devicetype }}
@@ -38,6 +47,15 @@
 			</td>
             <td>
 				{{ row.description }}
+			</td>
+            <td>
+				{{ row.app_devicename }}
+			</td>
+            <td>
+				{{ row.phoneup_devicename }}
+			</td>
+            <td>
+				{{ row.line_dnorpattern }}
 			</td>
 		</tr>
 		{% endfor %}
