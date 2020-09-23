@@ -9,9 +9,10 @@ from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
+from application.cms_cospace_usage import cms_cospace_usage
 from flask_login import logout_user, current_user, login_required
-from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users,ucreporter_settings_status_gunicorn
-from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers,ucreporter_settings_status_requester
+from application.ucreporter_settings import ucreporter_settings_mainpage,ucreporter_settings_users
+from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
 import application.callforward
 from application.aurus_consistency_checker import aurus_consistency_check
 
@@ -154,6 +155,29 @@ def cmscallleg(callegid):
 def cms_cospace_page():
 
     module_result = cms_cospace_view()
+
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['rendertype'] == 'success':  # данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               rows_list=module_result['rows_list'],
+                               formNAV=module_result['form_navigation'],
+                               formCMS=module_result['form_cmsselection'])
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           console_output=module_result['console_output'],
+                           formNAV=module_result['form_navigation'],
+                           formCMS=module_result['form_cmsselection'])
+
+
+@app.route('/cmsusage', methods=['GET', 'POST'])
+@app.route('/cmsusage/', methods=['GET', 'POST'])
+@login_required
+def cms_cospace_usage_page():
+
+    module_result = cms_cospace_usage()
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))

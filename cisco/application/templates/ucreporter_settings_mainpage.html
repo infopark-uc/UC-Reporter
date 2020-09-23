@@ -229,23 +229,7 @@
 	</div>
     {% endif %}
 
-    {% if content_type == "service_status" %}
-	<div>
-		<form>
-			<table>
-				<tr>
-					{{ form_status.RestartSubmit }}
-				</tr>
-				Статус сервиса:
-				<tr>
-					{{ form_status.Status_field }}
-				</tr>
-			</table>
-		</form>
-	</div>
-    {% endif %}
-
-    {% if content_type == "RoomControll" %}
+	{% if content_type == "RoomControll" %}
     <div id="tableWrap">
     <fieldset>
 	<legend>
@@ -268,6 +252,5 @@
     </fieldset>
     </div>
     {% endif %}
-
 
 {% endblock %}

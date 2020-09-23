@@ -1,0 +1,52 @@
+{% extends "base_templates/base_template.html" %}
+{% block Content %}
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Список комнат CMS:
+			{{ formCMS.select_CMSCluster() }}
+	        {{ formCMS.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				Name
+			</th>
+            <th>
+				Count last 30 days
+			</th>
+			<th>
+				Duration last 30 days
+			</th>
+			<th>
+				Count last 7 days
+			</th>
+			<th>
+				Duration last 7 days
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+            <td>
+				{{ row.Name }}
+			</td>
+			<td>
+				{{ row.count_mounth }}
+			</td>
+			<td>
+				{{ row.duration_mounth }}
+			</td>
+			<td>
+				{{ row.count_last_week }}
+			</td>
+			<td>
+				{{ row.duration_last_week }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+{% endblock %}
