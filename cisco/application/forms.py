@@ -19,7 +19,7 @@ class SelectSearchType(FlaskForm):
     submit = SubmitField('Найти')
 
 class SelectCUCMCluster(FlaskForm):
-    select_cluster = SelectField('Navigation', default="NF",
+    select_cluster = SelectField('Navigation', default="Infocell",
                                 choices=[('MSK', 'Московский филиал'),('NF', 'Нефтеюганский филиал'),('Infocell', 'Инфосэл')])
     submit = SubmitField('Найти')
 

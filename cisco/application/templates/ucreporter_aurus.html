@@ -12,27 +12,32 @@
 	<table class="DataTable">
 		<tr>
 			<th>
-				CUCM Device Type
+				Device Type
 			</th>
             <th>
-				CUCM Device Name
+				Device Name
+			</th>
+            <th>
+				Line
+			</th>
+            <th>
+				Username
 			</th>
 			<th>
-				CUCM enabled DN
-			</th>
-			<th>
-				CUCM Description
+				CUCM check - recorded DN
 			</th>
             <th>
-				CUCM AppUser
+				CUCM check - AppUser
 			</th>
             <th>
-				Aurus Activated Device
+				Aurus check - Activated Device
 			</th>
             <th>
-				Aurus Recorded Line
+				Aurus check - Recorded Line
 			</th>
-
+            <th>
+				Aurus check - Line user
+			</th>
 		</tr>
 		{% for row in rows_list.values() %}
 		<tr>
@@ -42,11 +47,14 @@
 			<td>
 				{{ row.devicename }}
 			</td>
-			<td>
-				{{ row.dnorpattern }}
-			</td>
             <td>
-				{{ row.description }}
+                {{ row.dnorpattern }}
+			</td>
+			<td>
+                {{ row.username }}
+			</td>
+			<td>
+				{{ row.cucmline_dnorpattern }}
 			</td>
             <td>
 				{{ row.app_devicename }}
@@ -56,6 +64,9 @@
 			</td>
             <td>
 				{{ row.line_dnorpattern }}
+			</td>
+            <td>
+				{{ row.line_username }}
 			</td>
 		</tr>
 		{% endfor %}

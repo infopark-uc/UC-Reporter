@@ -111,8 +111,6 @@ def get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_
     console_output = "Найдено записей: " + str(len(rows_list))
     print(console_output)
 
-    pprint(rows_list)
-
     renderdata = {
         "rendertype": "success",
         "console_output": console_output,
@@ -172,7 +170,6 @@ def get_dict_from_aurus(phoneup_url, phoneup_login, phoneup_password):
     print(console_output)
 
     rows_list = json.loads(get.text)
-    pprint (rows_list)
 
     # Get Dict with phones
     if len(rows_list) == 0:
@@ -231,9 +228,6 @@ def aurus_consistency_check():
         # CUCM URL's
         cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
 
-        console_output = cucm_url + "\n"
-        print(console_output)
-
         # V12 CUCM Headers
         headers11query = {'Content-Type': 'text/xml', 'SOAPAction': 'CUCM:DB ver=11.5 executeSQLQuery'}
 
@@ -255,6 +249,11 @@ def aurus_consistency_check():
         else:
             devices_with_enabled_record_list = {}
 
+        operationEndTime = datetime.now()
+        operationDuration = str(operationEndTime - operationStartTime)
+        console_output = " (Промежуточный результат " + operationDuration + ")"
+        print(console_output)
+
         # -----------------------------------------------------------
         # Get information about devices in application user "phoneup"
         # -----------------------------------------------------------
@@ -264,7 +263,7 @@ def aurus_consistency_check():
                                 INNER JOIN numplan AS n ON n.pkid==mdn.fknumplan
                                 INNER JOIN device ON device.pkid=applicationuserdevicemap.fkdevice
                                 INNER JOIN typemodel as tm on device.tkmodel = tm.enum
-                                where applicationuser.name = 'phoneup'"""
+                                where applicationuser.name = '""" + phoneup_app_user + "'"
 
         renderdata = get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_query)
 
@@ -272,6 +271,11 @@ def aurus_consistency_check():
             devices_in_application_user_list = renderdata["rows_list"]
         else:
             devices_in_application_user_list = {}
+
+        operationEndTime = datetime.now()
+        operationDuration = str(operationEndTime - operationStartTime)
+        console_output = " (Промежуточный результат " + operationDuration + ")"
+        print(console_output)
 
         # -------------------------------------------------------------
         # Get information about devices enabled for record from PhoneUP
@@ -290,15 +294,17 @@ def aurus_consistency_check():
         else:
             phoneup_activated_devices_list = {}
 
+        operationEndTime = datetime.now()
+        operationDuration = str(operationEndTime - operationStartTime)
+        console_output = " (Промежуточный результат " + operationDuration + ")"
+        print(console_output)
+
         # -------------------------------------------------------------
         # Get information about lines enabled for record from PhoneUP
         # -------------------------------------------------------------
 
         # phonUP URL's
         phoneup_url = "http://" + phoneup_ip_address + "/coreapi/api/Record/GetRecordedLines"
-
-        console_output = phoneup_url + "\n"
-        print(console_output)
 
         renderdata = get_dict_from_aurus(phoneup_url, phoneup_login, phoneup_password)
 
@@ -307,28 +313,50 @@ def aurus_consistency_check():
         else:
             phoneup_activated_lines_list = {}
 
+        operationEndTime = datetime.now()
+        operationDuration = str(operationEndTime - operationStartTime)
+        console_output = " (Промежуточный результат " + operationDuration + ")"
+        print(console_output)
+
         result_dict = {}
+
+        console_output = "Начинаем формировать итоговый словарь"
+        print(console_output)
+
         # Add enabled devices to result dict
         for enabled_device in devices_with_enabled_record_list:
             result_dict[enabled_device["devicename"]] = {
-                "devicetype" : enabled_device["devicetype"],
-                "devicename" : enabled_device["devicename"],
-                "dnorpattern" : enabled_device["dnorpattern"],
-                "description" : enabled_device["description"]
+                "devicetype": enabled_device["devicetype"],
+                "devicename": enabled_device["devicename"],
+                "username": enabled_device["description"],
+                "dnorpattern": enabled_device["dnorpattern"],
+                "cucmline_dnorpattern": enabled_device["dnorpattern"]
             }
+
+        console_output = "Информация о линиях с включенной записью в CUCM добавлена в итоговый словарь"
+        print(console_output)
 
         # Add devices from application user to result dict
         for device_in_app in devices_in_application_user_list:
             if device_in_app["devicename"] in result_dict:
                 result_dict[device_in_app["devicename"]]["app_devicename"] = device_in_app["devicename"]
-                result_dict[device_in_app["devicename"]]["app_display"] = device_in_app["display"]
+                result_dict[device_in_app["devicename"]]["app_username"] = device_in_app["display"]
+                result_dict[device_in_app["devicename"]]["app_dnorpattern"] = device_in_app["dnorpattern"]
+                result_dict[device_in_app["devicename"]]["app_devicetype"] = device_in_app["devicetype"]
             else:
                 result_dict[device_in_app["devicename"]] = {
-                    "app_devicename": device_in_app["devicename"],
-                    "app_display": device_in_app["display"],
+                    "devicetype": device_in_app["devicetype"],
+                    "devicename": device_in_app["devicename"],
+                    "username": device_in_app["display"],
                     "dnorpattern": device_in_app["dnorpattern"],
-                    "devicetype": device_in_app["devicetype"]
+                    "app_devicename": device_in_app["devicename"],
+                    "app_username": device_in_app["display"],
+                    "app_dnorpattern": device_in_app["dnorpattern"],
+                    "app_devicetype": device_in_app["devicetype"]
                 }
+
+        console_output = "Информация об устройствах из Application User в CUCM добавлена в итоговый словарь"
+        print(console_output)
 
         # Add activated devices from PhoneUP to result dict
         for phoneup_activated_device in phoneup_activated_devices_list:
@@ -337,33 +365,74 @@ def aurus_consistency_check():
                 result_dict[phoneup_activated_device["Name"]]["phoneup_devicetype"] = phoneup_activated_device["Type"]
             else:
                 result_dict[phoneup_activated_device["Name"]] = {
+                    "devicetype": phoneup_activated_device["Type"],
+                    "devicename": phoneup_activated_device["Name"],
+                    "dnorpattern": "",
                     "phoneup_devicename": phoneup_activated_device["Name"],
-                    #"dnorpattern": phoneup_activated_device["PhoneLines"],
                     "phoneup_devicetype": phoneup_activated_device["Type"]
                 }
 
+        console_output = "Информация об активированных устройствах в PhoneUP добавлена в итоговый словарь"
+        print(console_output)
+
         # Add recorded lines from PhoneUP to result dict
-        pprint(phoneup_activated_lines_list)
+        # Перебираем в цикле все полученниые линии включенные на запись в Фонапе
         for phoneup_activated_lines in phoneup_activated_lines_list:
-            if phoneup_activated_lines["DeviceNames"][0] in result_dict:
-                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_devicename"] = phoneup_activated_lines["DeviceNames"][0]
-                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_display"] = phoneup_activated_lines["Contacts"][0]
-                result_dict[phoneup_activated_lines["DeviceNames"][0]]["line_dnorpattern"] = phoneup_activated_lines["PhoneLine"]
-            else:
-                result_dict[phoneup_activated_lines["DeviceNames"]] = {
-                    "line_devicename": phoneup_activated_lines["DeviceNames"][0],
+            # Перебираем в цикле все существующие записи итогового словоря чтобы найти нет ли такой линии
+            line_was_found = False
+            for record in result_dict.values():
+                # Проверяем есть ли записываемая линия в записи итогового словаря
+                if record["dnorpattern"] == phoneup_activated_lines["PhoneLine"]:
+                    # Записываемая линия уже есть в записи итогового словаря, тогда
+                    # Дописываем значения в существующую запись
+                    record["line_dnorpattern"] = phoneup_activated_lines["PhoneLine"]
+                    # Проверяем есть ли информация об устройстве записываемой линии
+                    if len(phoneup_activated_lines["DeviceNames"]) > 0:
+                        phoneup_activated_line_device = phoneup_activated_lines["DeviceNames"][0]
+                    else:
+                        phoneup_activated_line_device = ""
+                    record["line_devicename"] = phoneup_activated_line_device
+                    # Проверяем есть ли информация о контактах записываемой линии
+                    if len(phoneup_activated_lines["Contacts"]) > 0:
+                        phoneup_activated_line_contact = phoneup_activated_lines["Contacts"][0]
+                    else:
+                        phoneup_activated_line_contact = ""
+                    record["line_username"] = phoneup_activated_line_contact
+                    line_was_found = True
+                    break
+            if not line_was_found:
+                # Записываемой линии нет в итоговом словаре, тогда
+                # Дописываем значения в существующую запись
+                # Проверяем есть ли информация об устройстве записываемой линии
+                if len(phoneup_activated_lines["DeviceNames"]) > 0:
+                    phoneup_activated_line_device = phoneup_activated_lines["DeviceNames"][0]
+                else:
+                    phoneup_activated_line_device = ""
+                # Проверяем есть ли информация о контактах записываемой линии
+                if len(phoneup_activated_lines["Contacts"]) > 0:
+                    phoneup_activated_line_contact = phoneup_activated_lines["Contacts"][0]
+                else:
+                    phoneup_activated_line_contact = ""
+                result_dict[phoneup_activated_lines["PhoneLine"]] = {
+                    "devicename": phoneup_activated_line_device,
+                    "username": phoneup_activated_line_contact,
+                    "dnorpattern": phoneup_activated_lines["PhoneLine"],
+                    "line_devicename": phoneup_activated_line_device,
                     "line_dnorpattern": phoneup_activated_lines["PhoneLine"],
-                    "line_display": phoneup_activated_lines["Contacts"][0]
+                    "line_username": phoneup_activated_line_contact
                 }
 
-        console_output = "result_dict: "
+        console_output = "Информация о включенных на запись линиях в PhoneUP добавлена в итоговый словарь"
         print(console_output)
-        pprint(result_dict)
+
+        # console_output = "result_dict: "
+        # print(console_output)
+        # pprint(result_dict)
 
 
         operationEndTime = datetime.now()
         operationDuration = str(operationEndTime - operationStartTime)
-        console_output = " (Done in " + operationDuration + ")"
+        console_output = "Найдено записей: " + str(len(result_dict)) + " (Done in " + operationDuration + ")"
 
         renderdata = {
             "rendertype": "success",
@@ -376,6 +445,8 @@ def aurus_consistency_check():
         }
 
         return renderdata
+
+    console_output = "Нет активного запроса"
 
     renderdata = {
         "rendertype": "null",
