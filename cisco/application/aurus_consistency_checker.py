@@ -263,7 +263,7 @@ def aurus_consistency_check():
                                 INNER JOIN numplan AS n ON n.pkid==mdn.fknumplan
                                 INNER JOIN device ON device.pkid=applicationuserdevicemap.fkdevice
                                 INNER JOIN typemodel as tm on device.tkmodel = tm.enum
-                                where applicationuser.name = '""" + phoneup_app_user + "' AND devicetype NOT LIKE '%CTI%'"
+                                where applicationuser.name = '""" + phoneup_app_user + "' AND tm.name NOT LIKE '%CTI%'"
 
         renderdata = get_dict_from_cucm(cucm_url, headers11query, cucm_login, cucm_password, sql_query)
 
