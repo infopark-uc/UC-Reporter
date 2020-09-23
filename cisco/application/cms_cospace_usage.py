@@ -6,6 +6,14 @@ import logging.handlers
 from application.sqlrequests import sql_request_dict
 from application.forms import SelectNavigation, SelectCMSClusterForCospace
 
+def time_format(input_time):
+	minutes,seconds = divmod(int(input_time),60)
+	hours, minutes = divmod(minutes, 60)
+	hms_time=(str(hours) + ":" + str(minutes) + ":" + str(seconds))
+	result=hms_time
+	return result
+
+
 def cms_cospace_usage():
 	rows_list = []
 	# Настройка логирования
@@ -65,14 +73,14 @@ def cms_cospace_usage():
 
 			for row in rows_list_mounth:
 				if row["duration_mounth"]:
-						row["duration_mounth"] = round((int(row["duration_mounth"]) / 3600),1)
+					row["duration_mounth"] = time_format(row["duration_mounth"])
 
 			# Словарь с данными за неделю
 			rows_list_last_week = sql_request_dict(sql_request_result_string_last_week)
 			# перевести секунды в часы
 			for row in rows_list_last_week:
 				if row["duration_last_week"]:
-					row["duration_last_week"] = round((int(row["duration_last_week"]) /3600),1)
+					row["duration_last_week"] = time_format(row["duration_last_week"])
 
 
 			rows_list = rows_list_mounth
