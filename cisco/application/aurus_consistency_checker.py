@@ -364,10 +364,14 @@ def aurus_consistency_check():
                 result_dict[phoneup_activated_device["Name"]]["phoneup_devicename"] = phoneup_activated_device["Name"]
                 result_dict[phoneup_activated_device["Name"]]["phoneup_devicetype"] = phoneup_activated_device["Type"]
             else:
+                if len(phoneup_activated_device["PhoneLines"]) > 0:
+                    phoneup_activated_device_line = phoneup_activated_lines["DeviceNames"][0]
+                else:
+                    phoneup_activated_device_line = ""
                 result_dict[phoneup_activated_device["Name"]] = {
                     "devicetype": phoneup_activated_device["Type"],
                     "devicename": phoneup_activated_device["Name"],
-                    "dnorpattern": "",
+                    "dnorpattern": phoneup_activated_device_line,
                     "phoneup_devicename": phoneup_activated_device["Name"],
                     "phoneup_devicetype": phoneup_activated_device["Type"]
                 }
@@ -402,15 +406,21 @@ def aurus_consistency_check():
                     break
             if not line_was_found:
                 # Записываемой линии нет в итоговом словаре, тогда
-                # Дописываем значения в существующую запись
+                # Создаем запись
                 # Проверяем есть ли информация об устройстве записываемой линии
                 if len(phoneup_activated_lines["DeviceNames"]) > 0:
-                    phoneup_activated_line_device = phoneup_activated_lines["DeviceNames"][0]
+                    if phoneup_activated_lines["DeviceNames"][0] != "Unknown":
+                        phoneup_activated_line_device = phoneup_activated_lines["DeviceNames"][0]
+                    else:
+                        phoneup_activated_line_device = ""
                 else:
                     phoneup_activated_line_device = ""
                 # Проверяем есть ли информация о контактах записываемой линии
                 if len(phoneup_activated_lines["Contacts"]) > 0:
-                    phoneup_activated_line_contact = phoneup_activated_lines["Contacts"][0]
+                    if phoneup_activated_lines["Contacts"][0] != "Unknown":
+                        phoneup_activated_line_contact = phoneup_activated_lines["Contacts"][0]
+                    else:
+                        phoneup_activated_line_contact = ""
                 else:
                     phoneup_activated_line_contact = ""
                 result_dict[phoneup_activated_lines["PhoneLine"]] = {
