@@ -458,6 +458,15 @@ def cdr_receiver():
                     else:
                         name = "none"
 
+                    # забираем callCorrelator
+                    if "callCorrelator" in record_item['call']:
+                        call_correlator = str(record_item['call']['callCorrelator'])
+                        console_output =  cms_ip + ": We get callCorrelator from callStart"
+                        #print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                    else:
+                        call_correlator = "none"
+
                     # забираем время
                     if "@time" in record_item:
                         starttime = str(record_item['@time'])
@@ -486,6 +495,7 @@ def cdr_receiver():
                             + "',StartTime='" + starttimeMSK
                             + "',coSpace='" + coSpace
                             + "',cms_ip='" + cms_ip
+                            + "',callCorrelator='" + call_correlator
                             + "',name='" + name + "';")
                     else:
                         console_output =  cms_ip + ": Space ID data already presence"
