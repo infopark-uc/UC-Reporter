@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `cms_cdr_records` (
 
 -- Дамп структуры для таблица ucreporter.cms_requester_config
 CREATE TABLE IF NOT EXISTS `cms_requester_config` (
+  `id` int(11) DEFAULT NULL,
   `cluster` tinytext COLLATE utf8_bin,
   `repeat_check` int(11) DEFAULT NULL,
   `ip` tinytext COLLATE utf8_bin,
@@ -119,14 +120,15 @@ CREATE TABLE IF NOT EXISTS `cms_servers` (
   `password` mediumtext COLLATE utf8_bin,
   `ip` mediumtext COLLATE utf8_bin,
   `api_port` mediumtext COLLATE utf8_bin,
-  `cluster` mediumtext COLLATE utf8_bin
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='login - CMS API user\r\npassword - CMS API Password\r\nip - ip CMS node\r\napi_port - CMS API port\r\ncluster - some for cms cluster nodes';
+  `cluster` mediumtext COLLATE utf8_bin,
+  `requester_running` tinytext COLLATE utf8_bin
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='login - CMS API user\r\npassword - CMS API Password\r\nip - ip CMS node\r\napi_port - CMS API port\r\ncluster - some for cms cluster nodes\r\nrequester_running - ';
 
 -- Экспортируемые данные не выделены.
 
 -- Дамп структуры для таблица ucreporter.cm_phones_table
 CREATE TABLE IF NOT EXISTS `cm_phones_table` (
-  `phone_index` mediumtext COLLATE utf8_bin,
+  `phone_index` int(11) DEFAULT NULL,
   `phone_number` mediumtext COLLATE utf8_bin,
   `phone_ip` mediumtext COLLATE utf8_bin,
   `phone_user` mediumtext COLLATE utf8_bin,
@@ -148,11 +150,15 @@ CREATE TABLE IF NOT EXISTS `cm_roomsystems_table` (
 
 -- Дамп структуры для таблица ucreporter.cm_servers_list
 CREATE TABLE IF NOT EXISTS `cm_servers_list` (
-  `cm_index` int(11) DEFAULT NULL,
-  `cm_name` mediumtext COLLATE utf8_bin,
+  `id` int(11) DEFAULT NULL,
   `cm_ip` mediumtext COLLATE utf8_bin,
   `cm_username` mediumtext COLLATE utf8_bin,
-  `cm_password` mediumtext COLLATE utf8_bin
+  `cm_password` mediumtext COLLATE utf8_bin,
+  `cluster` mediumtext COLLATE utf8_bin,
+  `phoneup_ip` mediumtext COLLATE utf8_bin,
+  `phoneup_username` mediumtext COLLATE utf8_bin,
+  `phoneup_password` mediumtext COLLATE utf8_bin,
+  `phoneup_app_user` mediumtext COLLATE utf8_bin
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='CUCM list\r\ncm_name - name of CUCM Publisher\r\ncm_ip - ipaddr of CUCM Publisher\r\ncm_username - API AXL User\r\ncm_passwod - API AXL Password';
 
 -- Экспортируемые данные не выделены.
@@ -171,7 +177,8 @@ CREATE TABLE IF NOT EXISTS `ucreporter_users` (
   `id` tinytext,
   `username` tinytext,
   `password` tinytext,
-  `password_hash` tinytext
+  `password_hash` tinytext,
+  `description` tinytext
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Table auth users';
 
 -- Экспортируемые данные не выделены.

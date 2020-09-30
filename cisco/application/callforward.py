@@ -21,7 +21,11 @@ def render():
         }
         return renderdata
 
+    choise_data = sql_request_dict(
+            "SELECT cluster,description FROM cm_servers_list")
     form_search = SelectForwardSearchType(csrf_enabled=False)
+    form_search.select_region.choices = [(choise["cluster"], choise["description"]) for choise in choise_data]
+
     if form_search.validate_on_submit():
         console_output = form_search.select_region.data + " " + form_search.select_field.data + " " + form_search.string_field.data
 
@@ -35,7 +39,7 @@ def render():
         # CUCM URL's
         cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
         console_output = cucm_url + "\n"
-        print(console_output)
+        #print(console_output)
 
         # V12 CUCM Headers
         headers11query = {'Content-Type': 'text/xml', 'SOAPAction': 'CUCM:DB ver=11.5 executeSQLQuery'}
@@ -74,7 +78,7 @@ where cfd.cfadestination like '"""
             """
             msg = msg_begin + form_search.string_field.data + msg_end
             console_output = msg + "\n"
-            print(console_output)
+            #print(console_output)
 
         # disable warning about untrusted certs
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -85,7 +89,7 @@ where cfd.cfadestination like '"""
                                  auth=(cucm_login, cucm_password))
         except requests.exceptions.ConnectionError:
             console_output = "Ошибка соединения с сервером " + cucm_ip_address
-            print(console_output)
+            #print(console_output)
             renderdata = {
                 "rendertype": "null",
                 "html_template": "cisco_callforward.html",
