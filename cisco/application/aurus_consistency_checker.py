@@ -365,7 +365,7 @@ def aurus_consistency_check():
                 result_dict[phoneup_activated_device["Name"]]["phoneup_devicetype"] = phoneup_activated_device["Type"]
             else:
                 if len(phoneup_activated_device["PhoneLines"]) > 0:
-                    phoneup_activated_device_line = phoneup_activated_lines["DeviceNames"][0]
+                    phoneup_activated_device_line = phoneup_activated_device["PhoneLines"][0]
                 else:
                     phoneup_activated_device_line = ""
                 result_dict[phoneup_activated_device["Name"]] = {
