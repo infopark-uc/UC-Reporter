@@ -210,8 +210,9 @@ def aurus_consistency_check():
 
     console_output = "Creating cluster selection form"
     print(console_output)
-
+    choice_data = sql_request_dict("SELECT cluster,description FROM cm_servers_list")
     form_cluster_selection = SelectCUCMCluster(meta={'csrf': False})
+    form_cluster_selection.select_cluster.choices = [(choice["cluster"], choice["description"]) for choice in choice_data]
     if form_cluster_selection.validate_on_submit():
 
         auth_data_list = sql_request_dict(
