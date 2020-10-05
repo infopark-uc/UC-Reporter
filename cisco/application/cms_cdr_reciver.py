@@ -4,8 +4,9 @@ import json
 import datetime
 from pprint import pprint
 from pprint import pformat
+import uuid
 import logging.handlers
-from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate
+from application.sqlrequests import cms_sql_request,cm_sqlselect_dict,cm_sqlupdate,sql_request_dict,sql_execute
 
 def cdr_receiver():
 
@@ -36,7 +37,12 @@ def cdr_receiver():
     try:
         cdr = xmltodict.parse(request.data) #get OrderedDict
         cdr_dict = json.loads(json.dumps(cdr)) #trasfrorm OrderedDict to Dict
-        cms_ip = str(request.environ['HTTP_X_FORWARDED_FOR']) #забираем IP
+        if "HTTP_X_FORWARDED_FOR" in request.environ:
+            cms_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
+        elif "REMOTE_ADDR" in request.environ:
+            cms_ip = str(request.environ['REMOTE_ADDR'])  # забираем IP
+        else:
+            cms_ip = "UNKNOWN"
 
         if type (cdr_dict['records']['record']) is list:
             console_output = cms_ip + ": We get record list"
@@ -485,6 +491,41 @@ def cdr_receiver():
                     #print("CMS_RECEIVER " + console_output)
                     logger.debug(console_output)
 
+                    # Добавление активного вызова - начало
+                    console_output = cms_ip + ": Request meeting_id_list form DB: " + "SELECT meeting_id FROM cms_cdr_active_calls WHERE callCorrelator_id='" + call_correlator + "'"
+                    logger.debug(console_output)
+                    meeting_id_list = sql_request_dict("SELECT meeting_id FROM cms_cdr_active_calls WHERE callCorrelator_id='" + str(call_correlator) + "'")
+                    if not meeting_id_list:
+                        console_output = cms_ip + ": insert new active CALL to database"
+                        #print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                        meeting_id = str(uuid.uuid1())
+                        # insert new active call IDs to database
+                        console_output = cms_ip + ": SQL:" + "INSERT INTO cms_cdr_active_calls SET meeting_id='" + meeting_id + "',coSpace_id='" + coSpace\
+                            + "',callCorrelator_id='" + call_correlator\
+                            + "',call_id='" + call_id + "';"
+                        logger.debug(console_output)
+                        sql_execute(
+                            "INSERT INTO cms_cdr_active_calls SET meeting_id='" + str(uuid.uuid1())
+                            + "',coSpace_id='" + coSpace
+                            + "',callCorrelator_id='" + call_correlator
+                            + "',call_id='" + call_id + "';")
+                    else:
+                        console_output =  cms_ip + ": active call already exists in database: " + call_correlator
+                        #print("CMS_RECEIVER " + console_output)
+                        logger.debug(console_output)
+                        if meeting_id_list[0]["meeting_id"]:
+                            meeting_id = str(meeting_id_list[0]["meeting_id"])
+                            sql_execute(
+                                "INSERT INTO cms_cdr_active_calls SET meeting_id='" + meeting_id
+                                + "',coSpace_id='" + coSpace
+                                + "',callCorrelator_id='" + call_correlator
+                                + "',call_id='" + call_id + "';")
+                        else:
+                            console_output = cms_ip + ": meeting_id not found for callCorrelator: " + call_correlator
+                            meeting_id = "UNKNOWN"
+                    # Добавление активного вызова - конец
+
                     if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
                         console_output = cms_ip + ": insert CALL to database"
                         #print("CMS_RECEIVER " + console_output)
@@ -496,6 +537,7 @@ def cdr_receiver():
                             + "',coSpace='" + coSpace
                             + "',cms_ip='" + cms_ip
                             + "',callCorrelator='" + call_correlator
+                            + "',meeting_id='" + meeting_id
                             + "',name='" + name + "';")
                     else:
                         console_output =  cms_ip + ": Space ID data already presence"
@@ -557,6 +599,15 @@ def cdr_receiver():
                         #print("CMS_RECEIVER " + console_output)
                         logger.debug(console_output)
                     #pprint(cdr_dict)
+
+                    # Удаление активного вызова - начало
+                    console_output = cms_ip + ": Start to delete active call: " + "DELETE FROM cms_cdr_active_calls WHERE call_id='" + call_id + "'"
+                    logger.debug(console_output)
+                    sql_execute("DELETE FROM cms_cdr_active_calls WHERE call_id='" + str(call_id) + "'")
+                    console_output = cms_ip + ": End to delete active call"
+                    logger.debug(console_output)
+                    # Удаление активного вызова - начало
+
                 else:
                     console_output = cms_ip + ": callEnd does not contain CallID"
                     #print("CMS_RECEIVER " + console_output)

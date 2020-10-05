@@ -54,20 +54,20 @@ def cmsviewer():
 		if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
 			if not form_cmsselection.confroom_filter.data:
 				rows_list = cms_sql_request_dict(
-					"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
+					"SELECT callCorrelator, name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
 				#print("CMS VW: get dict")
 			else:
 				rows_list = cms_sql_request_dict(
-					"SELECT name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls WHERE (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
+					"SELECT callCorrelator, name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls WHERE (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
 				#print("CMS VW: get dict")
 		else:
 			if not form_cmsselection.confroom_filter.data:
 				rows_list = cms_sql_request_dict(
-					"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
+					"SELECT callCorrelator, cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
 				#print("CMS VW: get dict")
 			else:
 				rows_list = cms_sql_request_dict(
-					"SELECT cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "'AND (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
+					"SELECT callCorrelator, cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "'AND (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
 				#print("CMS VW: get dict")
 
 		operationEndTime = datetime.now()
@@ -127,6 +127,61 @@ def cmscallviewer(call_id):
 	sql_request_string_video_statistics = ",rxVideo_packetLossBurst_duration,rxVideo_packetLossBurst_density,rxVideo_packetGap_duration,rxVideo_packetGap_density"
 	sql_request_string_call_type = ",guestConnection,callLeg_subtype"
 	sql_request_string_from = " FROM cms_cdr_records WHERE call_id='" + call_id + "';"
+	sql_request_result_string = sql_request_string_select_basic\
+								+ sql_request_string_audio_video_codecs\
+								+ sql_request_string_audio_statistics\
+								+ sql_request_string_video_statistics\
+								+ sql_request_string_call_type\
+								+ sql_request_string_from
+
+	rows_list = cms_sql_request_dict(sql_request_result_string)
+		#"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,rxAudio_codec,txAudio_codec,rxVideo_codec,txVideo_codec,txVideo_maxHeight,txVideo_maxWidth,cms_ip,alarm_type,alarm_value FROM cms_cdr_records WHERE call_id='" + call_id + "';")
+
+	#print("CMS CALLVW: get dict for callID:  " + call_id)
+
+	operationEndTime = datetime.now()
+	operationDuration = str( operationEndTime - operationStartTime)
+	console_output = "Done in " + operationDuration
+	for row in rows_list:
+		if row["durationseconds"]:
+			if is_digit(row["durationseconds"]):
+				row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
+
+	renderdata = {
+		"rendertype": "success",
+		"html_template": "cisco_cmsview.html",
+		"html_page_title": html_page_title,
+		"console_output": console_output,
+		"form_navigation": form_navigation,
+		"rows_list": rows_list
+	}
+	return renderdata
+
+
+def cmscallcorrelatorviewer(callcorrelatorid):
+
+	operationStartTime = datetime.now()
+
+	html_page_title = 'CMS Call Report'
+	#print("CMS CALLVW: request for callID: " + call_id)
+
+	form_navigation = SelectNavigation(meta={'csrf': False})
+	if form_navigation.validate_on_submit():
+		console_output = "Нет активного запроса"
+		#print(console_output)
+		renderdata = {
+			"rendertype": "redirect",
+			"redirect_to": form_navigation.select_navigation.data
+		}
+		return renderdata
+
+	sql_request_string_select_basic = "SELECT r.callleg_id,r.remoteaddress,r.displayName,r.durationseconds,r.startTime,r.cms_ip,r.alarm_type,r.alarm_value,r.reason"
+	sql_request_string_audio_video_codecs = ",r.rxAudio_codec,r.txAudio_codec,r.rxVideo_codec,r.txVideo_codec,r.txVideo_maxHeight,r.txVideo_maxWidth"
+	sql_request_string_audio_statistics = ",r.rxAudio_packetLossBurst_duration,r.rxAudio_packetLossBurst_density,r.rxAudio_packetGap_duration,r.rxAudio_packetGap_density"
+	sql_request_string_video_statistics = ",r.rxVideo_packetLossBurst_duration,r.rxVideo_packetLossBurst_density,r.rxVideo_packetGap_duration,r.rxVideo_packetGap_density"
+	sql_request_string_call_type = ",r.guestConnection,r.callLeg_subtype"
+	sql_request_string_from = " FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE callCorrelator='" + callcorrelatorid + "';"
+
 	sql_request_result_string = sql_request_string_select_basic\
 								+ sql_request_string_audio_video_codecs\
 								+ sql_request_string_audio_statistics\

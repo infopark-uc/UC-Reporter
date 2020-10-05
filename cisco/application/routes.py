@@ -6,7 +6,7 @@ from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
-from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer
+from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmscallcorrelatorviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from application.cms_cospace_usage import cms_cospace_usage
@@ -118,6 +118,20 @@ def cmspage():
 @login_required
 def cmscall(callid):
     module_result = cmscallviewer(callid)
+
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                           console_output=module_result['console_output'],
+                           rows_list=module_result['rows_list'],
+                           formNAV=module_result['form_navigation'])
+
+
+@app.route('/cms/callcorrelator/<string:callcorrelatorid>/', methods=['GET', 'POST'])
+@login_required
+def cmscallcorrelator(callcorrelatorid):
+    module_result = cmscallcorrelatorviewer(callcorrelatorid)
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))

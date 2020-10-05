@@ -1,4 +1,5 @@
 import pymysql
+from pprint import pprint
 
 def cm_sqlupdate(data, table, set_column, filter_colum, filter_colum_data):
      con = pymysql.connect('172.20.5.19', 'sqladmin','Qwerty123', 'ucreporter')
@@ -29,13 +30,22 @@ def cm_sqlselectall(table, filter_colum, filter_colum_data):
 ############ SQL Requests ###################################
 
 def sql_request_dict(sqlrequest):   #запрос листа словорей
-     con = pymysql.connect('172.20.5.19', 'sqladmin','Qwerty123', 'ucreporter',cursorclass=pymysql.cursors.DictCursor)
+
+     try:
+          con = pymysql.connect('172.20.5.19', 'sqladmin', 'Qwerty123', 'ucreporter',
+                                cursorclass=pymysql.cursors.DictCursor)
+     except:
+          console_output = "sqlselect_dict: MySQL DB access error"
+          print(console_output)  # info
+          #logger.info(console_output)
+          return None
+
      with con:
           cur = con.cursor()
           cur.execute(sqlrequest)
-          result = cur.fetchall() #забираем все значения
-          cur.close() #закрываем курсор
-     con.close() #закрываем соединение
+          result = cur.fetchall()
+          cur.close()  # закрываем курсор
+     con.close()  # закрываем соединение
      return result
 
 def sql_execute(sqlrequest):
