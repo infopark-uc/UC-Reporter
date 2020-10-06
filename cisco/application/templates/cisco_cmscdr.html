@@ -41,8 +41,8 @@
 		<tr>
 			<td>
 				 <a href="  {{ url_for('cmscall',callid=row.call_id) }}">{{ row.cospace_name }}</a>
-				{% if row.callCorrelator %}
-				(<a href="  {{ url_for('cmscallcorrelator',callcorrelatorid=row.callCorrelator) }}">All clusters view</a>)
+				{% if row.meeting_id %}
+				(<a href="  {{ url_for('cmsmeetingid',meeting_id=row.meeting_id) }}">All clusters view</a>)
 				{% endif %}
 			</td>
             <td>

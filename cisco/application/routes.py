@@ -6,7 +6,7 @@ from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
-from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmscallcorrelatorviewer
+from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmsmeetingviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from application.cms_cospace_usage import cms_cospace_usage
@@ -128,10 +128,10 @@ def cmscall(callid):
                            formNAV=module_result['form_navigation'])
 
 
-@app.route('/cms/callcorrelator/<string:callcorrelatorid>/', methods=['GET', 'POST'])
+@app.route('/cms/meeting/<string:meeting_id>/', methods=['GET', 'POST'])
 @login_required
-def cmscallcorrelator(callcorrelatorid):
-    module_result = cmscallcorrelatorviewer(callcorrelatorid)
+def cmsmeetingid(meeting_id):
+    module_result = cmsmeetingviewer(meeting_id)
 
     if module_result['rendertype'] == 'redirect':  # переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))

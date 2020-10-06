@@ -496,26 +496,22 @@ def cdr_receiver():
                     logger.debug(console_output)
                     meeting_id_list = sql_request_dict("SELECT meeting_id FROM cms_cdr_active_calls WHERE callCorrelator_id='" + str(call_correlator) + "'")
                     if not meeting_id_list:
-                        console_output = cms_ip + ": insert new active CALL to database"
-                        #print("CMS_RECEIVER " + console_output)
-                        logger.debug(console_output)
                         meeting_id = str(uuid.uuid1())
-                        # insert new active call IDs to database
-                        console_output = cms_ip + ": SQL:" + "INSERT INTO cms_cdr_active_calls SET meeting_id='" + meeting_id + "',coSpace_id='" + coSpace\
-                            + "',callCorrelator_id='" + call_correlator\
-                            + "',call_id='" + call_id + "';"
+                        console_output = cms_ip + ": insert new active CALL to database with new meeting_id: " + meeting_id
                         logger.debug(console_output)
+                        # insert new active call IDs to database
                         sql_execute(
-                            "INSERT INTO cms_cdr_active_calls SET meeting_id='" + str(uuid.uuid1())
+                            "INSERT INTO cms_cdr_active_calls SET meeting_id='" + meeting_id
                             + "',coSpace_id='" + coSpace
                             + "',callCorrelator_id='" + call_correlator
                             + "',call_id='" + call_id + "';")
                     else:
-                        console_output =  cms_ip + ": active call already exists in database: " + call_correlator
-                        #print("CMS_RECEIVER " + console_output)
+                        console_output =  cms_ip + ": active call already exists in database with call_correlator: " + call_correlator
                         logger.debug(console_output)
                         if meeting_id_list[0]["meeting_id"]:
                             meeting_id = str(meeting_id_list[0]["meeting_id"])
+                            console_output = cms_ip + ": insert existing active call in database with meeting_id: " + meeting_id
+                            logger.debug(console_output)
                             sql_execute(
                                 "INSERT INTO cms_cdr_active_calls SET meeting_id='" + meeting_id
                                 + "',coSpace_id='" + coSpace
@@ -524,6 +520,7 @@ def cdr_receiver():
                         else:
                             console_output = cms_ip + ": meeting_id not found for callCorrelator: " + call_correlator
                             meeting_id = "UNKNOWN"
+                            logger.debug(console_output)
                     # Добавление активного вызова - конец
 
                     if not cm_sqlselect_dict('id', 'cms_cdr_calls', 'id', call_id):
@@ -606,7 +603,7 @@ def cdr_receiver():
                     sql_execute("DELETE FROM cms_cdr_active_calls WHERE call_id='" + str(call_id) + "'")
                     console_output = cms_ip + ": End to delete active call"
                     logger.debug(console_output)
-                    # Удаление активного вызова - начало
+                    # Удаление активного вызова - конец
 
                 else:
                     console_output = cms_ip + ": callEnd does not contain CallID"
