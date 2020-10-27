@@ -8,6 +8,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
+import threading
 import logging.handlers
 from multiprocessing import Process
 
@@ -188,6 +189,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
                     + "',AudioPacketLossPercentageTX='" + AudioPacketLossPercentageTX
                     + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
 
+
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     logger = logger_init_auth()
@@ -295,17 +297,15 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
             # забираем callLeg ID
             if "@id" in callLeg:
                 callLeg_id = callLeg["@id"]
-
                 # Record the task, and then launch it
-                tasks[callLeg_id] = Process(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
+                tasks[callLeg_id] = threading.Thread(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
                 tasks[callLeg_id].start()
-
-
-
-                #pprint(tasks)
-                #callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
-
+                pprint(tasks)
             time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
+
+            #кто не спрятался я не виноват...
+            if tasks[callLeg_id].is_alive():
+                tasks[callLeg_id].join()
 
 def main(argv):
 
@@ -352,12 +352,8 @@ def main(argv):
             process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
             logger.info(console_output)
-
-
-
             process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
             process_information["cluster_data"] = cluster_data
-
             process_information['Process'].start()
             process_dict[thread_index] =  process_information
             thread_index = thread_index + 1  # увеличиваем счетчик
