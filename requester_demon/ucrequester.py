@@ -296,7 +296,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 callLeg_id = callLeg["@id"]
 
                 # Record the task, and then launch it
-                tasks[callLeg_id] = {'task_process': threading.Thread(
+                tasks[callLeg_id] = {'task_process': Process(
                     target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))}
                 tasks[callLeg_id]['task_process'].start()
                 pprint(tasks)
