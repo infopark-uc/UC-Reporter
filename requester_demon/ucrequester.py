@@ -8,7 +8,6 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
-import threading
 import logging.handlers
 from multiprocessing import Process
 
@@ -191,8 +190,6 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
 
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
-    CALLLEG_CHECK_REPEATTIME = 1 #пауза между запусками функции callleginfo
-
     logger = logger_init_auth()
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
@@ -212,6 +209,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
         page_offset = 0
         page_limit = 10
         callLeg_list = []
+        tasks = []
 
         endOfCycle = False
         while not endOfCycle:
@@ -296,12 +294,13 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
             # забираем callLeg ID
             if "@id" in callLeg:
                 callLeg_id = callLeg["@id"]
-                callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
-                time.sleep(CALLLEG_CHECK_REPEATTIME) #уменьшаем переодичность запросов callLeg
-            else:
-                callLeg_id = "none"
 
-        time.sleep(repeat_check)
+                # Record the task, and then launch it
+                tasks[callLeg_id] = {'task_process': threading.Thread(
+                    target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))}
+                tasks[callLeg_id]['task_process'].start()
+                pprint(tasks)
+            time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
 
 def main(argv):
 
@@ -340,28 +339,21 @@ def main(argv):
         request_configuration_dict = sqlselect_dict(
             "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';")
         console_output = "we get config"
-        #print(console_output) #info
+        print("UC-REQUESTER: " + console_output) #info
         logger.info(console_output)
         #pprint(request_configuration_dict)
         thread_index = 1
         for cluster_data in request_configuration_dict:
             process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
-            #print(console_output) #info
             logger.info(console_output)
-            #pprint(cluster_data)
+
 
 
             process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
             process_information["cluster_data"] = cluster_data
-            #process_information['Process'].name(cluster_data['ip'])
+
             process_information['Process'].start()
-
-            #console_output = str(process_dict[thread_index].name) + " PID " + str(process_dict[thread_index].ident) + " started for: " + cluster_data['ip']
-            #print(console_output)  # info
-            #logger.info(console_output)
-
-
             process_dict[thread_index] =  process_information
             thread_index = thread_index + 1  # увеличиваем счетчик
 
@@ -376,10 +368,8 @@ def main(argv):
                 else:
                     #process_dict[key]['Process'].terminate()
                     process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check'],))
-                    #process_dict[key]['Process'].setNdame(process_dict[key]['cluster_data']['ip'])
                     process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
-                    #print(console_output)
                     logger.error(console_output)
 
 
@@ -431,9 +421,9 @@ def logger_init_auth():
 
 if __name__ == "__main__":
     if not sys.version_info.major == 3 and sys.version_info.minor >= 5:
-        console_output =  cms_ip + ": Python 3.7 is needed!"
+        console_output =  ": Python 3.7 is needed!"
         print(console_output)
-        console_output =  cms_ip + ": You are using Python {}.{}.".format(sys.version_info.majoar, sys.version_info.minor)
+        console_output =   ": You are using Python {}.{}.".format(sys.version_info.majoar, sys.version_info.minor)
         print(console_output)
         sys.exit(1)
 
