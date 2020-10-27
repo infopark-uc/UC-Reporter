@@ -209,7 +209,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
         page_offset = 0
         page_limit = 10
         callLeg_list = []
-        tasks = []
+        tasks = {}
 
         endOfCycle = False
         while not endOfCycle:
@@ -252,6 +252,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 logger.error(console_output)
                 get.close()
                 break
+
             console_output = cms_ip + ": we got dict with calls"
             #print(console_output) #debug
             logger.debug(console_output)
@@ -296,10 +297,14 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 callLeg_id = callLeg["@id"]
 
                 # Record the task, and then launch it
-                tasks[callLeg_id] = {'task_process': Process(
-                    target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))}
-                tasks[callLeg_id]['task_process'].start()
-                pprint(tasks)
+                tasks[callLeg_id] = Process(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
+                tasks[callLeg_id].start()
+
+
+
+                #pprint(tasks)
+                #callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
+
             time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
 
 def main(argv):
@@ -324,7 +329,7 @@ def main(argv):
         sys.exit(2)
 
     if cms_ip_address:  #если указан IP
-
+        print("start for " + (str(cms_ip_address)))
         request_configuration_dict = sqlselect_dict(
             "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port, cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_servers.ip='" + cms_ip_address + "'")  # получаем лист словарей
         cluster_data = request_configuration_dict[0]  # делаем из листа словарь
