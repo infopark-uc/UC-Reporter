@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, StringField, PasswordField,Label
-from wtforms.validators import Optional, Length, Regexp, DataRequired
+from wtforms import SelectField, SubmitField, StringField, PasswordField,Label, IntegerField
+from wtforms.validators import Optional, Length, Regexp, DataRequired, NumberRange, InputRequired
 
 class SelectNavigation(FlaskForm):
     select_navigation = SelectField('Navigation', choices=[('usersearchpage', 'UC Reporter'), ('platform', 'Platform Administrator')])
@@ -36,6 +36,14 @@ class SelectCMSClusterForCDR(FlaskForm):
 
 class SelectCMSClusterForCospace(FlaskForm):
     select_CMSCluster = SelectField('Navigation', choices=[('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    submit = SubmitField('Найти')
+
+class SelectCMSClusterForReport(FlaskForm):
+    class Meta:
+        locales = ['es_ES', 'es']
+    select_CMSCluster = SelectField('Navigation', choices=[('ssk', 'ССК'), ('Infocell', 'Инфосэл'), ('infopark', 'Инфопарк')])
+    integer_field = IntegerField(7, validators=[DataRequired(message=" Укажите количество дней в интервале от 1 до 365"),
+                                              NumberRange(min=1, max=365, message=" Количество дней должно быть в интервале от 1 до 365")])
     submit = SubmitField('Найти')
 
 class UCRepoterLogin(FlaskForm):

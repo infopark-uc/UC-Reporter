@@ -1,0 +1,78 @@
+{% extends "base_templates/base_template.html" %}
+{% block Content %}
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Список комнат CMS:
+			{{ formCMS.select_CMSCluster() }}
+			количество дней:
+			{{ formCMS.integer_field() }}
+	        {{ formCMS.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				Имя
+			</th>
+            <th>
+				Количество </br> конференций
+			</th>
+			<th>
+				Среднее </br> количество серверов </br> в одной конференции
+			</th>
+			<th>
+				Средняя </br>продолжительность </br> одной конференции
+			</th>
+			<th>
+				Максимальная </br>продолжительность </br> одной конференции
+			</th>
+			<th>
+				Суммарная </br>продолжительность </br> всех конференций
+			</th>
+			<th>
+				Среднее </br>количество участников </br> в одной конференции
+			</th>
+			<th>
+				Максимальное </br>количество участников </br> в одной конференции
+			</th>
+			<th>
+				Суммарное </br>количество участников </br> во всех конференциях
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+            <td>
+				{{ row.Name }}
+			</td>
+			<td>
+				{{ row.number_of_confs }}
+			</td>
+			<td>
+				{{ row.avg_servers }}
+			</td>
+			<td>
+				{{ row.avg_duration }}
+			</td>
+			<td>
+				{{ row.max_duration }}
+			</td>
+			<td>
+				{{ row.sum_duration }}
+			</td>
+			<td>
+				{{ row.avg_calllegs }}
+			</td>
+			<td>
+				{{ row.max_calllegs }}
+			</td>
+			<td>
+				{{ row.sum_calllegs }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+{% endblock %}
