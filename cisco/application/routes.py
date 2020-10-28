@@ -45,10 +45,18 @@ def huntpage():
      if module_result['rendertype'] == 'redirect': #переход на другую страницу
         return redirect(url_for(module_result['redirect_to']))
 
-     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+     if module_result['rendertype'] == 'success':  # проверка если данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
                             console_output=module_result['console_output'],
                             rows_list=module_result['rows_list'],
-                            formNAV=module_result['form_navigation'])
+                            formNAV=module_result['form_navigation'],
+                            form_hunt_group=module_result['form_hunt_group'])
+
+     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                            console_output=module_result['console_output'],
+                            formNAV=module_result['form_navigation'],
+                            form_hunt_group=module_result['form_hunt_group'])
+
 
 @app.route("/cfa", methods=['GET', 'POST'])
 @login_required

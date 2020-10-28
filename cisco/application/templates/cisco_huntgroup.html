@@ -1,5 +1,14 @@
 {% extends "base_templates/base_template.html" %}
 {% block Content %}
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Выбор Hunt Group:
+			{{ form_hunt_group.select_hunt_group() }}
+	        {{ form_hunt_group.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
  	<table class="DataTable">
 		<tr>
 			<th>
@@ -38,4 +47,6 @@
 		</tr>
 		{% endfor %}
 	</table>
+	</div>
+	{% endif %}
 {% endblock %}

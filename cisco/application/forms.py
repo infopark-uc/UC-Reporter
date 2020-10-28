@@ -85,7 +85,9 @@ class CMSServerInformation(FlaskForm):
                                         Regexp('^\w+$',message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     SaveSubmit = SubmitField('Save')
 
-
+class SelectHuntGroup(FlaskForm):
+    select_hunt_group = SelectField('Navigation', default="", choices=[])
+    submit = SubmitField('Найти')
 
 
 
