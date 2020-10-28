@@ -8,6 +8,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
+import threading
 import logging.handlers
 from multiprocessing import Process
 
@@ -188,6 +189,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
                     + "',AudioPacketLossPercentageTX='" + AudioPacketLossPercentageTX
                     + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
 
+
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     logger = logger_init_auth()
@@ -291,21 +293,17 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
         # перебираем все активные callLeg
         for callLeg in callLeg_list:
-
             # забираем callLeg ID
             if "@id" in callLeg:
                 callLeg_id = callLeg["@id"]
-
                 # Record the task, and then launch it
-                tasks[callLeg_id] = Process(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
+                tasks[callLeg_id] = threading.Thread(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
                 tasks[callLeg_id].start()
 
 
-
-                #pprint(tasks)
-                #callleginfo(callLeg_id,cms_ip,cms_login,cms_password,cms_port)
-
             time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
+            pprint(tasks)
+
 
 def main(argv):
 
@@ -331,7 +329,7 @@ def main(argv):
     if cms_ip_address:  #если указан IP
         print("start for " + (str(cms_ip_address)))
         request_configuration_dict = sqlselect_dict(
-            "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port, cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_servers.ip='" + cms_ip_address + "'")  # получаем лист словарей
+            "SELECT DISTINCT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port, cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster WHERE cms_servers.ip='" + cms_ip_address + "'")  # получаем лист словарей
         cluster_data = request_configuration_dict[0]  # делаем из листа словарь
         console_output = "we get config for: " + cms_ip_address
         print(console_output)  # info
@@ -352,12 +350,8 @@ def main(argv):
             process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
             logger.info(console_output)
-
-
-
             process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],))
             process_information["cluster_data"] = cluster_data
-
             process_information['Process'].start()
             process_dict[thread_index] =  process_information
             thread_index = thread_index + 1  # увеличиваем счетчик
@@ -376,13 +370,7 @@ def main(argv):
                     process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     logger.error(console_output)
-
-
-
-           time.sleep(process_dict[key]['cluster_data']['repeat_check'])
-
-
-           #p.join() - ждать пока выполниться процедура.
+                time.sleep(process_dict[key]['cluster_data']['repeat_check'])
 
 def logger_init_auth():
 
