@@ -300,9 +300,9 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 tasks[callLeg_id] = threading.Thread(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
                 tasks[callLeg_id].start()
 
-
-            time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
-            pprint(tasks)
+            while threading.active_count() > 1: #засыпаем пока работают потоки
+                time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
+                #pprint(tasks)
 
 
 def main(argv):
@@ -370,7 +370,7 @@ def main(argv):
                     process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     logger.error(console_output)
-                time.sleep(process_dict[key]['cluster_data']['repeat_check'])
+                time.sleep(process_dict[key]['cluster_data']['repeat_check'] + 3)
 
 def logger_init_auth():
 
