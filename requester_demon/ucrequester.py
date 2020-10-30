@@ -13,6 +13,206 @@ import logging.handlers
 from multiprocessing import Process
 
 
+def insert_data_to_cdr(callleg_data,cms_ip):
+    try:
+        #данные о CallLeg
+        timenow = str(datetime.datetime.now())
+        #парсим ID
+        if "@id" in callleg_data:
+            callleg_id = str(callleg_data["@id"])
+
+        #парсим Name
+        if "name" in callleg_data:
+            displayName = str(callleg_data["name"])
+            remoteAddress = displayName
+        else:
+            displayName = "none"
+            remoteAddress = "none"
+
+        if "call" in callleg_data:
+            call_id = str(callleg_data['call'])
+        else:
+            call_id = "none"
+
+        # забираем  remoteParty
+        if "remoteParty" in callleg_data:
+            remoteParty = str(callleg_data['remoteParty'])
+        else:
+            remoteParty = "none"
+
+
+        if "subType" in callleg_data:
+            callLeg_subtype = str(callleg_data['subType'])
+        else:
+            callLeg_subtype = "none"
+
+
+        #данные о соединении
+        if "durationSeconds" in callleg_data['status']:
+            durationSeconds = str(callleg_data['status']['durationSeconds'])  # забираем  durationSeconds
+        else:
+            durationSeconds = "none"
+            # проверяем наличие информации о Аудио
+        if "rxAudio" in callleg_data['status']:
+            if "codec" in callleg_data['status']['rxAudio']:
+                acodecrx = str(callleg_data['status']['rxAudio']['codec'])  # забираем тип кодека аудио RX
+            else:
+                acodecrx = "none"
+            # собираем статистику вызова
+            if "packetStatistics" in callleg_data['status']['rxAudio']:
+                if "packetGap" in callleg_data['status']['rxAudio']['packetStatistics']:
+                    if "density" in callleg_data['status']['rxAudio']['packetStatistics']['packetGap']:
+                        rxAudio_packetGap_density = str(
+                            callleg_data['status']['rxAudio']['packetStatistics']['packetGap']['density'])
+                    else:
+                        rxAudio_packetGap_density = "none"
+                    if "duration" in callleg_data['status']['rxAudio']['packetStatistics']['packetGap']:
+                        rxAudio_packetGap_duration = str(
+                            callleg_data['status']['rxAudio']['packetStatistics']['packetGap']['duration'])
+                    else:
+                        rxAudio_packetGap_duration = "none"
+                else:
+                    rxAudio_packetGap_density = "none"
+                    rxAudio_packetGap_duration = "none"
+                if "packetLossBursts" in callleg_data['status']['rxAudio']['packetStatistics']:
+                    if "density" in callleg_data['status']['rxAudio']['packetStatistics']['packetLossBursts']:
+                        rxAudio_packetLossBurst_density = str(
+                            callleg_data['status']['rxAudio']['packetStatistics']['packetLossBursts']['density'])
+                    else:
+                        rxAudio_packetLossBurst_density = "none"
+                    if "duration" in callleg_data['status']['rxAudio']['packetStatistics']['packetLossBursts']:
+                        rxAudio_packetLossBurst_duration = str(
+                            callleg_data['status']['rxAudio']['packetStatistics']['packetLossBursts']['duration'])
+                    else:
+                        rxAudio_packetLossBurst_duration = "none"
+                else:
+                    rxAudio_packetLossBurst_density = "none"
+                    rxAudio_packetLossBurst_duration = "none"
+            else:
+                rxAudio_packetGap_density = "none"
+                rxAudio_packetGap_duration = "none"
+                rxAudio_packetLossBurst_density = "none"
+                rxAudio_packetLossBurst_duration = "none"
+        else:
+            acodecrx = "none"
+            rxAudio_packetGap_density = "none"
+            rxAudio_packetGap_duration = "none"
+            rxAudio_packetLossBurst_density = "none"
+            rxAudio_packetLossBurst_duration = "none"
+
+        if "txAudio" in callleg_data['status']:
+            if "codec" in callleg_data['status']['txAudio']:
+                acodectx = str(callleg_data['status']['txAudio']['codec'])  # забираем тип кодека аудио TX
+            else:
+                acodectx = "none"
+        else:
+            acodectx = "none"
+
+        # проверяем наличие информации о Видео
+        if "rxVideo" in callleg_data['status']:
+            if "codec" in callleg_data['status']['rxVideo']:
+                vcodecrx = str(callleg_data['status']['rxVideo']['codec'])  # забираем тип кодека аудио RX
+            else:
+                vcodecrx = "none"
+
+            # собираем статистику вызова
+            if "packetStatistics" in callleg_data['status']['rxVideo']:
+                if "packetGap" in callleg_data['status']['rxVideo']['packetStatistics']:
+                    if "density" in callleg_data['status']['rxVideo']['packetStatistics']['packetGap']:
+                        rxVideo_packetGap_density = str(
+                            callleg_data['status']['rxVideo']['packetStatistics']['packetGap']['density'])
+                    else:
+                        rxVideo_packetGap_density = "none"
+                    if "duration" in callleg_data['status']['rxVideo']['packetStatistics']['packetGap']:
+                        rxVideo_packetGap_duration = str(
+                            callleg_data['status']['rxVideo']['packetStatistics']['packetGap']['duration'])
+                    else:
+                        rxVideo_packetGap_duration = "none"
+                else:
+                    rxVideo_packetGap_density = "none"
+                    rxVideo_packetGap_duration = "none"
+                if "packetLossBursts" in callleg_data['status']['rxVideo']['packetStatistics']:
+                    if "density" in callleg_data['status']['rxVideo']['packetStatistics']['packetLossBursts']:
+                        rxVideo_packetLossBurst_density = str(
+                            callleg_data['status']['rxVideo']['packetStatistics']['packetLossBursts'][
+                                'density'])
+                    else:
+                        rxVideo_packetLossBurst_density = "none"
+                    if "duration" in callleg_data['status']['rxVideo']['packetStatistics']['packetLossBursts']:
+                        rxVideo_packetLossBurst_duration = str(
+                            callleg_data['status']['rxVideo']['packetStatistics']['packetLossBursts'][
+                                'duration'])
+                    else:
+                        rxVideo_packetLossBurst_duration = "none"
+                else:
+                    rxVideo_packetLossBurst_density = "none"
+                    rxVideo_packetLossBurst_duration = "none"
+            else:
+                rxVideo_packetGap_density = "none"
+                rxVideo_packetGap_duration = "none"
+                rxVideo_packetLossBurst_density = "none"
+                rxVideo_packetLossBurst_duration = "none"
+        else:
+            vcodecrx = "none"
+            rxVideo_packetGap_density = "none"
+            rxVideo_packetGap_duration = "none"
+            rxVideo_packetLossBurst_density = "none"
+            rxVideo_packetLossBurst_duration = "none"
+
+        if "txVideo" in callleg_data['status']:
+            if "codec" in callleg_data['status']['txVideo']:
+                vcodectx = str(callleg_data['status']['txVideo']['codec'])  # забираем тип кодека видео TX
+            else:
+                vcodectx = "none"
+            if "maxSizeHeight" in callleg_data['status']['txVideo']:
+                maxSizeHeight_videoTX = str(
+                    callleg_data['status']['txVideo']['maxSizeHeight'])  # забираем максимальную высоту видео TX
+            else:
+                maxSizeHeight_videoTX = "none"
+            if "maxSizeWidth" in callleg_data['status']['txVideo']:
+                maxSizeWidth_videoTX = str(
+                    callleg_data['status']['txVideo']['maxSizeWidth'])  # забираем максимальную ширину видео TX
+            else:
+                maxSizeWidth_videoTX = "none"
+        else:
+            vcodectx = "none"
+            maxSizeHeight_videoTX = "none"
+            maxSizeWidth_videoTX = "none"
+
+        #заносим инфу базу данных
+        if not sqlselect_dict("SELECT callleg_id FROM cms_cdr_records WHERE callleg_id='" + callleg_id + "'"):
+            sqlrequest("INSERT INTO cms_cdr_records SET date='" + timenow
+                           + "',call_id='" + call_id
+                           + "',remoteParty='" + remoteParty
+                           + "',remoteAddress='" + remoteAddress
+                           + "',callleg_id='" + callleg_id
+                           + "',displayName='" + displayName
+                           + "',cms_ip='" + cms_ip
+                           + "',callLeg_subtype='" + callLeg_subtype  + "';")
+        else: #если уже данны есть, обновляем
+            sqlrequest("UPDATE cms_cdr_records SET durationSeconds='" + durationSeconds
+                           + "',txVideo_maxHeight='" + maxSizeHeight_videoTX
+                           + "',txVideo_maxWidth='" + maxSizeWidth_videoTX
+                           + "',remoteAddress='" + remoteAddress
+                           + "',rxVideo_codec='" + vcodecrx
+                           + "',rxVideo_packetGap_density='" + rxVideo_packetGap_density
+                           + "',rxVideo_packetGap_duration='" + rxVideo_packetGap_duration
+                           + "',rxVideo_packetLossBurst_density='" + rxVideo_packetLossBurst_density
+                           + "',rxVideo_packetLossBurst_duration='" + rxVideo_packetLossBurst_duration
+                           + "',rxAudio_codec='" + acodecrx
+                           + "',rxAudio_packetGap_density='" + rxAudio_packetGap_density
+                           + "',rxAudio_packetGap_duration='" + rxAudio_packetGap_duration
+                           + "',rxAudio_packetLossBurst_density='" + rxAudio_packetLossBurst_density
+                           + "',rxAudio_packetLossBurst_duration='" + rxAudio_packetLossBurst_duration
+                           + "',txVideo_codec='" + vcodectx
+                           + "',txAudio_codec='" + acodectx
+                           + "',txVideo_maxHeight='" + maxSizeHeight_videoTX
+                           + "',txVideo_maxWidth='" + maxSizeWidth_videoTX
+                           + "' WHERE callleg_id='" + callleg_id + "';")
+    except:
+        console_output = cms_ip + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! distributionLink !!!!!!!!<<<Parser failure>>!"
+        print(console_output)
+
 def sqlselect_dict(sqlrequest):
 
     logger = logger_init_auth()
@@ -121,6 +321,12 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
     else:
         call_id_name = "None"
 
+    #вносим информацию о distributionLink в таблицу CDR
+    if "subType" in callLeg:
+        if callLeg['subType'] == "distributionLink":
+            insert_data_to_cdr(callLeg,cms_ip)
+
+
     # забираем Remote Party
     if "remoteParty" in callLeg:
         call_id_remote_party = str(callLeg['remoteParty'])
@@ -175,9 +381,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
        VideoPacketLossPercentageTX = "0.0"
        VideoRoundTripTimeTX = "0"
 
-    console_output = cms_ip + " CallLeg for user " + current_user + " ID:" + callleg_id + " is inserted to database"
-    #print(console_output) #debug
-    logger.info(console_output)
+
     sqlrequest("INSERT INTO cms_cdr_calllegs SET callleg_id='" + callleg_id
                     + "',cms_node='" + cms_ip
                     + "',date='" + timenow
@@ -188,7 +392,9 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port):
                     + "',AudioPacketLossPercentageRX='" + AudioPacketLossPercentageRX
                     + "',AudioPacketLossPercentageTX='" + AudioPacketLossPercentageTX
                     + "',AudioRoundTripTimeTX='" + AudioRoundTripTimeTX + "';")
-
+    console_output = cms_ip + " CallLeg for user " + current_user + " ID:" + callleg_id + " is inserted to database"
+    # print(console_output) #debug
+    logger.info(console_output)
 
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
@@ -300,9 +506,9 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 tasks[callLeg_id] = threading.Thread(target=callleginfo, args=(callLeg_id,cms_ip,cms_login,cms_password,cms_port))
                 tasks[callLeg_id].start()
 
-
-            time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
-            pprint(tasks)
+            while threading.active_count() > 1: #засыпаем пока работают потоки
+                time.sleep(repeat_check) #уменьшаем переодичность запросов callLeg
+                #pprint(tasks)
 
 
 def main(argv):
@@ -370,7 +576,7 @@ def main(argv):
                     process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     logger.error(console_output)
-                time.sleep(process_dict[key]['cluster_data']['repeat_check'])
+                time.sleep(process_dict[key]['cluster_data']['repeat_check'] + 3)
 
 def logger_init_auth():
 
