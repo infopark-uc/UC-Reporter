@@ -62,7 +62,7 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
             console_output = "no any handlers in Logger " + loggerName + " - create new one"
             print(loggerName + ": " + console_output)
 
-            rotate_file_handler = logging.handlers.RotatingFileHandler("../../logs/" + loggerName + ".log",
+            rotate_file_handler = logging.handlers.RotatingFileHandler("../logs/" + loggerName + ".log",
                                                                             maxBytes=UCREPORTER_LOG_FILE_SIZE,
                                                                             backupCount=UCREPORTER_LOG_FILE_COUNT)
             #rotate_file_handler.setLevel(logging.DEBUG)
