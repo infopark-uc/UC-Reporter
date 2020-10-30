@@ -1,4 +1,5 @@
 1. Copy services to /etc/systemd/system/
 2. systemctl enable ucreporter
 3. systemctl enable ucrequester
-4. systemctl restart ucreporter && systemctl restart ucrequester
+4. systemctl enable ucporterlogsrv
+5. systemctl restart ucreporter && systemctl restart ucrequester && systemctl restart ucporterlogsrv

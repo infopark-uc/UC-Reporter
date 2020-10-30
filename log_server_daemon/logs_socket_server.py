@@ -40,7 +40,9 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
 
         # if a name is specified, we use the named logger rather than the one
         # implied by the record.
-        if self.server.logname is not None:
+        if record.name is not None:
+            loggerName = record.name
+        elif self.server.logname is not None:
             loggerName = self.server.logname
         else:
             loggerName = record.module

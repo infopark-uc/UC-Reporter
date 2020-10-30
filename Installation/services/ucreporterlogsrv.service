@@ -1,0 +1,12 @@
+[Unit]
+Description=UC Reporter Log Service
+After=mariadb.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/UC-Reporter/log_server_daemon/
+ExecStart=/usr/bin/python3 /opt/UC-Reporter/log_server_daemon/logs_socket_server.py -d
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

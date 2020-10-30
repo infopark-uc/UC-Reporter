@@ -175,7 +175,7 @@ def cms_cospace_usage_by_cluster():
           SUM(cms_cdr_calls.callLegsMaxActive) AS callLegs FROM cms_cdr_calls
           INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip
           WHERE cms_cdr_calls.StartTime >= DATE(NOW()) - INTERVAL """ + str(form_cmsselection.integer_field.data) + """ DAY AND cms_servers.cluster
-          LIKE '""" + form_cmsselection.select_CMSCluster.data + """' AND NAME NOT LIKE 'Сове%' GROUP BY id ORDER BY NAME"""
+          LIKE '""" + form_cmsselection.select_CMSCluster.data + """' AND NAME NOT LIKE 'Сове%' AND cms_cdr_calls.meeting_id IS NOT NULL GROUP BY id ORDER BY NAME"""
 
         rows_list_period = sql_request_dict(sql_request_result_string)
 
