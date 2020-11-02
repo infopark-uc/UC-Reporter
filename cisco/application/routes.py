@@ -366,7 +366,7 @@ def platform_CUCMservers(server_id):
                                html_page_header=module_result['html_page_header'],
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
-                               form_CUCM_server=module_result['form_CUCM_server'],
+                               form_CUCM_server=module_result['form_cucm_server'],
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
@@ -376,7 +376,7 @@ def platform_CUCMservers(server_id):
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
                                rows_list=module_result['rows_list'],
-                               form_CUCM_server=module_result['form_CUCM_server'],
+                               form_CUCM_server=module_result['form_cucm_server'],
                                formNAV=module_result['form_navigation'])
 
 @app.route('/platform/servers/cms/', defaults={'server_id': None }, methods=['GET', 'POST'])
@@ -394,7 +394,7 @@ def platform_CMSservers(server_id):
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
                                rows_list=module_result['rows_list'],
-                               form_CMS_server=module_result['form_CMS_server'],
+                               form_CMS_server=module_result['form_cms_server'],
                                formNAV=module_result['form_navigation'])
 
     if module_result['content_type'] == 'cms_server_edit':  # данные получены
@@ -402,7 +402,7 @@ def platform_CMSservers(server_id):
                                html_page_header=module_result['html_page_header'],
                                content_type=module_result['content_type'],
                                console_output=module_result['console_output'],
-                               form_CMS_server=module_result['form_CMS_server'],
+                               form_CMS_server=module_result['form_cms_server'],
                                rows_list=module_result['rows_list'],
                                formNAV=module_result['form_navigation'])
 
