@@ -70,6 +70,9 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
             rotate_file_handler.setFormatter(formatter)
             logger.addHandler(rotate_file_handler)
 
+            syslog_handler = logging.handlers.SysLogHandler(facility="local5")
+            logger.addHandler(syslog_handler)
+
             logger.info(console_output)
             console_output = "New handler was created in Logger " + loggerName
             print(loggerName + ": " + console_output)
