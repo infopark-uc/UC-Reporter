@@ -60,4 +60,34 @@
         </div>
     {% endif %}
 
+    {% if div_rtt %}
+	    {{ div_rtt|safe }}
+    {% endif %}
+    {% if script_rtt %}
+	    {{ script_rtt|safe }}
+    {% endif %}
+
+    {% if max_loss_values_rtt %}
+        <div id="tableWrap">
+        <table class="GraphDataTable">
+            <tr>
+                <td>
+                    Max Audio Round Trip Time:
+                </td>
+                <td>
+                    {{ max_loss_values_rtt.AudioRTT }}
+                </td>
+            </tr>
+                    <tr>
+                <td>
+                    Max Video Round Trip Time:
+                </td>
+                <td>
+                    {{ max_loss_values_rtt.VideoRTT }}
+                </td>
+            </tr>
+        </table>
+        </div>
+    {% endif %}
+
 {% endblock %}

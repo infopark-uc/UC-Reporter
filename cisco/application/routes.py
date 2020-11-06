@@ -165,7 +165,11 @@ def cmscallleg(callegid):
                                div=module_result['div'],
                                script=module_result['script'],
                                resources=module_result['resources'],
-                               max_loss_values=module_result['max_loss_values'])
+                               max_loss_values=module_result['max_loss_values'],
+                               div_rtt=module_result['div_rtt'],
+                               script_rtt=module_result['script_rtt'],
+                               max_loss_values_rtt=module_result['max_loss_values_rtt']
+                               )
 
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
         console_output=module_result['console_output'],
