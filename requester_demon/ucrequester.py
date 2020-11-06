@@ -472,8 +472,8 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
         endOfCycle = False
         while not endOfCycle:
             http_url = "https://" + cms_ip + ":" + cms_port + "/api/v1/callLegs?limit=" + str(page_limit) + "&offset=" + str(page_offset)
-            console_output =  cms_ip + ": URL: " + http_url
-            logger.debug(console_output)
+            #console_output =  cms_ip + ": URL: " + http_url
+            #logger.debug(console_output)
 
             try:
                 get = requests.get(http_url, headers=http_headers, verify=False, auth=(cms_login, cms_password))
