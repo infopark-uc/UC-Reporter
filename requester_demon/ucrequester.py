@@ -1,6 +1,5 @@
 import xmltodict
 import pymysql
-from pprint import pprint
 import time
 import datetime
 import requests
@@ -8,14 +7,61 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import OrderedDict
 import getopt
 import sys
+from sys import platform
 import threading
 import logging.handlers
 import logging
-from application.ucreporter_logs import logger_init
 from multiprocessing import Process
 
+def logger_init(logger_name, logging_level):
+    # Настройка логирования для логирования в файл
+    LOG_FILE_NAME = "../logs/" + logger_name + ".log"
+    LOG_FILE_SIZE = 2048000
+    LOG_FILE_COUNT = 5
+
+    # Создаем диспетчер логов
+    logger = logging.getLogger(logger_name)
+    # Устанавливаем уровень логирования для диспетчера логов
+    logger.setLevel(logging_level)
+
+    # Проверяем наличие обработчика логов в диспетчере логов
+    if logger.hasHandlers():
+        console_output = "Handlers are already exists in Logger " + logger_name + str([(type(handler)) for handler in logger.handlers])
+        logger.debug(console_output)
+        console_output = logger_name + ": logging level: " + logging.getLevelName(logging_level)
+        logger.debug(console_output)
+        return logger
+    else:
+        console_output = "No any handlers in Logger " + logger_name + " - create new one"
+        # Проверяем платформу
+        if platform == "linux":
+            # Создаем обработчик логов отправляющий их на SocketServer логов для Linux
+            socketHandler = logging.handlers.SocketHandler('localhost', logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+            logger.addHandler(socketHandler)
+
+        elif platform == "win32":
+            # Создаем обработчик логов отправляющий файл логов для Windows
+            auth_rotate_file_handler = logging.handlers.RotatingFileHandler(LOG_FILE_NAME,
+                                                                            maxBytes=LOG_FILE_SIZE,
+                                                                            backupCount=LOG_FILE_COUNT)
+
+            auth_rotate_file_handler.setLevel(logging_level)
+            formatter = logging.Formatter('%(asctime)s %(name)s - %(levelname)s: %(message)s')
+            auth_rotate_file_handler.setFormatter(formatter)
+            logger.addHandler(auth_rotate_file_handler)
+
+        logger.info(console_output)
+        console_output = "New handler was created in Logger " + logger_name + " logging level: " + logging.getLevelName(
+            logging_level)
+        logger.info(console_output)
+        return logger
 
 def insert_data_to_cdr(callleg_data, cms_ip, logger):
+
+
+    console_output = cms_ip + " Start parsing callleg info for distribution link"
+    logger.debug(console_output)
+
     try:
         #данные о CallLeg
         timenow = str(datetime.datetime.now())
@@ -181,8 +227,10 @@ def insert_data_to_cdr(callleg_data, cms_ip, logger):
             maxSizeHeight_videoTX = "none"
             maxSizeWidth_videoTX = "none"
 
+        console_output = cms_ip + " Insert distribution link info in DB"
+        logger.debug(console_output)
         #заносим инфу базу данных
-        if not sqlselect_dict("SELECT callleg_id FROM cms_cdr_records WHERE callleg_id='" + callleg_id + "'"):
+        if not sqlselect_dict("SELECT callleg_id FROM cms_cdr_records WHERE callleg_id='" + callleg_id + "'",logger):
             sqlrequest("INSERT INTO cms_cdr_records SET date='" + timenow
                            + "',call_id='" + call_id
                            + "',remoteParty='" + remoteParty
@@ -213,7 +261,6 @@ def insert_data_to_cdr(callleg_data, cms_ip, logger):
                            + "' WHERE callleg_id='" + callleg_id + "';",logger)
     except:
         console_output = cms_ip + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! distributionLink !!!!!!!!<<<Parser failure>>!"
-        print(console_output)
         logger.error(console_output)
 
 def sqlselect_dict(sqlrequest, logger):
@@ -250,6 +297,9 @@ def sqlrequest(sqlrequest, logger):
 
 
 def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port,logger):
+
+    console_output = cms_ip + ": Start get CallLegInfo procedure for callLeg: " + callleg_id
+    logger.debug(console_output)
 
     # URL
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -393,8 +443,13 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port,logger):
     console_output = cms_ip + " CallLeg for user " + current_user + " ID:" + callleg_id + " is inserted to database"
     logger.info(console_output)
 
-def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check,logger):
+def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
+    # Настройка логирования
+    logger = logger_init('UC_Requester', logging.DEBUG)
+
+    console_output = cms_ip + ": Start get CallLegs procedure"
+    logger.debug(console_output)
 
     if (cms_login is None) or (cms_password is None) or (cms_port is None):
         console_output = cms_ip + ": Login, password and port not received"
@@ -497,7 +552,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check,logger):
 def main(argv):
 
     # Настройка логирования
-    logger = logger_init('CMS_RECEIVER', logging.DEBUG)
+    logger = logger_init('UC_Requester', logging.DEBUG)
 
     cms_ip_address = ""
     try:
@@ -523,14 +578,14 @@ def main(argv):
         cluster_data = request_configuration_dict[0]  # делаем из листа словарь
         console_output = "we get config for: " + cms_ip_address
         print(console_output)  # info
-        getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'], logger)
+        getCallLegs(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'])
 
     else:
         process_dict = {} #объявляем словарь для работы с потоками
 
 
         request_configuration_dict = sqlselect_dict(
-            "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';")
+            "SELECT cms_servers.ip,cms_servers.login,cms_servers.password,cms_servers.api_port,cms_requester_config.repeat_check FROM cms_requester_config INNER JOIN cms_servers ON cms_servers.cluster=cms_requester_config.cluster AND cms_servers.ip=cms_requester_config.ip WHERE cms_requester_config.running='True';", logger)
         console_output = "we get config"
         print("UC-REQUESTER: " + console_output) #info
         logger.info(console_output)
@@ -539,7 +594,7 @@ def main(argv):
             process_information = {}  # словарь для сопоставления номера потока и IP ноды
             console_output = "start request for: " + cluster_data['ip']
             logger.info(console_output)
-            process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check'],logger))
+            process_information['Process'] = Process(target=getCallLegs, args=(cluster_data['login'],cluster_data['password'],cluster_data['ip'],cluster_data['api_port'],cluster_data['repeat_check']))
             process_information["cluster_data"] = cluster_data
             process_information['Process'].start()
             process_dict[thread_index] = process_information
@@ -553,7 +608,7 @@ def main(argv):
                     console_output = " Process for " + str(process_dict[key]['cluster_data']['ip']) + " PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     logger.debug(console_output)
                 else:
-                    process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check'],logger))
+                    process_dict[key]['Process'] = Process(target=getCallLegs, args=(process_dict[key]['cluster_data']['login'],process_dict[key]['cluster_data']['password'],process_dict[key]['cluster_data']['ip'],process_dict[key]['cluster_data']['api_port'],process_dict[key]['cluster_data']['repeat_check']))
                     process_dict[key]['Process'].start()
                     console_output = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Process restart for " + str(process_dict[key]['cluster_data']['ip']) + "  PID " + str(process_dict[key]['Process'].ident) + " running status {}".format(process_dict[key]['Process'].is_alive())
                     logger.error(console_output)
