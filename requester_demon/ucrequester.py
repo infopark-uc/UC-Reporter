@@ -446,7 +446,7 @@ def callleginfo(callleg_id,cms_ip,cms_login,cms_password,cms_port,logger):
 def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 
     # Настройка логирования
-    logger = logger_init('UC_Requester', logging.DEBUG)
+    logger = logger_init('UC-REQUESTER', logging.DEBUG)
 
     console_output = cms_ip + ": Start get CallLegs procedure"
     logger.debug(console_output)
@@ -552,7 +552,7 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
 def main(argv):
 
     # Настройка логирования
-    logger = logger_init('UC_Requester', logging.DEBUG)
+    logger = logger_init('UC-REQUESTER', logging.DEBUG)
 
     cms_ip_address = ""
     try:
