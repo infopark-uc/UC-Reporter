@@ -504,27 +504,32 @@ def getCallLegs(cms_login,cms_password,cms_ip,cms_port,repeat_check):
                 get.close()
                 break
 
-            console_output = cms_ip + ": we got dict with calls"
-            logger.debug(console_output)
+            #console_output = cms_ip + ": we got dict with calls"
+            #logger.debug(console_output)
+
             xml_dict = xmltodict.parse(get.text)
             get.close() #закрываем web сессию
             totalCallLegs = xml_dict["callLegs"]["@total"]
-            console_output =  cms_ip + ": Total number of CallLegs: " + totalCallLegs
-            logger.debug(console_output)
 
             # проверям что есть активные CallLeg
             if "callLeg" in xml_dict["callLegs"]:
+
+                console_output = cms_ip + ": Total number of CallLegs: " + totalCallLegs
+                logger.debug(console_output)
+
                 # Проверяем тип list или OrderedDict для выбора корректного способа добавления в общий список
                 if type(xml_dict["callLegs"]["callLeg"]) is OrderedDict:
                     callLeg_list.append(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: 1"
                     logger.debug(console_output)
+                    console_output = cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
+                    logger.debug(console_output)
                 elif type(xml_dict["callLegs"]["callLeg"]) is list:
                     callLeg_list.extend(xml_dict["callLegs"]["callLeg"])
                     console_output =  cms_ip + ": Number of CallLegs from current request: " + str(len(xml_dict["callLegs"]["callLeg"]))
                     logger.debug(console_output)
-            console_output =  cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
-            logger.debug(console_output)
+                    console_output = cms_ip + ": Number of collected CallLegs: " + str(len(callLeg_list))
+                    logger.debug(console_output)
 
             if int(totalCallLegs) > len(callLeg_list):
                 page_offset = len(callLeg_list)
