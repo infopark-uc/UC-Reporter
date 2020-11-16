@@ -418,6 +418,161 @@ def cmscalllegviewer(callleg_id):
     }
     return renderdata
 
+
+def cmsallcalllegsviewer(meeting_id):
+
+    operationStartTime = datetime.now()
+
+    html_page_title = 'CMS CallLeg Report'
+    print("CMS All CallLegs veiwer: request for meetingID: " + meeting_id)
+
+    form_navigation = SelectNavigation(meta={'csrf': False})
+    if form_navigation.validate_on_submit():
+        console_output = "Нет активного запроса"
+        print("CMS CALLLEGVW: " + console_output)
+        renderdata = {
+            "rendertype": "redirect",
+            "redirect_to": form_navigation.select_navigation.data
+        }
+        return renderdata
+
+    # Получаем список CallLeg_ID для Meeting_ID
+    sql_request_string = "SELECT r.callleg_id, r.displayName, r.date FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "' ORDER BY r.displayName, r.date;"
+    calleg_list = cms_sql_request_dict(sql_request_string)
+
+    # Получаем время начала и окончания конференции для выравнивания графиков
+
+    sql_request_string = "SELECT MIN(r.date) AS startTime, MAX(IFNULL((ADDDATE(r.date, INTERVAL r.durationSeconds SECOND)), CURRENT_TIMESTAMP(6))) AS endTime FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "';"
+    conference_time_list = cms_sql_request_dict(sql_request_string)
+
+    start_time = conference_time_list[0]["startTime"]
+    end_time = conference_time_list[0]["endTime"]
+    console_output = "Время начала: " + start_time + ", время окончания: " + end_time
+    print("CMS CALLLEGVW: " + console_output)
+
+    # Делаем цикл длz подготовки всех графиков
+    resources = ""
+    plot_list = []
+
+    for callleg in calleg_list:
+
+        sql_request_string = """SELECT cms_cdr_calllegs.date,
+                                       cms_cdr_calllegs.AudioPacketLossPercentageRX,
+                                       cms_cdr_calllegs.AudioPacketLossPercentageTX,
+                                       cms_cdr_calllegs.VideoPacketLossPercentageRX,
+                                       cms_cdr_calllegs.VideoPacketLossPercentageTX                                    
+                                       FROM cms_cdr_calllegs WHERE cms_cdr_calllegs.callleg_id='""" + callleg["callleg_id"] + "';"
+
+        console_output = "Делаем запрос в БД для calleg_ID " + callleg["callleg_id"]
+        print("CMS All CallLegs veiwer: " + console_output)
+        rows_list = cms_sql_request_dict(sql_request_string)
+
+        if isinstance(rows_list, list):
+            console_output = "rows_list is list "
+            print("CMS All CallLegs veiwer: " + console_output)
+        else:
+            console_output = "rows_list is not list, it is: " + str(type(rows_list))
+            print("CMS All CallLegs veiwer: " + console_output)
+            pprint(rows_list)
+
+            operationEndTime = datetime.now()
+            operationDuration = str( operationEndTime - operationStartTime)
+            console_output = "There is no data for the request in DB. Done in " + operationDuration
+            continue
+
+        # создаем листы значений по осям x и y для построения графиков
+        AudioPacketLossPercentageRX_list = []
+        AudioPacketLossPercentageTX_list = []
+        VideoPacketLossPercentageRX_list = []
+        VideoPacketLossPercentageTX_list = []
+        date_list = []
+
+        # заполняем листы из словаря с данными из БД
+        for row in rows_list:
+            AudioPacketLossPercentageRX_list.append(float(row["AudioPacketLossPercentageRX"]))
+            AudioPacketLossPercentageTX_list.append(float(row["AudioPacketLossPercentageTX"]))
+            VideoPacketLossPercentageRX_list.append(float(row["VideoPacketLossPercentageRX"]))
+            VideoPacketLossPercentageTX_list.append(float(row["VideoPacketLossPercentageTX"]))
+            date_list.append(datetime.strptime(row["date"], '%Y-%m-%d %H:%M:%S.%f'))
+
+        # создаем объект класса ColumnDataSource содержащий все данные графика потерь
+        plot_source = ColumnDataSource(data=dict(
+            date=date_list,
+            AudioRX=AudioPacketLossPercentageRX_list,
+            AudioTX=AudioPacketLossPercentageTX_list,
+            VideoRX=VideoPacketLossPercentageRX_list,
+            VideoTX=VideoPacketLossPercentageTX_list)
+        )
+
+        # создаем объект класса HoverTool со значениями из ColumnDataSource для всплывающих подсказок графика потерь
+        hover_tool = HoverTool(
+            tooltips=[
+                ("Audio RX", "@AudioRX{([0]0.0)}"),
+                ("Audio TX", "@AudioTX{([0]0.0)}"),
+                ("Video RX", "@VideoRX{([0]0.0)}"),
+                ("Video TX", "@VideoTX{([0]0.0)}")
+            ],
+
+            # режим отображения подсказки при наведении мышкой на график
+            mode='mouse'
+        )
+
+        # создаем объект класса figure описывающий график потерь
+        p = figure(title=callleg["displayName"], plot_width=1800, plot_height=250, x_axis_type="datetime",
+                   x_range=(datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'), datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f')))
+        p.sizing_mode = "scale_width"
+        # добавляем к объекту графика инструмент - объект всплывающих подсказок
+        p.add_tools(hover_tool)
+        # добавляем линии на график
+        p.line(x="date", y="AudioRX", source=plot_source, line_width=2, color='#A6CEE3', legend_label='Audio RX')
+        p.line(x="date", y="AudioTX", source=plot_source, line_width=2, color='#B2DF8A', legend_label='Audio TX')
+        p.line(x="date", y="VideoRX", source=plot_source, line_width=2, color='#33A02C', legend_label='Video RX')
+        p.line(x="date", y="VideoTX", source=plot_source, line_width=2, color='#FB9A99', legend_label='Video TX')
+        # задаем формат отображения даты и времени на оси x для масштабирования
+        p.xaxis.formatter = DatetimeTickFormatter(
+            milliseconds=["%H:%M:%S.%3Ns"],
+            seconds=["%H:%M:%S"],
+            minsec=["%H:%M:%S"],
+            minutes=["%H:%M:%S"],
+            hourmin=["%H:%M:%S"],
+            hours=["%d %B %Y"],
+            days=["%d %B %Y"],
+            months=["%d %B %Y"],
+            years=["%d %B %Y"],
+        )
+        # задаем угол наклона подписей с датами на оси x
+        p.xaxis.major_label_orientation = pi / 4
+        # формируем объекты содержащие html-код с графиком для web-страницы
+        script, div = components(p)
+
+        plot_list.append([script, div])
+
+        # формируем обект содержащий html-код с ссылками на библиотеки javascript
+        if not resources:
+            resources = CDN.render()
+
+        operationEndTime = datetime.now()
+        operationDuration = str( operationEndTime - operationStartTime)
+        console_output = "Промежуточное время " + operationDuration
+
+
+    operationEndTime = datetime.now()
+    operationDuration = str( operationEndTime - operationStartTime)
+    console_output = "Done in " + operationDuration
+
+
+    renderdata = {
+        "rendertype": "success",
+        "html_template": "cisco_cmspacketloss_for_meeting.html",
+        "html_page_title": html_page_title,
+        "console_output": console_output,
+        "form_navigation": form_navigation,
+        "plot_list": plot_list,
+        "resources": resources
+    }
+    return renderdata
+
+
 def cmsrecordingsviewer():
     # вывод списка записей
 

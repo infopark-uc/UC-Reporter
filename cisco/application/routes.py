@@ -6,7 +6,7 @@ from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
 from application.sendmail import ucsendmail
-from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmsmeetingviewer
+from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmsmeetingviewer,cmsallcalllegsviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
 from application.cms_cospace_usage import cms_cospace_usage, cms_cospace_usage_by_cluster
@@ -174,6 +174,28 @@ def cmscallleg(callegid):
     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
         console_output=module_result['console_output'],
         formNAV=module_result['form_navigation'])
+
+
+@app.route('/cms/allcalllegsplot/<string:meeting_id>/', methods=['GET', 'POST'])
+@login_required
+def cmscallleg_for_meeting(meeting_id):
+    module_result = cmsallcalllegsviewer(meeting_id)
+
+    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
+        return redirect(url_for(module_result['redirect_to']))
+
+    if module_result['rendertype'] == 'success':  # проверка если данные получены
+        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+                               console_output=module_result['console_output'],
+                               formNAV=module_result['form_navigation'],
+                               plot_list=module_result['plot_list'],
+                               resources=module_result['resources']
+                               )
+
+    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
+        console_output=module_result['console_output'],
+        formNAV=module_result['form_navigation'])
+
 
 @app.route('/cmscospace', methods=['GET', 'POST'])
 @app.route('/cmscospace/', methods=['GET', 'POST'])

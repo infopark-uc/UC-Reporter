@@ -1,0 +1,23 @@
+{% extends "base_templates/base_template.html" %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='base_packetloss_graph.css') }}">
+{% endblock %}
+
+{% block Content %}
+
+    {% if resources %}
+            {{ resources|safe }}
+    {% endif %}
+
+
+    {% for plot in plot_list %}
+
+    {% if plot[0] %}
+	    {{ plot[0]|safe }}
+    {% endif %}
+    {% if plot[1] %}
+	    {{ plot[1]|safe }}
+    {% endif %}
+    {% endfor %}
+
+{% endblock %}
