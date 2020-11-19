@@ -1,6 +1,6 @@
 import xmltodict
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import logging.handlers
 from application.sqlrequests import sql_request_dict
@@ -16,7 +16,8 @@ def time_format(input_time):
 
 
 def time_format_with_days(input_time):
-    result = time.strftime("%H:%M:%S", time.gmtime(int(input_time)))
+    #result = time.strftime("%d %H:%M:%S", time.gmtime(int(input_time)))
+    result = str(timedelta(seconds=input_time))
     return result
 
 def cms_cospace_usage():
@@ -235,11 +236,17 @@ def cms_cospace_usage_by_cluster():
         #перевести секунды в часы
         for row in rows_list.values():
             if row["avg_duration"]:
-                row["avg_duration"] = time_format_with_days(row["avg_duration"])
+                print(f'avg_duration before: {row["avg_duration"]}')
+                row["avg_duration"] = time_format_with_days(round(row["avg_duration"]))
+                print(f'avg_duration after: {row["avg_duration"]}')
             if row["max_duration"]:
+                print(f'max_duration before: {row["max_duration"]}')
                 row["max_duration"] = time_format_with_days(row["max_duration"])
+                print(f'max_duration after: {row["max_duration"]}')
             if row["sum_duration"]:
+                print(f'sum_duration before: {row["sum_duration"]}')
                 row["sum_duration"] = time_format_with_days(row["sum_duration"])
+                print(f'sum_duration after: {row["sum_duration"]}')
             if row["avg_servers"]:
                 row["avg_servers"] = round(row["avg_servers"], 1)
             if row["avg_calllegs"]:
