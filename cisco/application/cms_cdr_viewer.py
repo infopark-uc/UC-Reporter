@@ -490,8 +490,9 @@ def cmsallcalllegsviewer(meeting_id):
             logger.error("CMS All CallLegs viewer: " + console_output)
             console_output = ("CMS All CallLegs viewer: " + "{!r}; callleginfo get exception ".format(e))
             logger.error(console_output)
-
-
+            console_output = "Завершаем график для " + callleg["displayName"]
+            logger.debug("CMS All CallLegs viewer: " + console_output)
+            continue
 
         if isinstance(rows_list, list):
             console_output = "Тип полученного объекта rows_list - list "
