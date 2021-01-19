@@ -483,7 +483,15 @@ def cmsallcalllegsviewer(meeting_id):
 
         console_output = "Делаем запрос в БД для calleg_ID " + callleg["callleg_id"]
         logger.debug("CMS All CallLegs viewer: " + console_output)
-        rows_list = cms_sql_request_dict(sql_request_string)
+        try:
+            rows_list = cms_sql_request_dict(sql_request_string)
+        except BaseException as e:
+            console_output = "======= Что за дичь творится для " + callleg["callleg_id"] + "?!"
+            logger.error("CMS All CallLegs viewer: " + console_output)
+            console_output = ("CMS All CallLegs viewer: " + "{!r}; callleginfo get exception ".format(e))
+            logger.error(console_output)
+
+
 
         if isinstance(rows_list, list):
             console_output = "Тип полученного объекта rows_list - list "
