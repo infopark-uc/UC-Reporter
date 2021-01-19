@@ -1,12 +1,15 @@
 import requests
 import xmltodict
 from pprint import pprint
+from pprint import pformat
 from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectCMSClusterForCDR
 from application.sqlrequests import cms_sql_request_dict
 import time
 from flask_login import current_user
+from application.ucreporter_logs import logger_init
+import logging
 import collections
 
 # библиотеки для графиков
@@ -16,6 +19,7 @@ from bokeh.resources import CDN
 from bokeh.models import DatetimeTickFormatter, HoverTool, ColumnDataSource
 from math import pi
 from datetime import datetime
+
 
 def is_digit(string):
     if string.isdigit():
@@ -421,15 +425,19 @@ def cmscalllegviewer(callleg_id):
 
 def cmsallcalllegsviewer(meeting_id):
 
+    # Настройка логирования
+    logger = logger_init('CMS_VIEWER', logging.DEBUG)
+
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CallLeg Report'
-    print("CMS All CallLegs veiwer: request for meetingID: " + meeting_id)
+    console_output = "================================== Выполняется запрос для  meetingID: " + meeting_id
+    logger.debug("CMS All CallLegs viewer: " + console_output)
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
-        print("CMS CALLLEGVW: " + console_output)
+        logger.debug("CMS All CallLegs viewer: " + console_output)
         renderdata = {
             "rendertype": "redirect",
             "redirect_to": form_navigation.select_navigation.data
@@ -437,24 +445,34 @@ def cmsallcalllegsviewer(meeting_id):
         return renderdata
 
     # Получаем список CallLeg_ID для Meeting_ID
+    console_output = "Делаем запрос в БД об участниках совещании " + meeting_id
+    logger.debug("CMS All CallLegs viewer: " + console_output)
     sql_request_string = "SELECT r.callleg_id, r.displayName, r.date FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "' ORDER BY r.displayName, r.date;"
     calleg_list = cms_sql_request_dict(sql_request_string)
+    console_output = "Запрос в БД об участниках совещании выполнен"
+    logger.debug("CMS All CallLegs viewer: " + console_output)
 
     # Получаем время начала и окончания конференции для выравнивания графиков
-
-    sql_request_string = "SELECT MIN(r.date) AS startTime, MAX(IFNULL((ADDDATE(r.date, INTERVAL r.durationSeconds SECOND)), CURRENT_TIMESTAMP(6))) AS endTime FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "';"
+    console_output = "Делаем запрос в БД о времени совещания " + meeting_id
+    logger.debug("CMS All CallLegs viewer: " + console_output)
+    sql_request_string = "SELECT MIN(r.date) AS startTime, MAX(IFNULL((ADDDATE(r.date, INTERVAL r.durationSeconds SECOND)), CURRENT_TIMESTAMP(6))) AS endTime FROM cms_cdr_calls as c INNER JOIN cms_cdr_records as r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "';"
     conference_time_list = cms_sql_request_dict(sql_request_string)
+    console_output = "Запрос в БД о времени совещании выполнен"
+    logger.debug("CMS All CallLegs viewer: " + console_output)
 
     start_time = conference_time_list[0]["startTime"]
     end_time = conference_time_list[0]["endTime"]
     console_output = "Время начала: " + start_time + ", время окончания: " + end_time
-    print("CMS CALLLEGVW: " + console_output)
+    logger.debug("CMS All CallLegs viewer: " + console_output)
 
-    # Делаем цикл длz подготовки всех графиков
+    # Делаем цикл для подготовки всех графиков
     resources = ""
     plot_list = []
 
     for callleg in calleg_list:
+
+        console_output = "Начинаем строить график для " + callleg["displayName"]
+        logger.debug("CMS All CallLegs viewer: " + console_output)
 
         sql_request_string = """SELECT cms_cdr_calllegs.date,
                                        cms_cdr_calllegs.AudioPacketLossPercentageRX,
@@ -464,20 +482,21 @@ def cmsallcalllegsviewer(meeting_id):
                                        FROM cms_cdr_calllegs WHERE cms_cdr_calllegs.callleg_id='""" + callleg["callleg_id"] + "';"
 
         console_output = "Делаем запрос в БД для calleg_ID " + callleg["callleg_id"]
-        print("CMS All CallLegs veiwer: " + console_output)
+        logger.debug("CMS All CallLegs viewer: " + console_output)
         rows_list = cms_sql_request_dict(sql_request_string)
 
         if isinstance(rows_list, list):
-            console_output = "rows_list is list "
-            print("CMS All CallLegs veiwer: " + console_output)
+            console_output = "Тип полученного объекта rows_list - list "
+            logger.debug("CMS All CallLegs viewer: " + console_output)
         else:
-            console_output = "rows_list is not list, it is: " + str(type(rows_list))
-            print("CMS All CallLegs veiwer: " + console_output)
-            pprint(rows_list)
+            console_output = "Тип полученного объекта rows_list не list, это: " + str(type(rows_list))
+            logger.debug("CMS All CallLegs viewer: " + console_output)
+            logger.debug("\n" + pformat(rows_list))
 
             operationEndTime = datetime.now()
             operationDuration = str( operationEndTime - operationStartTime)
-            console_output = "There is no data for the request in DB. Done in " + operationDuration
+            console_output = "В БД нет данных для этого участника. Промежуточное время " + operationDuration
+            logger.debug("CMS All CallLegs viewer: " + console_output)
             continue
 
         # создаем листы значений по осям x и y для построения графиков
@@ -553,12 +572,14 @@ def cmsallcalllegsviewer(meeting_id):
 
         operationEndTime = datetime.now()
         operationDuration = str( operationEndTime - operationStartTime)
-        console_output = "Промежуточное время " + operationDuration
+        console_output = "График для " + callleg["displayName"] + " построен. Промежуточное время " + operationDuration
+        logger.debug("CMS All CallLegs viewer: " + console_output)
 
 
     operationEndTime = datetime.now()
     operationDuration = str( operationEndTime - operationStartTime)
     console_output = "Done in " + operationDuration
+    logger.debug("CMS All CallLegs viewer: " + console_output)
 
 
     renderdata = {
@@ -582,7 +603,7 @@ def cmsrecordingsviewer():
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CDR Recordings Report'
-    print("CMS CALLVW: request for recordings")
+    logger.debug("CMS CALLVW: request for recordings")
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
