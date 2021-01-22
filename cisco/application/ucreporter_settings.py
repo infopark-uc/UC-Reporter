@@ -2,6 +2,7 @@ from application.forms import SelectNavigation, UserInformation, CUCMServerInfor
 	CMSServerInformation
 from datetime import datetime
 from application.sqlrequests import sql_request_dict, sql_execute
+from application.database import UCREPORTER_USERS_TABLE_CLASS,CMS_SERVER_TABLE_CLASS,CM_SERVER_LIST_TABLE_CLASS
 from pprint import pprint
 
 def ucreporter_settings_mainpage():
@@ -126,8 +127,9 @@ def ucreporter_settings_users(user_id):
 			return renderdata
 
 	else:
-		sql_request_result_string = "SELECT * FROM ucreporter_users;"
-		rows_list = sql_request_dict(sql_request_result_string)
+		#sql_request_result_string = "SELECT * FROM ucreporter_users;"
+		#rows_list = sql_request_dict(sql_request_result_string)
+		rows_list = UCREPORTER_USERS_TABLE_CLASS.query.all()
 
 		content_type = "user_list"
 		operation_end_time = datetime.now()
@@ -251,8 +253,10 @@ def ucreporter_settings_CMSservers(server_id):
 			return renderdata
 	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
 	else:
-		sql_request_result_string = "SELECT * FROM cms_servers;"
-		rows_list = sql_request_dict(sql_request_result_string)
+		#sql_request_result_string = "SELECT * FROM cms_servers;"
+		#rows_list = sql_request_dict(sql_request_result_string)
+		rows_list = CMS_SERVER_TABLE_CLASS.query.all()
+
 		content_type = "cms_server_list"
 		operation_end_time = datetime.now()
 		operation_duration = str(operation_end_time - operation_start_time)
@@ -360,8 +364,9 @@ def ucreporter_settings_CUCMservers(server_id):
 
 	# отрисовка данных списка серверов в случае, если не пришел ID сервера.
 	else:
-		sql_request_result_string = "SELECT * FROM cm_servers_list;"
-		rows_list = sql_request_dict(sql_request_result_string)
+		#sql_request_result_string = "SELECT * FROM cm_servers_list;"
+		#rows_list = sql_request_dict(sql_request_result_string)
+		rows_list = CM_SERVER_LIST_TABLE_CLASS.query.all()
 		content_type = "cucm_server_list"
 		operation_end_time = datetime.now()
 		operation_duration = str(operation_end_time - operation_start_time)
