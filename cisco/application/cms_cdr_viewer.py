@@ -5,7 +5,7 @@ from pprint import pformat
 from application.sqlrequests import cm_sqlselect,cm_sqlselectall,cm_sqlupdate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectCMSClusterForCDR
-from application.sqlrequests import cms_sql_request_dict
+from application.sqlrequests import sql_request_dict
 import time
 from flask_login import current_user
 from application.ucreporter_logs import logger_init
@@ -57,20 +57,20 @@ def cmsviewer():
     if form_cmsselection.validate_on_submit():
         if form_cmsselection.select_CMSCluster.data == SEARCH_FOR_ALL:
             if not form_cmsselection.confroom_filter.data:
-                rows_list = cms_sql_request_dict(
+                rows_list = sql_request_dict(
                     "SELECT meeting_id, name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
                 #print("CMS VW: get dict")
             else:
-                rows_list = cms_sql_request_dict(
+                rows_list = sql_request_dict(
                     "SELECT meeting_id, name AS cospace_name , cospace AS cospace_id, id AS call_id, starttime, callLegsMaxActive, durationSeconds, EndTime, cms_ip FROM cms_cdr_calls WHERE (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
                 #print("CMS VW: get dict")
         else:
             if not form_cmsselection.confroom_filter.data:
-                rows_list = cms_sql_request_dict(
+                rows_list = sql_request_dict(
                     "SELECT meeting_id, cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "' ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
                 #print("CMS VW: get dict")
             else:
-                rows_list = cms_sql_request_dict(
+                rows_list = sql_request_dict(
                     "SELECT meeting_id, cms_cdr_calls.name AS cospace_name,cms_cdr_calls.cospace AS cospace_id, cms_cdr_calls.id AS call_id, cms_cdr_calls.starttime, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.durationSeconds, cms_cdr_calls.EndTime, cms_cdr_calls.cms_ip FROM cms_cdr_calls INNER JOIN cms_servers ON cms_cdr_calls.cms_ip=cms_servers.ip WHERE cms_servers.cluster='" + form_cmsselection.select_CMSCluster.data + "'AND (cms_cdr_calls.name LIKE  '%" + form_cmsselection.confroom_filter.data + "%') ORDER BY starttime DESC LIMIT " + form_cmsselection.limit_field.data)
                 #print("CMS VW: get dict")
 
@@ -138,7 +138,7 @@ def cmscallviewer(call_id):
                                 + sql_request_string_call_type\
                                 + sql_request_string_from
 
-    rows_list = cms_sql_request_dict(sql_request_result_string)
+    rows_list = sql_request_dict(sql_request_result_string)
         #"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,rxAudio_codec,txAudio_codec,rxVideo_codec,txVideo_codec,txVideo_maxHeight,txVideo_maxWidth,cms_ip,alarm_type,alarm_value FROM cms_cdr_records WHERE call_id='" + call_id + "';")
 
     #print("CMS CALLVW: get dict for callID:  " + call_id)
@@ -193,7 +193,7 @@ def cmsmeetingviewer(meeting_id):
                                 + sql_request_string_call_type\
                                 + sql_request_string_from
 
-    rows_list = cms_sql_request_dict(sql_request_result_string)
+    rows_list = sql_request_dict(sql_request_result_string)
         #"SELECT DISTINCT callleg_id,remoteaddress,durationseconds,rxAudio_codec,txAudio_codec,rxVideo_codec,txVideo_codec,txVideo_maxHeight,txVideo_maxWidth,cms_ip,alarm_type,alarm_value FROM cms_cdr_records WHERE call_id='" + call_id + "';")
 
     #print("CMS CALLVW: get dict for callID:  " + call_id)
@@ -249,7 +249,7 @@ def cmscalllegviewer(callleg_id):
 
     console_output = "Делаем запрос в БД"
     print("CMS CALLLEGVW: " + console_output)
-    rows_list = cms_sql_request_dict(sql_request_string)
+    rows_list = sql_request_dict(sql_request_string)
 
     if isinstance(rows_list, list):
         console_output = "rows_list is list "
@@ -448,7 +448,7 @@ def cmsallcalllegsviewer(meeting_id):
     console_output = "Делаем запрос в БД об участниках совещании " + meeting_id
     logger.debug("CMS All CallLegs viewer: " + console_output)
     sql_request_string = "SELECT r.callleg_id, r.displayName, r.date FROM cms_cdr_calls c INNER JOIN cms_cdr_records r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "' ORDER BY r.displayName, r.date;"
-    calleg_list = cms_sql_request_dict(sql_request_string)
+    calleg_list = sql_request_dict(sql_request_string)
     console_output = "Запрос в БД об участниках совещании выполнен"
     logger.debug("CMS All CallLegs viewer: " + console_output)
 
@@ -456,7 +456,7 @@ def cmsallcalllegsviewer(meeting_id):
     console_output = "Делаем запрос в БД о времени совещания " + meeting_id
     logger.debug("CMS All CallLegs viewer: " + console_output)
     sql_request_string = "SELECT MIN(r.date) AS startTime, MAX(IFNULL((ADDDATE(r.date, INTERVAL r.durationSeconds SECOND)), CURRENT_TIMESTAMP(6))) AS endTime FROM cms_cdr_calls as c INNER JOIN cms_cdr_records as r ON r.call_id=c.id WHERE meeting_id='" + meeting_id + "';"
-    conference_time_list = cms_sql_request_dict(sql_request_string)
+    conference_time_list = sql_request_dict(sql_request_string)
     console_output = "Запрос в БД о времени совещании выполнен"
     logger.debug("CMS All CallLegs viewer: " + console_output)
 
@@ -484,7 +484,7 @@ def cmsallcalllegsviewer(meeting_id):
         console_output = "Делаем запрос в БД для calleg_ID " + callleg["callleg_id"]
         logger.debug("CMS All CallLegs viewer: " + console_output)
         try:
-            rows_list = cms_sql_request_dict(sql_request_string)
+            rows_list = sql_request_dict(sql_request_string)
         except BaseException as e:
             console_output = "======= Что за дичь творится для " + callleg["callleg_id"] + "?!"
             logger.error("CMS All CallLegs viewer: " + console_output)
@@ -606,13 +606,17 @@ def cmsallcalllegsviewer(meeting_id):
 def cmsrecordingsviewer():
     # вывод списка записей
 
+    # Настройка логирования
+    logger = logger_init('CMS_VIEWER', logging.DEBUG)
+
     NETPATH = "\\\\192.168.12.195\\record\\"
     RECORD_FILE_EXTENTION = ".mp4"
 
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CDR Recordings Report'
-    logger.debug("CMS CALLVW: request for recordings")
+    console_output = "request for recordings"
+    logger.debug("CMS Recording viewer: " + console_output)
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
@@ -625,9 +629,10 @@ def cmsrecordingsviewer():
         return renderdata
 
     sql_request_result_string = "SELECT cms_cdr_calls.name, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.StartTime, cms_cdr_calls.durationSeconds, cms_cdr_recordings.path, cms_cdr_recordings.recording_id FROM cms_cdr_calls INNER JOIN cms_cdr_recordings ON cms_cdr_recordings.call_id=cms_cdr_calls.id ORDER BY cms_cdr_calls.StartTime DESC;"
-    rows_list = cms_sql_request_dict(sql_request_result_string)
+    rows_list = sql_request_dict(sql_request_result_string)
 
-    print("CMS CALLVW: get dict for call recordings")
+    console_output = "get dict for call recordings"
+    logger.debug("CMS Recording viewer: " + console_output)
 
     for row in rows_list:
         row["original_path"] = row["path"]
@@ -642,6 +647,7 @@ def cmsrecordingsviewer():
     operationEndTime = datetime.now()
     operationDuration = str(operationEndTime - operationStartTime)
     console_output = "Done in " + operationDuration
+    logger.debug("CMS Recording viewer: " + console_output)
 
     renderdata = {
         "rendertype": "success",
