@@ -77,20 +77,13 @@ def cfa():
                             formNAV=module_result['form_navigation'],
                             formSRCH=module_result['form_search'])
 
-@app.route('/roomrequest', methods=['GET', 'POST'])
-def roomrequest():
-    #ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
-    codec("0") # "0" - index roomsystem from database
-    return "roomrequest done"
+@app.route('/roomrequest/<string:system_id>/', methods=['GET', 'POST'])
+def roomrequest(system_id):
+    return codec(system_id)
 
-@app.route('/SubmitOrder', methods=['GET', 'POST'])
-def order():
-    #ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # забираем IP
-    return submit_order("0") # "0" - index roomsystem from database
-
-@app.route('/ucsendmail', methods=['POST'])
-def ucmail():
-    return ucsendmail()
+@app.route('/SubmitOrder/<string:system_id>/', methods=['GET', 'POST'])
+def order(system_id):
+    return submit_order(system_id)
 
 @app.route('/cdr', methods=['POST'])
 def cdr():

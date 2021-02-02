@@ -1,0 +1,8 @@
+mariadb-libs-5.5.68-1.el7.x86_64
+mariadb-devel-5.5.68-1.el7.x86_64
+mariadb-server-5.5.68-1.el7.x86_64
+python36-devel
+MySQL-python
+gcc
+gcc-devel
+
