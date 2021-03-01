@@ -368,3 +368,6 @@ def aurus_consitency_check():
                            console_output=module_result['console_output'],
                            formNAV=module_result['form_navigation'],
                            formCUCM=module_result['form_cluster_selection'])
+
+
+app.secret_key = "Super_secret_key"
