@@ -1,6 +1,14 @@
 from application import db
 from flask_login import UserMixin
+import datetime
 
+class CmsCdrRecordingsTableClass(db.Model):
+	__tablename__ = 'cms_cdr_recordings'
+	timestamp = db.Column(db.TIMESTAMP, default=datetime.datetime.utcnow)
+	recording_id = db.Column(db.String(64), primary_key=True)
+	path = db.Column(db.String(64))
+	call_id = db.Column(db.String(64))
+	callLeg_id = db.Column(db.String(64))
 
 # Class table- table name in SQL
 class CmsServerTableClass(db.Model):
@@ -14,7 +22,6 @@ class CmsServerTableClass(db.Model):
 	requester_running = db.Column(db.String(64))
 	def __repr__(self):
 		return '<{}>'.format(self.ip)
-
 
 
 class CmServerListTableClass(db.Model):
@@ -33,7 +40,7 @@ class CmServerListTableClass(db.Model):
 	def __repr__(self):
 		return '<{}>'.format(self.id)
 
-
+# users for service UC Reporter
 class UCReporterUsersTableClass(db.Model,UserMixin):
 	__tablename__ = 'ucreporter_users'
 	id = db.Column(db.Integer, primary_key=True)
@@ -51,7 +58,7 @@ class UCReporterUsersTableClass(db.Model,UserMixin):
 	def check_password(self, password):
 		return check_password_hash(self.password_hash, password)
 
-######### modul roomservice start ######
+######### modul roomservice ######
 class RmcWidgetsTableClass(db.Model):
 	__tablename__ = 'rmc_widgets'
 	wg_id = db.Column(db.Integer, primary_key=True)
@@ -74,8 +81,6 @@ class RmcPanelTableClass(db.Model):
 
 	def __repr__(self):
 		return '<{}>'.format(self.panel_name)
-
-
 
 class RmcPhoneTableClass(db.Model):
 	__tablename__ = 'rmc_phones'
@@ -103,7 +108,7 @@ class RmcCodecTableClass(db.Model):
 class RmcSystemsTableClass(db.Model):
 	__tablename__ = 'rmc_systems_index'
 	system_id = db.Column(db.Integer, primary_key=True)
-	cs_id = db.Column(db.Integer, db.ForeignKey('rmc_codec.cs_id'))
+	cs_id = db.Column(db.Integer, db.ForeignKey('rmc_codecs.cs_id'))
 	ph_id = db.Column(db.Integer, db.ForeignKey('rmc_phones.ph_id'))
 	panel_id = db.Column(db.Integer, db.ForeignKey('rmc_panels.panel_id'))
 	system_name = db.Column(db.String(50), nullable=False)

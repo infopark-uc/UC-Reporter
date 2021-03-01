@@ -9,6 +9,7 @@
 
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="{{ url_for('static', filename='popup.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <style>
@@ -60,7 +61,9 @@
 			</td>
 			<td>
 				<div>
-					<img width="20" height="20" class="play-btn" data-toggle="modal" data-target="#id_{{row.recording_id}}" src="{{ url_for('static', filename='icon_play.png') }}" />
+					<a href="{{ url_for('cms_record_play_page', recording_id=row.recording_id) }}">
+						<img width="20" height="20" class="play-btn" data-toggle="modal" data-target="#id_{{row.recording_id}}" src="{{ url_for('static', filename='icon_play.png') }}" />
+					</a>
 				</div>
 			</td>
 		</tr>
@@ -68,25 +71,6 @@
 		{% endfor %}
 	</table>
 	</div>
-
-        {% for row in rows_list %}
-<div class="modal fade" id="id_{{row.recording_id}}" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-body">
-
-				<video width="100%" controls>
-					<source src="file://192.168.12.195/record/{{row.original_path}}.mp4" type='video/mp4'>
-					{# Если браузер не поддерживает видео тэг выводим сообщение: #}
-					Your browser does not support video.
-				</video>
-
-
-			</div>
-		</div>
-	</div>
-</div>
-        {% endfor %}
 
 	{% endif %}
 {% endblock %}

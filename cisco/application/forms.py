@@ -54,7 +54,7 @@ class UCRepoterLogin(FlaskForm):
 class UserInformation(FlaskForm):
     UserName_field = StringField('UserName')
     id_field = Label('id',text='')
-    Descriotion_field = StringField('Description',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."),
+    Description_field = StringField('Description',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."),
                                         Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
     Password_field = StringField('Password',validators=[Optional(), Length(max=32, message=" Длина запроса не более 32 символов."),
                                         Regexp('^\w+$', message=" Допустимые символы в запросе: буквы, цифры и подчеркивания.")])
