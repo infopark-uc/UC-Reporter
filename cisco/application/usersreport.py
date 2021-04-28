@@ -23,13 +23,13 @@ def usersreport():
             "redirect_to": form_navigation.select_navigation.data
         }
         return renderdata
-
-    form_search = SelectSearchType(meta={'csrf': False})
+    choise_data = sql_request_dict(
+        "SELECT cluster,description FROM cm_servers_list")
+    form_search = SelectSearchType(csrf_enabled=False)
+    form_search.select_region.choices = [(choise["cluster"], choise["description"]) for choise in choise_data]
+    #form_search = SelectSearchType(meta={'csrf': False})
     if form_search.validate_on_submit():
         console_output = form_search.select_region.data + " " + form_search.select_field.data + " " + form_search.string_field.data
-        #cucm_ip_address = cm_sqlselect("cm_ip", "cm_servers_list", "cm_name", form_search.select_region.data)
-        #cucm_login = cm_sqlselect("cm_username", "cm_servers_list", "cm_name", form_search.select_region.data)
-        #cucm_password = cm_sqlselect("cm_password", "cm_servers_list", "cm_name", form_search.select_region.data)
 
         auth_data_list = sql_request_dict(
             "SELECT cm_ip,cm_username,cm_password FROM cm_servers_list WHERE cluster='"+ form_search.select_region.data + "'")  # получаем лист словарей
