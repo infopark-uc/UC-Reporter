@@ -16,6 +16,8 @@ from application.ucreporter_settings import ucreporter_settings_CMSservers,ucrep
 import application.callforward
 from application.aurus_consistency_checker import aurus_consistency_check
 from application.cms_cdr_recording_player import recording_play,recording_page
+from application.phone_api import phone_cgi
+from application.cucm_blf_report import phone_blf_search
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -369,5 +371,12 @@ def aurus_consitency_check():
                            formNAV=module_result['form_navigation'],
                            formCUCM=module_result['form_cluster_selection'])
 
+@app.route('/phone_cgi/', methods=['GET', 'POST'])
+def phone_cgi_page():
+    return phone_cgi()
+
+@app.route('/phone_blf/', methods=['GET', 'POST'])
+def phone_blf_page():
+    return phone_blf_search()
 
 app.secret_key = "Super_secret_key"

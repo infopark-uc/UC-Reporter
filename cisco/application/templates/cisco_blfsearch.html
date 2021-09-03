@@ -1,0 +1,40 @@
+{% extends "base_templates/base_template.html" %}
+{% block Content %}
+
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Найти телефоны в
+			{{ formSRCH.select_region() }}
+			где клавиша BLF с
+		    {{ formSRCH.select_field() }}
+			начинается с:
+			{{ formSRCH.string_field() }}
+	        {{ formSRCH.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				MAC Address
+			</th>
+            <th>
+				Device Description
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+			<td>
+				{{ row.name }}
+			</td>
+			<td>
+				{{ row.description }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+
+{% endblock %}

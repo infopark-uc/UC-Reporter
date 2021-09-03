@@ -1,0 +1,50 @@
+{% extends "base_templates/base_template.html" %}
+{% block Content %}
+    <div><p> Страница в разработке </p></div>
+	<div class="SearchItem">
+		<form action="" method="post" novalidate>
+		    Найти телефон в
+			{{ formSRCH.select_region() }}
+			с номером:
+			{{ formSRCH.string_field() }}
+	        {{ formSRCH.submit() }}
+		</form>
+	</div>
+    {% if rows_list %}
+	<div id="tableWrap">
+	<table class="DataTable">
+		<tr>
+			<th>
+				MAC Address
+			</th>
+			<th>
+				DeviceType
+			</th>
+            <th>
+				Device Description
+			</th>  
+            <th>
+				Number
+			</th>
+		</tr>
+		{% for row in rows_list %}
+		<tr>
+			<td>
+				{{ row.name }}
+			</td>
+			<td>
+				{{ row.devtype }}
+			</td>
+			<td>
+				{{ row.description }}
+			</td>
+			<td>
+				{{ row.dn }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endif %}
+
+{% endblock %}
