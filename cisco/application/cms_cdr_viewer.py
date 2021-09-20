@@ -1,3 +1,4 @@
+from flask import render_template, redirect, url_for
 import requests
 import xmltodict
 from pprint import pprint
@@ -31,7 +32,6 @@ def is_digit(string):
         except ValueError:
             return False
 
-
 def cmsviewer():
 
     operationStartTime = datetime.now()
@@ -39,6 +39,7 @@ def cmsviewer():
     SEARCH_FOR_ALL = "all"
 
     html_page_title = 'Cisco Meetings Server CDR Report'
+    html_template = 'cisco_cmscdr.html'
 
     # Temporary values
     console_output = "Нет активного запроса"
@@ -47,11 +48,7 @@ def cmsviewer():
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         #print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     form_cmsselection = SelectCMSClusterForCDR(meta={'csrf': False})
     if form_cmsselection.validate_on_submit():
@@ -82,47 +79,34 @@ def cmsviewer():
             if row["durationSeconds"]:
                 row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
 
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "cisco_cmscdr.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cmsselection": form_cmsselection,
-            "rows_list": rows_list
-        }
-        return renderdata
+
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               rows_list=rows_list,
+                               formNAV=form_navigation,
+                               formCMS=form_cmsselection)
 
     operationEndTime = datetime.now()
     operationDuration = str( operationEndTime - operationStartTime)
     console_output = "Нет активного запроса (" + operationDuration + ")"
-
-    renderdata = {
-        "rendertype": "Null",
-        "html_template": "cisco_cmscdr.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_cmsselection": form_cmsselection
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           formCMS=form_cmsselection)
 
 def cmscallviewer(call_id):
 
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS Call Report'
+    html_template = 'cisco_cmsview.html'
     #print("CMS CALLVW: request for callID: " + call_id)
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         #print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
 
     sql_request_string_select_basic = "SELECT DISTINCT callleg_id,remoteaddress,displayName,durationseconds,startTime,cms_ip,alarm_type,alarm_value,reason"
@@ -151,33 +135,24 @@ def cmscallviewer(call_id):
             if is_digit(row["durationseconds"]):
                 row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
 
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_cmsview.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "rows_list": rows_list
-    }
-    return renderdata
-
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           rows_list=rows_list,
+                           formNAV=form_navigation)
 
 def cmsmeetingviewer(meeting_id):
 
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS Call Report'
+    html_template = 'cisco_cmsview.html'
     #print("CMS CALLVW: request for callID: " + call_id)
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         #print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     sql_request_string_select_basic = "SELECT r.callleg_id,r.remoteaddress,r.displayName,r.durationseconds,r.startTime,r.cms_ip,r.alarm_type,r.alarm_value,r.reason"
     sql_request_string_audio_video_codecs = ",r.rxAudio_codec,r.txAudio_codec,r.rxVideo_codec,r.txVideo_codec,r.txVideo_maxHeight,r.txVideo_maxWidth"
@@ -206,33 +181,24 @@ def cmsmeetingviewer(meeting_id):
             if is_digit(row["durationseconds"]):
                 row["durationseconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationseconds"])))
 
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_cmsview.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "rows_list": rows_list
-    }
-    return renderdata
-
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           rows_list=rows_list,
+                           formNAV=form_navigation)
 
 def cmscalllegviewer(callleg_id):
 
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CallLeg Report'
-    print("CMS CALLLEGVW: request for calllegID: " + callleg_id)
+    html_template = 'cisco_cmspacketloss.html'
+    #print("CMS CALLLEGVW: request for calllegID: " + callleg_id)
 
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
-        print("CMS CALLLEGVW: " + console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        #print("CMS CALLLEGVW: " + console_output)
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     #sql_request_string = "SELECT cms_cdr_calllegs.callleg_id,cms_cdr_calllegs.date,cms_cdr_calllegs.AudioPacketLossPercentageRX,cms_cdr_calllegs.AudioPacketLossPercentageTX,cms_cdr_calllegs.VideoPacketLossPercentageRX,cms_cdr_calllegs.VideoPacketLossPercentageTX,cms_cdr_records.remoteaddress FROM cms_cdr_calllegs INNER JOIN cms_cdr_records ON  cms_cdr_calllegs.callleg_id=cms_cdr_records.callleg_id WHERE cms_cdr_calllegs.callleg_id='" + callleg_id + "';")
     sql_request_string = """SELECT cms_cdr_calllegs.callleg_id,
@@ -248,29 +214,25 @@ def cmscalllegviewer(callleg_id):
                                    FROM cms_cdr_calllegs INNER JOIN cms_cdr_records ON  cms_cdr_calllegs.callleg_id=cms_cdr_records.callleg_id WHERE cms_cdr_calllegs.callleg_id='""" + callleg_id + "';"
 
     console_output = "Делаем запрос в БД"
-    print("CMS CALLLEGVW: " + console_output)
+    #print("CMS CALLLEGVW: " + console_output)
     rows_list = sql_request_dict(sql_request_string)
 
     if isinstance(rows_list, list):
         console_output = "rows_list is list "
-        print("CMS CALLLEGVW:" + console_output)
+        #print("CMS CALLLEGVW:" + console_output)
     else:
         console_output = "rows_list is not list, it is: " + str(type(rows_list))
-        print("CMS CALLLEGVW: " + console_output)
-        pprint(rows_list)
+        #print("CMS CALLLEGVW: " + console_output)
+        #pprint(rows_list)
 
         operationEndTime = datetime.now()
         operationDuration = str( operationEndTime - operationStartTime)
         console_output = "There is no data for the request in DB. Done in " + operationDuration
         #print(console_output)
-        renderdata = {
-            "rendertype": "null",
-            "html_template": "cisco_cmspacketloss.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation
-        }
-        return renderdata
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               formNAV=form_navigation)
+
 
     # создаем листы значений по осям x и y для построения графиков
     AudioPacketLossPercentageRX_list = []
@@ -374,7 +336,6 @@ def cmscalllegviewer(callleg_id):
     script, div = components(p)
     # формируем обект содержащий html-код с ссылками на библиотеки javascript
     resources = CDN.render()
-
     # создаем объект класса figure описывающий график RTT
     p_rtt = figure(plot_width=1800, plot_height=250, x_axis_type="datetime")
     p_rtt.sizing_mode = "scale_width"
@@ -399,29 +360,19 @@ def cmscalllegviewer(callleg_id):
     p_rtt.xaxis.major_label_orientation = pi / 4
     # формируем объекты содержащие html-код с графиком для web-страницы
     script_rtt, div_rtt = components(p_rtt)
-
-
     operationEndTime = datetime.now()
     operationDuration = str( operationEndTime - operationStartTime)
     console_output = "Information for: " + rows_list[0]["displayName"] + ". Done in " + operationDuration
-
-
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_cmspacketloss.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "script": script,
-        "div": div,
-        "resources": resources,
-        "max_loss_values": max_loss_values,
-        "script_rtt": script_rtt,
-        "div_rtt": div_rtt,
-        "max_loss_values_rtt": max_loss_values_rtt
-    }
-    return renderdata
-
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           div=div,
+                           script=script,
+                           resources=resources,
+                           max_loss_values=max_loss_values,
+                           div_rtt=div_rtt,
+                           script_rtt=script_rtt,
+                           max_loss_values_rtt=max_loss_values_rtt)
 
 def cmsallcalllegsviewer(meeting_id):
 
@@ -431,6 +382,7 @@ def cmsallcalllegsviewer(meeting_id):
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CallLeg Report'
+    html_template ='cisco_cmspacketloss_for_meeting.html'
     console_output = "================================== Выполняется запрос для  meetingID: " + meeting_id
     logger.debug("CMS All CallLegs viewer: " + console_output)
 
@@ -438,11 +390,7 @@ def cmsallcalllegsviewer(meeting_id):
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         logger.debug("CMS All CallLegs viewer: " + console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     # Получаем список CallLeg_ID для Meeting_ID
     console_output = "Делаем запрос в БД об участниках совещании " + meeting_id
@@ -583,25 +531,15 @@ def cmsallcalllegsviewer(meeting_id):
         operationDuration = str( operationEndTime - operationStartTime)
         console_output = "График для " + callleg["displayName"] + " построен. Промежуточное время " + operationDuration
         logger.debug("CMS All CallLegs viewer: " + console_output)
-
-
     operationEndTime = datetime.now()
     operationDuration = str( operationEndTime - operationStartTime)
     console_output = "Done in " + operationDuration
     logger.debug("CMS All CallLegs viewer: " + console_output)
-
-
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_cmspacketloss_for_meeting.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "plot_list": plot_list,
-        "resources": resources
-    }
-    return renderdata
-
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           plot_list=plot_list,
+                           resources=resources)
 
 def cmsrecordingsviewer():
     # вывод списка записей
@@ -611,10 +549,10 @@ def cmsrecordingsviewer():
 
     NETPATH = "\\\\192.168.12.195\\record\\"
     RECORD_FILE_EXTENTION = ".mp4"
-
     operationStartTime = datetime.now()
 
     html_page_title = 'CMS CDR Recordings Report'
+    html_template = 'cisco_cmsrecordings.html'
     console_output = "request for recordings"
     logger.debug("CMS Recording viewer: " + console_output)
 
@@ -622,11 +560,7 @@ def cmsrecordingsviewer():
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     sql_request_result_string = "SELECT cms_cdr_calls.name, cms_cdr_calls.callLegsMaxActive, cms_cdr_calls.StartTime, cms_cdr_calls.durationSeconds, cms_cdr_recordings.path, cms_cdr_recordings.recording_id FROM cms_cdr_calls INNER JOIN cms_cdr_recordings ON cms_cdr_recordings.call_id=cms_cdr_calls.id ORDER BY cms_cdr_calls.StartTime DESC;"
     rows_list = sql_request_dict(sql_request_result_string)
@@ -648,13 +582,7 @@ def cmsrecordingsviewer():
     operationDuration = str(operationEndTime - operationStartTime)
     console_output = "Done in " + operationDuration
     logger.debug("CMS Recording viewer: " + console_output)
-
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_cmsrecordings.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "rows_list": rows_list
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           rows_list=rows_list,
+                           formNAV=form_navigation)

@@ -52,102 +52,27 @@ def cdr():
 @app.route('/cms/', methods=['GET', 'POST'])
 @login_required
 def cmspage():
-
-    module_result = cmsviewer()
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               rows_list=module_result['rows_list'],
-                               formNAV=module_result['form_navigation'],
-                               formCMS=module_result['form_cmsselection'])
-
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'],
-                           formCMS=module_result['form_cmsselection'])
-
-
-
+    return cmsviewer()
 
 @app.route('/cms/call/<string:callid>/', methods=['GET', 'POST'])
 @login_required
 def cmscall(callid):
-    module_result = cmscallviewer(callid)
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'])
-
+    return cmscallviewer(callid)
 
 @app.route('/cms/meeting/<string:meeting_id>/', methods=['GET', 'POST'])
 @login_required
 def cmsmeetingid(meeting_id):
-    module_result = cmsmeetingviewer(meeting_id)
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           rows_list=module_result['rows_list'],
-                           formNAV=module_result['form_navigation'])
-
+    return cmsmeetingviewer(meeting_id)
 
 @app.route('/cms/callleg/<string:callegid>/', methods=['GET', 'POST'])
 @login_required
 def cmscallleg(callegid):
-    module_result = cmscalllegviewer(callegid)
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # проверка если данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               formNAV=module_result['form_navigation'],
-                               div=module_result['div'],
-                               script=module_result['script'],
-                               resources=module_result['resources'],
-                               max_loss_values=module_result['max_loss_values'],
-                               div_rtt=module_result['div_rtt'],
-                               script_rtt=module_result['script_rtt'],
-                               max_loss_values_rtt=module_result['max_loss_values_rtt']
-                               )
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-        console_output=module_result['console_output'],
-        formNAV=module_result['form_navigation'])
-
+    return cmscalllegviewer(callegid)
 
 @app.route('/cms/allcalllegsplot/<string:meeting_id>/', methods=['GET', 'POST'])
 @login_required
 def cmscallleg_for_meeting(meeting_id):
-    module_result = cmsallcalllegsviewer(meeting_id)
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # проверка если данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               formNAV=module_result['form_navigation'],
-                               plot_list=module_result['plot_list'],
-                               resources=module_result['resources']
-                               )
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-        console_output=module_result['console_output'],
-        formNAV=module_result['form_navigation'])
-
+    return cmsallcalllegsviewer(meeting_id)
 
 @app.route('/cmscospace', methods=['GET', 'POST'])
 @app.route('/cmscospace/', methods=['GET', 'POST'])
@@ -221,21 +146,7 @@ def cms_cospace_usage_by_cluster_page():
 @app.route('/cmsrec/', methods=['GET', 'POST'])
 @login_required
 def cms_recordings_page():
-
-    module_result = cmsrecordingsviewer()
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               rows_list=module_result['rows_list'],
-                               formNAV=module_result['form_navigation'])
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'])
+    return cmsrecordingsviewer()
 
 @app.route('/cmsrec/playfile/<string:recording_id>/', methods=['GET', 'POST'])
 @login_required
