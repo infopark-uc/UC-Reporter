@@ -34,21 +34,7 @@ def huntpage():
 @app.route("/cfa", methods=['GET', 'POST'])
 @login_required
 def cfa():
-     module_result = application.callforward.render()
-     if module_result['rendertype'] == 'redirect': #переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-     if module_result['rendertype'] == 'success': # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                                   console_output=module_result['console_output'],
-                                   rows_list=module_result['rows_list'],
-                                   formNAV=module_result['form_navigation'],
-                                   formSRCH=module_result['form_search'])
-
-     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                            console_output=module_result['console_output'],
-                            formNAV=module_result['form_navigation'],
-                            formSRCH=module_result['form_search'])
+     return application.callforward.render()
 
 @app.route('/roomrequest/<string:system_id>/', methods=['GET', 'POST'])
 def roomrequest(system_id):

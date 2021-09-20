@@ -1,6 +1,7 @@
 import requests
 import xmltodict
 import collections
+from flask import render_template, redirect, url_for
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectForwardSearchType
 from application.sqlrequests import sql_request_dict
@@ -9,20 +10,16 @@ def render():
     SEARCH_BY_DN = "DN"
     SEARCH_BY_TRANSFER = "Transfer"
     html_page_title = 'CUCM CallForward Report'
+    html_template = 'cisco_callforward.html'
     # Temporary values
     console_output = "Нет активного запроса"
     form_navigation = SelectNavigation(csrf_enabled=False)
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
-    choise_data = sql_request_dict(
-            "SELECT cluster,description FROM cm_servers_list")
+    choise_data = sql_request_dict("SELECT cluster,description FROM cm_servers_list")
     form_search = SelectForwardSearchType(csrf_enabled=False)
     form_search.select_region.choices = [(choise["cluster"], choise["description"]) for choise in choise_data]
 
@@ -90,55 +87,36 @@ where cfd.cfadestination like '"""
         except requests.exceptions.ConnectionError:
             console_output = "Ошибка соединения с сервером " + cucm_ip_address
             #print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_callforward.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
+
 
         except:
             console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + cucm_ip_address
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_callforward.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         # Check is answer is successful
         if post.status_code == 401:
             console_output = "Пользователь " + cucm_login + " не авторизован для подключения к серверу " + cucm_ip_address
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_callforward.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         if post.status_code != 200:
             console_output = "Ошибка при подключении к серверу: " + str(post.status_code) + ": " + post.reason
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_callforward.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
 
         # Convert output to Dict
@@ -162,54 +140,33 @@ where cfd.cfadestination like '"""
             else:
                 console_output = "Телефонов соответсвующих запросу не найдено"
                 print(console_output)
-                renderdata = {
-                    "rendertype": "null",
-                    "html_template": "cisco_callforward.html",
-                    "html_page_title": html_page_title,
-                    "console_output": console_output,
-                    "form_navigation": form_navigation,
-                    "form_search": form_search
-                }
-                return renderdata
+                return render_template(html_template, html_page_title=html_page_title,
+                                       console_output=console_output,
+                                       formNAV=form_navigation,
+                                       formSRCH=form_search)
 
         else:
             console_output = "Телефонов соответсвующих запросу не найдено"
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_callforward.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         console_output = "Найдено записей: " + str(len(rows_list))
-        print(console_output)
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "cisco_callforward.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_search" : form_search,
-            "rows_list": rows_list
-        }
-        print(rows_list)
-        return renderdata
+        #print(console_output)
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               formNAV=form_navigation,
+                               formSRCH=form_search,
+                               rows_list=rows_list)
 
     else:
         if form_search.string_field.errors:
             console_output = " ".join(form_search.string_field.errors)
             print(console_output)
 
-    renderdata = {
-        "rendertype": "null",
-        "html_template": "cisco_callforward.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_search": form_search
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           formSRCH=form_search)
