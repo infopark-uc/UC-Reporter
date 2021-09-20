@@ -1,6 +1,7 @@
 import requests
 import xmltodict
 import collections
+from flask import render_template, redirect, url_for
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType, SelectHuntGroup
 from application.sqlrequests import sql_request_dict
@@ -17,6 +18,7 @@ def huntreport():
     cucm_password = str(auth_data_list[0]['cm_password'])
 
     html_page_title = 'CUCM Hunt Report'
+    html_template = 'cisco_huntgroup.html'
 
     # CUCM URL's
     cucm_url = "https://" + cucm_ip_address + ":8443/axl/"
@@ -76,11 +78,7 @@ def huntreport():
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
 
     form_hunt_group = SelectHuntGroup(meta={'csrf': False})
@@ -182,50 +180,30 @@ def huntreport():
                         xml_dict["soapenv:Envelope"]["soapenv:Body"]["ns:executeSQLQueryResponse"]["return"]["row"]]
             else:
                 console_output = "Телефонов в Hunt Group " + form_hunt_group.select_hunt_group.data + " не найдено"
-                renderdata = {
-                    "rendertype": "null",
-                    "html_template": "cisco_huntgroup.html",
-                    "html_page_title": html_page_title,
-                    "console_output": console_output,
-                    "form_navigation": form_navigation,
-                    "form_hunt_group": form_hunt_group
-                }
-                return renderdata
+                return render_template(html_template, html_page_title=html_page_title,
+                                       console_output=console_output,
+                                       formNAV=form_navigation,
+                                       form_hunt_group=form_hunt_group)
+
+
         else:
             console_output = "Телефонов в Hunt Group " + form_hunt_group.select_hunt_group.data + " не найдено"
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_huntgroup.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_hunt_group": form_hunt_group
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   form_hunt_group=form_hunt_group)
 
         console_output = "Найдено записей: " + str(len(rows_list))
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               formNAV=form_navigation,
+                               form_hunt_group=form_hunt_group,
+                               rows_list=rows_list)
 
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "cisco_huntgroup.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_hunt_group": form_hunt_group,
-            "rows_list": rows_list
-        }
-        return renderdata
-
-
-    renderdata = {
-        "rendertype": "success",
-        "html_template": "cisco_huntgroup.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_hunt_group": form_hunt_group,
-        "rows_list": rows_list
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           form_hunt_group=form_hunt_group,
+                           rows_list=rows_list)
 
 
