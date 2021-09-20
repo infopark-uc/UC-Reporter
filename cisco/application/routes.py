@@ -24,21 +24,7 @@ from application.cucm_blf_report import phone_blf_search
 @app.route("/index", methods=['GET', 'POST'])
 @login_required
 def usersearchpage():
-     module_result = usersreport() #получаем данные из модуля
-     if module_result['rendertype'] == 'success': #проверка если данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                                   console_output=module_result['console_output'],
-                                   rows_list=module_result['rows_list'],
-                                   formNAV=module_result['form_navigation'],
-                                   formSRCH=module_result['form_search'])
-
-     if module_result['rendertype'] == 'redirect': #переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-     return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'],
-                           formSRCH=module_result['form_search'])
+     return usersreport()
 
 @app.route("/hunt", methods=['GET', 'POST'])
 @login_required

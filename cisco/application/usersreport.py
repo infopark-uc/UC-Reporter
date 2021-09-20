@@ -1,6 +1,7 @@
 import requests
 import xmltodict
 import collections
+from flask import render_template, redirect, url_for
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from application.forms import SelectNavigation, SelectSearchType
 from application.sqlrequests import sql_request_dict
@@ -8,7 +9,7 @@ from application.sqlrequests import sql_request_dict
 def usersreport():
     SEARCH_BY_DN = "Number"
     SEARCH_BY_USER = "User"
-
+    html_template = 'cisco_usersearch.html'
     html_page_title = 'CUCM Users report'
 
     # Temporary values
@@ -18,11 +19,8 @@ def usersreport():
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         print(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
+
     choise_data = sql_request_dict(
         "SELECT cluster,description FROM cm_servers_list")
     form_search = SelectSearchType(csrf_enabled=False)
@@ -90,55 +88,36 @@ def usersreport():
         except requests.exceptions.ConnectionError:
             console_output = "Ошибка соединения с сервером " + cucm_ip_address
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_usersearch.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search,
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
+
 
         except:
             console_output = "Что-то пошло не так при подключении пользователя " + cucm_login + " к серверу " + cucm_ip_address
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_usersearch.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search,
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         # Check is answer is successful
         if post.status_code == 401:
             console_output = "Пользователь " + cucm_login + " не авторизован для подключения к серверу " + cucm_ip_address
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_usersearch.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search,
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         if post.status_code != 200:
             console_output = "Ошибка при подключении к серверу: " + str(post.status_code) + ": " + post.reason
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_usersearch.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search,
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         # Convert output to Dict
         console_output = "Данные получены из CUCM " + cucm_ip_address
@@ -161,52 +140,32 @@ def usersreport():
             else:
                 console_output = "Телефонов соответсвующих запросу не найдено"
                 print(console_output)
-                renderdata = {
-                    "rendertype": "null",
-                    "html_template": "cisco_usersearch.html",
-                    "html_page_title": html_page_title,
-                    "console_output": console_output,
-                    "form_navigation": form_navigation,
-                    "form_search": form_search,
-                }
-                return renderdata
+                return render_template(html_template, html_page_title=html_page_title,
+                                       console_output=console_output,
+                                       formNAV=form_navigation,
+                                       formSRCH=form_search)
         else:
             console_output = "Телефонов соответсвующих запросу не найдено"
             print(console_output)
-            renderdata = {
-                "rendertype": "null",
-                "html_template": "cisco_usersearch.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_search": form_search,
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formSRCH=form_search)
 
         console_output = "Найдено записей: " + str(len(rows_list))
         print(console_output)
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "cisco_usersearch.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_search": form_search,
-            "rows_list" : rows_list
-        }
-        return renderdata
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               rows_list=rows_list,
+                               formNAV=form_navigation,
+                               formSRCH=form_search)
 
     else:
         if form_search.string_field.errors:
             console_output = " ".join(form_search.string_field.errors)
             print(console_output)
 
-    renderdata={
-        "rendertype": "Null",
-        "html_template": "cisco_usersearch.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_search":form_search
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           formSRCH=form_search)
