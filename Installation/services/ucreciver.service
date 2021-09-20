@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve flask application
+After=network.target
+
+[Service]
+#User=apache
+#Group=apache
+WorkingDirectory=/opt/UC-Reporter/cms_cdr_reciver/
+ExecStart=/usr/local/bin/gunicorn --config reciver_config.py cms_reciver:app
+
+[Install]
+WantedBy=multi-user.target

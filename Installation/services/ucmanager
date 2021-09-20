@@ -1,0 +1,717 @@
+#! /bin/bash
+# get our process id
+my_pid=$$
+UC_LOCKFILE=/var/lock/subsys/ucrep
+
+## function Usage() {{{
+function Usage()
+{
+    cat << xxENDxx 1>&2
+Usage: $prog { restart | start | status | stop }
+Where:
+    status  - report on status UC-Report services
+    restart - 'stop' followed by 'start'
+    start   - starts all UC-Report services
+    stop    - stops all running UC-Report services
+xxENDxx
+    exit 1
+}
+## }}}
+
+case $1 in
+    status)
+        Forward "status"
+        ;;
+
+    start)
+        touch $UC_LOCKFILE
+        Forward "start"
+        ;;
+
+    stop)
+        Reverse "stop"
+        rm -f $UC_LOCKFILE
+        ;;
+
+    restart)
+        Reverse "stop"
+        Forward "start"
+        ;;
+    *)
+        Usage
+        ;;
+esac
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# get our process id
+my_pid=$$
+CISCO_LOCKFILE=/var/lock/subsys/cisco
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/BWhttpd/bin
+export PATH
+LD_LIBRARY_PATH=/usr/BWhttpd/lib
+export LD_LIBRARY_PATH
+MIBDIRS=/usr/BWhttpd/mibs/Teleste/MPCE4
+MIBDIRS=$MIBDIRS:/usr/BWhttpd/mibs/Teleste/MPX-D8_mibs:/usr/BWhttpd/mibs/Teleste/EASI_MIBs
+MIBDIRS=$MIBDIRS:/usr/BWhttpd/mibs/Teleste/mibs
+MIBDIRS=$MIBDIRS:/usr/BWhttpd/mibs/Teleste2/mibs
+MIBDIRS=$MIBDIRS:/usr/BWhttpd/mibs/Teleste3/mibs
+MIBDIRS=$MIBDIRS:/usr/BWhttpd/mibs
+BINDIR=/usr/BWhttpd/bin
+VSMCLOGFILE=/usr/BWhttpd/tomcat/logs/vsmc_be/vsmc_be.log
+
+# variables for detecting collisions of execution
+START_FLAG_DIR=/usr/BWhttpd/root/cisco_start
+STOP_FLAG_DIR=/usr/BWhttpd/root/cisco_stop
+START_FLAG=$START_FLAG_DIR/pid
+STOP_FLAG=$STOP_FLAG_DIR/pid
+
+export MIBDIRS
+
+## Ensure the columns environment variable is not set for this script or any of
+## its children, otherwise commands such as 'ps' will truncate its output.
+COLUMNS=
+export COLUMNS
+
+
+ODBCSYSINI=/usr/BWhttpd/etc
+export ODBCSYSINI
+
+prog=$(basename $0)
+set -h
+
+script_SNMPD="/usr/BWhttpd/bin/rcsnmpd"
+script_SNMPTRAPD="/usr/BWhttpd/bin/rcsnmptrapd"
+script_SNMPSERVER="/usr/BWhttpd/bin/init_snmp"
+script_HttpServer="/usr/BWhttpd/bin/init_httpserver"
+script_MediaOut="/usr/BWhttpd/bin/init_mediaout"
+
+
+## function RunScript {{{
+##
+## This takes the service from the prod/rprods list and evaluates the
+## corresponding script that supports it. If that script exists, it executes it
+## passing in the requested script parameter.
+##
+## ARG $1: The prod/rprod entry that we translate into a script
+##
+## ARG $2: The action to pass to the script (stop, start, restart, etc.)
+##
+function RunScript()
+{
+    func=$1
+    parm=$2
+
+    script=$(eval echo \$script_$func)
+
+    if [[ -f $script ]]; then
+        $script $parm
+        rc=$?
+    fi
+}
+## }}}
+function getOS()
+{
+    if [ $(grep -q -ir 'red.*hat' /etc/issue; echo $?) -eq 0 ]; then
+        echo "redhat"
+    elif [ $(grep -q -ir 'suse' /etc/issue; echo $?) -eq 0 ]; then
+        echo "suse"
+    else
+        uname -o
+    fi
+}
+function log_vsmc(){
+    if [ -f $VSMCLOGFILE ]; then
+        echo -ne "\n `date` :: $@ \n" >> $VSMCLOGFILE 2>&1
+    fi
+}
+function updateSUSEConfig()
+{
+    mac_addresses=("${@}");
+    NETWORK_RULE_FILE="/etc/udev/rules.d/30-net_persistent_names.rules";
+    \cp $NETWORK_RULE_FILE /tmp/30-net_persistent_names.rules.bak
+    grep -v "IMPORT=\"/lib/udev/rename_netiface %k eth" $NETWORK_RULE_FILE > $TMP_NET_CONFIG_FILE;
+    \mv $TMP_NET_CONFIG_FILE $NETWORK_RULE_FILE;
+    log_vsmc "Interface names succesfully updated..server will reboot now"
+    echo "Network interface names are not proper..Rebooting Server" 1>&2
+    shutdown -r now
+}
+function UpdateNetworkInterface()
+{
+    OS=$(getOS);
+    log_vsmc "Entered into UpdateNetworkInterface for OS:$OS"
+    TMP_NET_CONFIG_FILE=/tmp/tmp_net_config;
+    rm -rf $TMP_NET_CONFIG_FILE;
+    rhelrel=$(grep "Red Hat Enterprise Linux Server release" /etc/redhat-release )
+    rel=`echo $rhelrel | cut -d' ' -f7 | cut -d'.' -f1`
+    if [ $rel -eq 6 ]; then
+         INTERFACESDETAIL=$(ifconfig -a | grep "^eth" | grep -i "ETHERNET" | sort | awk -F ' ' '{print $1":-"$5}');
+    elif [ $rel -eq 7 ]; then
+         INTERFACESDETAIL=$(ifconfig -a | grep eth |  grep flags | awk -F ' ' '{print $1}' > a; ifconfig -a | grep Ethernet | awk -F ' ' '{print $2}' > b; paste -d"-" a b ; rm -f a b);
+    fi
+    eth_interface_count=0;
+    for interface_detail in $INTERFACESDETAIL; do
+        interfaceName=${interface_detail%%:-*};
+        ## ignore the  virtual interface while counting or comparing ifconfig output against network config file
+        if [[ $interfaceName =~ ":" ]]; then
+            continue;
+        fi
+        interface_names[$eth_interface_count]=${interface_detail%%:-*};
+        mac_addresses[$eth_interface_count]=${interface_detail##*:-};
+        log_vsmc "interface_name:${interface_names[$eth_interface_count]} and mac addr:${mac_addresses[$eth_interface_count]}"
+        ((eth_interface_count++));
+    done
+    is_interface_proper="true";
+    log_vsmc "Existing interface count:$eth_interface_count"
+    if [ $eth_interface_count -eq 1 ] && [ ${interface_names[0]} == "eth0" ]
+    then
+        log_vsmc "There is one interface with name eth0 so no need to update"
+        return 0;
+    fi
+    if [ $eth_interface_count -eq 2 ] && [ ${interface_names[0]} == "eth0" ] && [ ${interface_names[1]} == "eth1" ]
+    then
+        log_vsmc "There are two interfaces with names eth0 and eth1 so no need to update"
+        return 0;
+    fi
+    if [ "$OS" == "suse" ]
+    then
+        configured_interface_count=$(cat /etc/udev/rules.d/30-net_persistent_names.rules | grep -c "IMPORT=\"/lib/udev/rename_netiface %k eth");
+        log_vsmc "Interfaces count in rule file:$configured_interface_count"
+        if [ $configured_interface_count != $eth_interface_count ]
+        then
+            is_interface_proper="false";
+        else
+            for (( i = 0 ; i < ${#interface_names[@]} ; i++ )) do
+                if [ ${interface_names[$i]} != "eth$i" ]
+                then
+                    is_interface_proper="false";
+                    break;
+                fi
+            done
+        fi
+        if [ "$is_interface_proper" == "false" ]
+        then
+            log_vsmc "Interface names mismatch..updating interface configuration in SUSE"
+            updateSUSEConfig "${mac_addresses[@]}"
+        fi
+    elif [ "$OS" == "redhat" ]
+    then
+        config_file_list=$(ls -1 /etc/sysconfig/network-scripts/ifcfg-eth*);
+        configured_interface_count=$(ls -1 /etc/sysconfig/network-scripts/ifcfg-eth* | wc -l);
+        log_vsmc "Interfaces count from network-script dir:$configured_interface_count"
+        if [ $configured_interface_count != $eth_interface_count ]
+        then
+            is_interface_proper="false";
+        else
+            for (( i = 0 ; i < ${#interface_names[@]} ; i++ )) do
+                if [ ${interface_names[$i]} != "eth$i" ]
+                then
+                    is_interface_proper="false";
+                    break;
+                fi
+            done
+        fi
+        if [ "$is_interface_proper" == "false" ]
+        then
+            log_vsmc "Interface names mismatch..updating interface configuration in RHEL"
+            for config_file in $config_file_list; do
+                \mv $config_file $config_file.bak
+            done
+            for (( i = 0 ; i < ${#interface_names[@]} ; i++ )) do
+                log_vsmc "eth$i configuration"
+                file_with_devicename=$(grep -l -r "DEVICE=${interface_names[$i]}" /etc/sysconfig/network-scripts/ifcfg-eth* | head -n1);
+                log_vsmc "File with device name :$file_with_devicename"
+                if [ "x$file_with_devicename" == "x" ] || [ ! -f $file_with_devicename ]
+                then
+                    file_name=$file_with_devicename
+                else
+                    file_name=$(grep -l -r "HWADDR=${mac_addresses[$i]}" $file_with_devicename | head -n1)
+                    if [ "x$file_name" == "x" ] || [ ! -f $file_name ]
+                    then
+                        file_name=$file_with_devicename
+                    fi
+                fi
+                log_vsmc "File to be modified:$file_name"
+                if [ "x$file_name" == "x" ] || [ ! -f $file_name ]
+                then
+                    echo -ne "DEVICE=eth$i\nBOOTPROTO=none\nHWADDR=${mac_addresses[$i]}\nONBOOT=yes\nIPADDR=\nNETMASK=\nGATEWAY=\nTYPE=Ethernet\nUSERCTL=no\nPEERDNS=no" > /etc/sysconfig/network-scripts/ifcfg-eth$i 2>&1
+                else
+                    \mv $file_name /etc/sysconfig/network-scripts/ifcfg-eth$i;
+                    sed "s/^DEVICE=.*/DEVICE=eth$i/g" /etc/sysconfig/network-scripts/ifcfg-eth$i > $TMP_NET_CONFIG_FILE;
+                    \mv $TMP_NET_CONFIG_FILE /etc/sysconfig/network-scripts/ifcfg-eth$i ;
+                    rm -rf $TMP_NET_CONFIG_FILE;
+                fi
+            done
+            rm -rf /etc/sysconfig/network-scripts/ifcfg-eth*.bak;
+            log_vsmc "Interface names succesfully updated..server will reboot now"
+            echo "Network interface names are not proper..Rebooting Server" 1>&2
+            shutdown -r now
+        fi
+    fi
+}
+
+## function Forward() {{{
+##
+## For each element in the <prods> list (global above), determine its
+## corresponding script, and if it exists invoke that script passing along the
+## argument that was given to Forward()
+##
+## If arg $1 is "start", then check the status after all of the scripts started.
+##
+## ARG $1 : The action to pass to the script (stop, start, restart, etc.)
+##
+
+function Forward()
+{
+    if [[ $1 == "start" ]]; then
+
+        autoConfFile="/mysql/data/vsom/mysql/data/auto.cnf"
+        if [[ -f /root/first_boot_after_ova ]] ; then
+
+                if [[ -f $autoConfFile ]] ; then
+                        echo "$autoConfFile file present!"
+                        uuid=$(uuidgen -t)
+                        echo "Adding new UUID: $uuid to $autoConfFile"
+                        echo "[auto]" > $autoConfFile
+                        echo "server-uuid=$uuid" >> $autoConfFile
+                        echo "New UUID: $uuid"
+                else
+                        echo "Not adding new UUID to $autoConfFile"
+                fi
+
+                echo "removing the first boot configuration"
+                rm -fv /root/first_boot_after_ova
+        else
+                echo "/root/first_boot_after_ova not found, Not adding new UUID"
+        fi
+
+        ##START -- CSCvq24958
+        if [[ -f /sys/fs/cgroup/cpu/user.slice/cpu.rt_runtime_us ]] ; then
+                RTRUNTIME=`cat /sys/fs/cgroup/cpu/user.slice/cpu.rt_runtime_us`
+                if [[ $RTRUNTIME == 0 ]] ; then
+                        #echo "runtime is zero, set to 950000"
+                        #echo "/sys/fs/cgroup/cpu/user.slice/cpu.rt_runtime_us File Present"
+                        echo 950000 > /sys/fs/cgroup/cpu/user.slice/cpu.rt_runtime_us
+                fi
+        fi
+        #END
+
+        ##START -- CSCvq29238
+        if [[ ! -f /etc/systemd/system/cisco.service.d/timeout.conf ]] ; then
+                mkdir -p /etc/systemd/system/cisco.service.d
+                echo "[Service]" > /etc/systemd/system/cisco.service.d/timeout.conf
+                echo "TimeoutSec=0" >> /etc/systemd/system/cisco.service.d/timeout.conf         ## TimeoutSec=0 == infinity -- which sets start and stop timeout to 0
+        fi
+        #END
+
+        ## check to see if another start in progress
+        if [ -f $START_FLAG ]; then
+            ## make sure process is still running
+            if [ -d /proc/`cat $START_FLAG` ]; then
+                echo "Another cisco start is in progress. Aborting." 1>&2
+                exit 1;
+            fi
+            rm -rf $START_FLAG_DIR > /dev/null 2>&1
+        fi
+
+        ## check if stop in progress
+        if [ -f $STOP_FLAG ]; then
+            ## make sure process is still running
+            if [ -d /proc/`cat $STOP_FLAG` ]; then
+                echo "Another cisco stop in progress. Aborting." 1>&2
+                exit 1
+            fi
+            rm -rf $STOP_FLAG_DIR > /dev/null 2>&1
+        fi
+
+        ## create the start flag file
+        mkdir $START_FLAG_DIR  > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Another cisco start is in progress. Aborting." 1>&2
+            exit 1;
+        else
+            ## put our process id in the flag file
+            echo $my_pid > $START_FLAG
+        fi
+        UpdateNetworkInterface
+    elif [[ $1 == "enable" ]]; then
+        if [ -f $START_FLAG -o -f $STOP_FLAG ]; then
+            echo "cisco start|stop in progress. Aborting" 1>&2
+            exit 1;
+        fi
+        prods=$(echo $prods | sed -e "s/VSMS/BMS/g")
+    fi
+
+    ## run specified scripts
+    for p in $prods; do
+        ## check if we have been told to stop
+        if [ $1 != "status" -a -f $STOP_FLAG ]; then
+            echo "cisco stop in progress. Aborting" 1>&2
+            rm -rf $START_FLAG_DIR > /dev/null 2>&1
+            exit 1
+        fi
+        RunScript $p $1
+    done
+
+
+    ## check the status and send an appropriate trap if we are doing the start
+    ## forward action.
+    if [[ $1 == "start" ]]; then
+        CheckSystemStatus
+    fi
+
+    ## remove our start flag
+    if [[ $1 == "start" ]]; then
+        rm -rf $START_FLAG_DIR
+    fi
+}
+## }}}
+
+
+
+
+## function VerifyStartEnv() {{{
+function VerifyStartEnv()
+{
+    httpd_pidfile=/usr/BWhttpd/logs/httpd.pid
+    lockfile=/var/lock/subsys/ims
+
+    ##
+    ## Verify that httpserver isn't already running
+    ##
+    local running=$(ps auxww | egrep 'HttpServer' | egrep -v grep | wc -l)
+    if [[ $running -ge 1 ]]; then
+        echo "HttpServer already running..Stopping" 1>&2
+        $script_HttpServer stop
+    fi
+
+    ##
+    ## Check if BMS is running
+    ##
+    if [[ -f $lockfile ]]; then
+        local numDaemons=$(ps auxww | egrep '(umsdevice|archiver)' | egrep -v grep | wc -l)
+        if [[ $numDaemons -eq 0 ]]; then
+            rm -f $lockfile
+        else
+            echo "BMS already running..Stopping" 1>&2
+            $script_BMS stop
+        fi
+    fi
+}
+## }}}
+
+
+
+
+
+## function Reverse() {{{
+##
+## Send the 'stop' trap if invoked with the "stop" argument
+##
+## For each element in the <rprods> list (global above), determine its
+## corresponding script, and if it exists invoke that script passing along the
+## argument that was given to Reverse()
+##
+## ARG $1 : The action to pass to the script (stop, start, restart, etc.)
+##
+function Reverse()
+{
+    ## Send the stop trap if the Reverse action is stop. We send this before
+    ## we start the stop action itself, because it needs to be sent before
+    ## we actually stop the process that reports the stop.
+    if [[ $1 == "stop" ]]; then
+        ## check to see if another stop in progress
+        if [ -f $STOP_FLAG ]; then
+            ## make sure process is still running
+            if [ -d /proc/`cat $STOP_FLAG` ]; then
+                echo "Another cisco stop in progress. Aborting." 1>&2
+                exit 1
+            fi
+            rm -rf $STOP_FLAG_DIR > /dev/null 2>&1
+        fi
+
+        ## create the stop flag file
+        mkdir $STOP_FLAG_DIR  > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Another cisco stop is in progress. Aborting." 1>&2
+            exit 1;
+        else
+            echo $my_pid > $STOP_FLAG
+        fi
+
+        if [ -f $BINDIR/ciscotrap ] && [ -f $BINDIR/rcsnmpd ] && \
+           [ -f $BINDIR/xvcrman ]; then
+            ciscotrap "stop"
+        fi
+
+        ## if start in progress, wait upto 5 minutes for it to end
+        if [ -f $START_FLAG ]; then
+            echo "cisco start in progress, waiting for up to 5 minutes for it to end" 1>&2
+            i=0;
+            while [ -f $START_FLAG -a $((++i)) -le 300 ]; do
+                sleep 1
+            done
+
+            ## remove start flag file
+            if [ -f $START_FLAG ]; then
+                rm -rf $START_FLAG_DIR >/dev/null 2>&1
+            fi
+        fi
+    elif [[ $1 == "disable" ]]; then
+        if [ -f $START_FLAG -o -f $STOP_FLAG ]; then
+            echo "cisco start|stop in progress. Aborting" 1>&2
+            exit 1;
+        fi
+        rprods=$(echo $rprods | sed -e "s/VSMS/BMS/g")
+    fi
+
+    ## run specified scripts
+    for p in $rprods; do
+        RunScript $p $1
+    done
+
+    ## remove the stop flag file
+    if [[ $1 == "stop" ]]; then
+        rm -rf $STOP_FLAG_DIR > /dev/null 2>&1
+    fi
+}
+## }}}
+
+
+
+
+
+
+
+
+
+## function CheckProc() {{{
+## Check on the status of the process with the given PID
+##
+function CheckProc()
+{
+    if [[ -d /proc/$1 ]]; then
+        pstat=0
+    else
+        pstat=1
+    fi
+}
+## }}}
+
+
+
+
+## function ClearState() {{{
+## Clear all of our run state (files and IPC mechanisms)
+function ClearState()
+{
+
+        local sems=$(ipcs -s -c | egrep nobody | awk '{print $1}')
+        for s in $sems; do
+                ipcrm -s $s
+        done
+
+        local shms=$(ipcs -m -c | egrep nobody | awk '{print $1}')
+        for s in $shms; do
+                ipcrm -m $s
+        done
+
+        ## remove any temporary runtime files
+        rm -f /usr/BWhttpd/root/run/* >> /dev/null 2>&1
+}
+## }}}
+
+
+
+
+## function CheckSystemStatus() {{{
+## Check status on the cisco start and send trap based on the result
+#
+function CheckSystemStatus()
+{
+    local stat
+    local down_procs=
+
+    # loop over all services and for each one execute its script with the
+    # status parameter and determine if it is down
+    #
+    # if down then append the service to the down_procs variable.
+    for p in $prods; do
+        stat=$(RunScript $p status | egrep -i 'down')
+
+        if [[ -n $stat ]]; then
+            down_procs="$down_procs $p"
+        fi
+    done
+
+
+    ## Check the down_procs variable. If it is empty then send the start trap,
+    ## else if one or more instances are down then send the partial trap and
+    ## inform the user of the services that failed to start.
+    if [[ -z $down_procs ]]; then
+        dy_debug "All processes are up."
+
+        if [ -f $BINDIR/ciscotrap ]; then
+            ciscotrap "start"
+        fi
+
+        #run consistency check on start up
+        if [ -f $BINDIR/consistency_check.sh ]; then
+            consistency_check.sh &
+        fi
+
+    else
+        echo "The following cisco services failed to start:$down_procs"
+        TS=`date +"%F  .........."`
+        gut_log "$TS [ /usr/BWhttpd/cisco CheckSystemStatus() ] ERROR: The following cisco services failed to start: $down_procs"
+
+        if [ -f $BINDIR/ciscotrap ]; then
+            ciscotrap "partial"
+        fi
+        ## for ORA exit with a non-zero return code
+        if [ -d /opt/cisco/ora ]; then
+            rm -rf $START_FLAG_DIR
+            exit 1;
+        fi
+    fi
+}
+## }}}
+
+
+
+## function dy_debug() {{{
+##
+## Display debug function if the CISCO_DEBUG environment variable exists
+##
+## Debugging can be enabled by invoking 'CISCO_DEBUG=1;export CISCO_DEBUG'
+## from the command line before running the cisco services script
+##
+## Debugging can be disabled by invoking 'CISCO_DEBUG=;export CISCO_DEBUG'
+function dy_debug()
+{
+    if [[ -n $CISCO_DEBUG ]]; then
+        echo -n "DEBUG> "
+        echo $1
+    fi
+}
+## }}}
+
+
+
+##
+## Add a special log entry to indicate who is execute what command. This tracks
+## the last cisco command that was done as well as who executed it and how long
+## the system has been up (which can help determine if this was a reboot
+## scenario). Unfortunately the USER is empty for both reboots as well as when
+## the script is invoked from the VSMC.
+##
+log_args=$@
+function log_this() {
+    gut_log "User '$USER/$UID' invoking cisco command with arguments \
+             '$log_args' uptime is [$(uptime)]"
+}
+
+#determine how long the system has been up
+up_sec=`cat /proc/uptime | cut -d'.' -f1`
+
+## if up less than 10 minutes
+## delete any start or stop flag file that existed
+## prior to restart
+if [ x$up_sec != x ]; then
+    if [ $up_sec -lt 600 ]; then
+        ## get current time in UTC seconds
+        now=`date +%s`
+        ## calculate restart time
+        let "rtime= $now - $up_sec"
+        ## check if start/stop files existed before restart time
+        for file in $START_FLAG $STOP_FLAG; do
+            if [ -f $file ]; then
+                ## get file time and convert to UTC seconds
+                _date=`ls -l $file | cut -d' ' -f6-7`
+                secs=`date --date="$_date" +%s`
+                ## if less than restart time, delete the file
+                if [ $secs -lt $rtime ]; then
+                    if [ $file == $START_FLAG ]; then
+                        rm -rf $START_FLAG_DIR
+                    else
+                        rm -rf $STOP_FLAG_DIR
+                    fi
+                fi
+            fi
+        done
+    fi
+fi
+function getEnabledState()
+{
+    SERVICE_STATUS="disabled"
+    CISCO_RPMS_STR=$(rpm -qa | grep Cisco | tr '\n' ',')
+    if [[ "${CISCO_RPMS_STR}" =~ "Cisco_Tomcat"  &&
+          "${CISCO_RPMS_STR}" =~ "Cisco_VSBase"  &&
+          "${CISCO_RPMS_STR}" =~ "Cisco_VSMS"  &&
+          "${CISCO_RPMS_STR}" =~ "Cisco_VSMC" ]] &&
+          [ ! -f /usr/BWhttpd/conf/tomcat.disabled ]
+    then
+        SERVICE_STATUS="enabled"
+    fi
+    echo "$SERVICE_STATUS"
+    exit 0
+}
+
+case $1 in
+    status)
+        Forward "status"
+        ;;
+
+    enabledState)
+        getEnabledState
+        ;;
+
+    enable)
+        log_this
+        Forward "enable"
+        ;;
+
+    disable)
+        log_this
+        Reverse "disable"
+        ;;
+
+    start)
+        log_this
+        Check6.xInstall
+        touch $CISCO_LOCKFILE
+        Forward "start"
+        ;;
+
+    stop)
+        log_this
+        Reverse "stop"
+        ClearState
+        rm -f $CISCO_LOCKFILE
+        ;;
+
+    restart)
+        log_this
+        Check6.xInstall
+        Reverse "stop"
+        ClearState
+        Forward "start"
+        ;;
+    *)
+        Usage
+        ;;
+esac
+
+exit 0
