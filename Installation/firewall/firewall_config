@@ -2,4 +2,5 @@ configuration for Firewalld:
 firewall-cmd --add-service=mysql --permanent         #для доступа из вне к базе данных
 firewall-cmd --add-service=http --permanent
 firewall-cmd --permanent --add-service=https
+firewall-cmd --permanent --add-port=8080/tcp
 firewall-cmd  --reload
