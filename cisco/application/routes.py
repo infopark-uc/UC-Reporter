@@ -5,7 +5,6 @@ from application.huntreport import huntreport
 from application.usersreport import usersreport
 from application.roomcontrol import codec,submit_order,get_value,set_value,send_order
 from application.cms_cdr_reciver import cdr_receiver
-from application.sendmail import ucsendmail
 from application.cms_cdr_viewer import cmsviewer,cmscallviewer,cmscalllegviewer,cmsrecordingsviewer,cmsmeetingviewer,cmsallcalllegsviewer
 from application.cms_cospace_viewer import cms_cospace_view
 from application.ucreporter_login import ucreporter_login
