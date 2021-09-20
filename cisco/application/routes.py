@@ -84,46 +84,13 @@ def cms_cospace_page():
 @app.route('/cmsusage/', methods=['GET', 'POST'])
 @login_required
 def cms_cospace_usage_page():
-
-    module_result = cms_cospace_usage()
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               rows_list=module_result['rows_list'],
-                               formNAV=module_result['form_navigation'],
-                               formCMS=module_result['form_cmsselection'])
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'],
-                           formCMS=module_result['form_cmsselection'])
-
+    return cms_cospace_usage()
 
 @app.route('/cmsclusterusage', methods=['GET', 'POST'])
 @app.route('/cmsclusterusage/', methods=['GET', 'POST'])
 @login_required
 def cms_cospace_usage_by_cluster_page():
-
-    module_result = cms_cospace_usage_by_cluster()
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               rows_list=module_result['rows_list'],
-                               formNAV=module_result['form_navigation'],
-                               formCMS=module_result['form_cmsselection'])
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'],
-                           formCMS=module_result['form_cmsselection'])
+    return cms_cospace_usage_by_cluster()
 
 @app.route('/cmsrec', methods=['GET', 'POST'])
 @app.route('/cmsrec/', methods=['GET', 'POST'])

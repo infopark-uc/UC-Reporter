@@ -3,6 +3,7 @@ from pprint import pprint
 from datetime import datetime, timedelta
 import time
 import logging.handlers
+from flask import render_template, redirect, url_for
 from application.sqlrequests import sql_request_dict
 from application.forms import SelectNavigation, SelectCMSClusterForCospace, SelectCMSClusterForReport
 
@@ -13,7 +14,6 @@ def time_format(input_time):
     hms_time = (str(hours) + ":" + str(minutes) + ":" + str(seconds))
     result = hms_time
     return result
-
 
 def time_format_with_days(input_time):
     #result = time.strftime("%d %H:%M:%S", time.gmtime(int(input_time)))
@@ -48,16 +48,13 @@ def cms_cospace_usage():
 
     operation_start_time = datetime.now()
     html_page_title = 'CMS CoSpace Usage Report'
+    html_template = 'cisco_cms_cospace_usage.html'
     form_cmsselection = SelectCMSClusterForCospace(csrf_enabled=False)
     form_navigation = SelectNavigation(csrf_enabled=False)
     if form_navigation.validate_on_submit():
         console_output = "Нет активного запроса"
         logger.debug(console_output)
-        renderdata = {
-            "rendertype": "redirect",
-            "redirect_to": form_navigation.select_navigation.data
-        }
-        return renderdata
+        return redirect(url_for(form_navigation.select_navigation.data))
 
     if form_cmsselection.validate_on_submit():
             sql_request_result_string_mounth = """SELECT cms_cdr_calls.Name,COUNT(cms_cdr_calls.Name) AS count_mounth,
@@ -101,31 +98,20 @@ def cms_cospace_usage():
             operation_duration = str( operation_end_time - operation_start_time)
             console_output = "Done in " + operation_duration
             logger.debug(console_output)
-            renderdata = {
-                "rendertype": "success",
-                "html_template": "cisco_cms_cospace_usage.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cmsselection": form_cmsselection,
-                "rows_list": rows_list
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   rows_list=rows_list,
+                                   formNAV=form_navigation,
+                                   formCMS=form_cmsselection)
 
     operation_end_time = datetime.now()
     operation_duration = str( operation_end_time - operation_start_time)
     console_output = "Нет активного запроса (" + operation_duration + ")"
     logger.debug(console_output)
-
-    renderdata = {
-        "rendertype": "Null",
-        "html_template": "cisco_cms_cospace_usage.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_cmsselection": form_cmsselection
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           formCMS=form_cmsselection)
 
 def add_new_value_to_average(count, current_avarege, new_value):
     result = (count - 1) / count * current_avarege + (new_value / count)
@@ -159,6 +145,7 @@ def cms_cospace_usage_by_cluster():
 
     operation_start_time = datetime.now()
     html_page_title = 'CMS CoSpace Usage by cluster Report'
+    html_template = 'cisco_cms_cospace_by_cluster_usage.html'
     form_cmsselection = SelectCMSClusterForReport(meta={'csrf': False})
     form_navigation = SelectNavigation(meta={'csrf': False})
     if form_navigation.validate_on_submit():
@@ -257,44 +244,27 @@ def cms_cospace_usage_by_cluster():
         operation_duration = str( operation_end_time - operation_start_time)
         console_output = "Done in " + operation_duration
         logger.debug(console_output)
-        renderdata = {
-            "rendertype": "success",
-            "html_template": "cisco_cms_cospace_by_cluster_usage.html",
-            "html_page_title": html_page_title,
-            "console_output": console_output,
-            "form_navigation": form_navigation,
-            "form_cmsselection": form_cmsselection,
-            "rows_list": rows_list.values()
-        }
-        return renderdata
+        return render_template(html_template, html_page_title=html_page_title,
+                               console_output=console_output,
+                               rows_list=rows_list.values(),
+                               formNAV=form_navigation,
+                               formCMS=form_cmsselection)
     else:
         if form_cmsselection.integer_field.errors:
             console_output = " ".join(form_cmsselection.integer_field.errors)
             operation_end_time = datetime.now()
             operation_duration = str(operation_end_time - operation_start_time)
             logger.debug(console_output)
-
-            renderdata = {
-                "rendertype": "Null",
-                "html_template": "cisco_cms_cospace_by_cluster_usage.html",
-                "html_page_title": html_page_title,
-                "console_output": console_output,
-                "form_navigation": form_navigation,
-                "form_cmsselection": form_cmsselection
-            }
-            return renderdata
+            return render_template(html_template, html_page_title=html_page_title,
+                                   console_output=console_output,
+                                   formNAV=form_navigation,
+                                   formCMS=form_cmsselection)
 
     operation_end_time = datetime.now()
     operation_duration = str( operation_end_time - operation_start_time)
     console_output = "Нет активного запроса (" + operation_duration + ")"
     logger.debug(console_output)
-
-    renderdata = {
-        "rendertype": "Null",
-        "html_template": "cisco_cms_cospace_by_cluster_usage.html",
-        "html_page_title": html_page_title,
-        "console_output": console_output,
-        "form_navigation": form_navigation,
-        "form_cmsselection": form_cmsselection
-    }
-    return renderdata
+    return render_template(html_template, html_page_title=html_page_title,
+                           console_output=console_output,
+                           formNAV=form_navigation,
+                           formCMS=form_cmsselection)
