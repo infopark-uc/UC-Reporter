@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template, redirect, url_for
 import xmltodict
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -89,18 +89,14 @@ def cms_cospace_view():
 
 	operationStartTime = datetime.now()
 	html_page_title = 'CMS CoSpace Report'
-
+	html_template = 'cisco_cms_cospaceview.html'
 
 	form_navigation = SelectNavigation(csrf_enabled=False)
 	if form_navigation.validate_on_submit():
 		console_output = "Нет активного запроса"
 		#print(console_output)
 		logger.debug(console_output)
-		renderdata = {
-			"rendertype": "redirect",
-			"redirect_to": form_navigation.select_navigation.data
-		}
-		return renderdata
+		return redirect(url_for(form_navigation.select_navigation.data))
 
 	form_cmsselection = SelectCMSClusterForCospace(csrf_enabled=False)
 	if form_cmsselection.validate_on_submit():
@@ -167,30 +163,18 @@ def cms_cospace_view():
 			operationDuration = str( operationEndTime - operationStartTime)
 			console_output = "Done in " + operationDuration
 			logger.debug(console_output)
-
-			#pprint(rows_list)
-			renderdata = {
-				"rendertype": "success",
-				"html_template": "cisco_cms_cospaceview.html",
-				"html_page_title": html_page_title,
-				"console_output": console_output,
-				"form_navigation": form_navigation,
-				"form_cmsselection": form_cmsselection,
-				"rows_list": rows_list
-			}
-			return renderdata
+			return render_template(html_template, html_page_title=html_page_title,
+			                       console_output=console_output,
+			                       rows_list=rows_list,
+			                       formNAV=form_navigation,
+			                       formCMS=form_cmsselection)
 
 	operationEndTime = datetime.now()
 	operationDuration = str( operationEndTime - operationStartTime)
 	console_output = "Нет активного запроса (" + operationDuration + ")"
 	logger.debug(console_output)
 
-	renderdata = {
-		"rendertype": "Null",
-		"html_template": "cisco_cms_cospaceview.html",
-		"html_page_title": html_page_title,
-		"console_output": console_output,
-		"form_navigation": form_navigation,
-		"form_cmsselection": form_cmsselection
-	}
-	return renderdata
+	return render_template(html_template, html_page_title=html_page_title,
+	                       console_output=console_output,
+	                       formNAV=form_navigation,
+	                       formCMS=form_cmsselection)

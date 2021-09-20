@@ -78,24 +78,7 @@ def cmscallleg_for_meeting(meeting_id):
 @app.route('/cmscospace/', methods=['GET', 'POST'])
 @login_required
 def cms_cospace_page():
-
-    module_result = cms_cospace_view()
-
-    if module_result['rendertype'] == 'redirect':  # переход на другую страницу
-        return redirect(url_for(module_result['redirect_to']))
-
-    if module_result['rendertype'] == 'success':  # данные получены
-        return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                               console_output=module_result['console_output'],
-                               rows_list=module_result['rows_list'],
-                               formNAV=module_result['form_navigation'],
-                               formCMS=module_result['form_cmsselection'])
-
-    return render_template(module_result['html_template'], html_page_title=module_result['html_page_title'],
-                           console_output=module_result['console_output'],
-                           formNAV=module_result['form_navigation'],
-                           formCMS=module_result['form_cmsselection'])
-
+    return cms_cospace_view()
 
 @app.route('/cmsusage', methods=['GET', 'POST'])
 @app.route('/cmsusage/', methods=['GET', 'POST'])
