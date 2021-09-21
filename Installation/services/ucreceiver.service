@@ -5,7 +5,7 @@ After=network.target
 [Service]
 #User=apache
 #Group=apache
-WorkingDirectory=/opt/UC-Reporter/cms_cdr_reciver/
+WorkingDirectory=/opt/UC-Reporter/ucreceiver_daemon/
 ExecStart=/usr/local/bin/gunicorn --config receiver_gunicorn.py ucreceiver:app
 
 [Install]
