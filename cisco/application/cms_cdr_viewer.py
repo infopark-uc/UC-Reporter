@@ -576,7 +576,7 @@ def cmsrecordingsviewer():
                 row["durationSeconds"] = time.strftime("%H:%M:%S", time.gmtime(int(row["durationSeconds"])))
 
         #формируем путь к файлу
-        row["path"] = NETPATH + row["path"].replace("/","\\") + RECORD_FILE_EXTENTION
+        row["path"] = NETPATH + row["path"].replace("_","\\") + RECORD_FILE_EXTENTION
 
     operationEndTime = datetime.now()
     operationDuration = str(operationEndTime - operationStartTime)
