@@ -14,7 +14,7 @@ from application.ucreporter_settings import ucreporter_settings_mainpage,ucrepor
 from application.ucreporter_settings import ucreporter_settings_CMSservers,ucreporter_settings_CUCMservers
 import application.callforward
 from application.aurus_consistency_checker import aurus_consistency_check
-from application.cms_cdr_recording_player import recording_play,recording_page
+from application.cms_cdr_recording_player import recording_page
 from application.phone_api import phone_cgi
 from application.cucm_blf_report import phone_blf_search
 
