@@ -1,7 +1,7 @@
 {% extends "base_templates/base_template.html" %}
 {% block Content %}
 <video
-     src="{{ url_for('cms_record_play_file', recording_id=recording_id)}}"
+     src="{{ url_for('static', filename=recording_id)}}"
      width="800"
      height="400"
      controls

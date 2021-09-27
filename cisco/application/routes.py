@@ -98,11 +98,6 @@ def cms_cospace_usage_by_cluster_page():
 def cms_recordings_page():
     return cmsrecordingsviewer()
 
-@app.route('/cmsrec/playfile/<string:recording_id>/', methods=['GET', 'POST'])
-@login_required
-def cms_record_play_file(recording_id):
-    return recording_play(recording_id)
-
 @app.route('/cmsrec/playrecord/<string:recording_id>/', methods=['GET', 'POST'])
 @login_required
 def cms_record_play_page(recording_id):
