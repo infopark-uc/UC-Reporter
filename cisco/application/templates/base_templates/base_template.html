@@ -51,9 +51,13 @@
 						<li><a href="{{ url_for('cfa') }}">CallForward report</a></li>
 						<li><a href="{{ url_for('phone_blf_page') }}">BLF report</a></li>
 						<li><a href="{{ url_for('huntpage') }}">HuntList report</a></li>
-						<li><a href="{{ url_for('aurus_consitency_check') }}">Aurus report</a></li>
 						<li><a href="{{ url_for('phone_cgi_page') }}">Phone CGI</a></li>
 					</ul>
+				</li>
+				<li><a href="" class="active">Aurus Reports<span class="fa fa-angle-down"></span></a>
+					<ul class="submenu">
+						 <li><a href="{{ url_for('aurus_consitency_check') }}">Aurus report</a></li>
+					 </ul>
 				</li>
 				<li><a href="" class="active">CMS Reports<span class="fa fa-angle-down"></span></a>
 				     <ul class="submenu">
